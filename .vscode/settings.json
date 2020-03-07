@@ -1,0 +1,22 @@
+{
+	"csscomb.preset": "csscomb.json",
+	"csscomb.formatOnSave": true,
+
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": true
+	},
+
+	"files.insertFinalNewline": true,
+	"files.exclude": {
+		"**/node_modules": true,
+		"yarn.lock": true
+	},
+
+	"typescript.tsdk": "node_modules/typescript/lib",
+
+	"editor.tabCompletion": "on",
+	"editor.renderIndentGuides": true,
+	"editor.insertSpaces": false,
+	"editor.renderWhitespace": "boundary"
+}

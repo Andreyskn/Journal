@@ -1,0 +1,13 @@
+export {};
+
+declare global {
+	type Maybe<T> = T | undefined | null;
+
+	type Action<T extends string | number, P = undefined> = P extends undefined
+		? { type: T }
+		: { type: T; payload: P };
+
+	type OmitType<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+	type KeyOf<T, U extends keyof T> = Extract<keyof T, U>;
+}
