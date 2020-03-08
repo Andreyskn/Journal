@@ -5,17 +5,23 @@ module.exports = {
 	mode: 'development',
 	devtool: 'inline-source-map',
 
+	devServer: {
+		hot: true,
+	},
+
 	resolve: {
 		extensions: ['.ts', '.tsx', '.js', 'jsx'],
 		mainFields: ['esnext', 'browser', 'module', 'main'],
+		alias: {
+			'react-dom': '@hot-loader/react-dom',
+		},
 	},
 
 	module: {
 		rules: [
 			{
 				test: /\.tsx?$/,
-				// use: ['awesome-typescript-loader'],
-				use: ['ts-loader'],
+				use: ['react-hot-loader/webpack', 'ts-loader'],
 				exclude: /node_modules/,
 			},
 			{

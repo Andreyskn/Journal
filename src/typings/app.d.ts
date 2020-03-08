@@ -1,20 +1,8 @@
-import { Record } from 'immutable';
-
-type TasksKey = KeyOf<AppState, 'tasks'>;
+import { Record, OrderedMap } from 'immutable';
 
 declare global {
-	type AppState = {
-		tasks: TasksState;
-	};
+	type AppState = TasksState & TabsState;
 
-	type ImmutableAppState = OmitType<Record<AppState>, 'updateIn'> & {
-		updateIn(
-			keyPath: [TasksKey],
-			updater: (tasks: TasksState) => TasksState
-		): ImmutableAppState;
-		updateIn(
-			keyPath: [TasksKey, Task['timestamp']],
-			updater: (tasks: ImmutableTask) => ImmutableTask
-		): ImmutableAppState;
-	};
+	interface ImmutableAppState
+		extends OmitType<Record<AppState>, 'updateIn'> {}
 }

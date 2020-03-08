@@ -1,3 +1,14 @@
 .task-list {
+	overflow: auto;
 
+	height: 100%;
+	padding: 30px;
+
+	&__title {
+		margin-bottom: 30px;
+	}
+
+	&__form {
+		margin-bottom: 20px;
+	}
 }

@@ -1,3 +1,20 @@
 .task-item {
+	display: flex;
 
+	justify-content: space-between;
+	align-items: center;
+
+	& + & {
+		margin-top: 15px;
+	}
+
+	&:hover {
+		.task-item__delete-btn {
+			opacity: 1;
+		}
+	}
+
+	&__delete-btn {
+		opacity: 0;
+	}
 }

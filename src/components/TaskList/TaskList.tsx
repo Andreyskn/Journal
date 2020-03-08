@@ -1,43 +1,72 @@
-import React, { Dispatch, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import './task-list.scss';
 import { useBEM } from '../../utils';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { TaskItem } from '../TaskItem';
 import { action } from '../../store';
+import {
+	Classes,
+	EditableText,
+	H1,
+	IEditableTextProps,
+} from '@blueprintjs/core';
 
-export type TaskListProps = {};
+export type TaskListProps = {
+	taskList: ImmutableTaskList;
+};
 
 const [taskListBlock, taskListElement] = useBEM('task-list');
 
-export const TaskList: React.FC<TaskListProps> = props => {
-	const tasks = useSelector<AppState, AppState['tasks']>(
-		state => state.tasks
-	);
-
-	const dispatch = useDispatch<Dispatch<TaskAction>>();
+export const TaskList: React.FC<TaskListProps> = ({ taskList }) => {
+	const dispatch = useDispatch<TaskDispatch>();
 
 	const addTask = useCallback(
 		(event: React.FormEvent<HTMLFormElement>) => {
 			event.preventDefault();
-			const input = event.currentTarget.elements[0] as HTMLInputElement;
+			const input = event.currentTarget
+				.elements[0] as HTMLTextAreaElement;
 
 			if (!input.value) return;
 
-			dispatch(action('@tasks/ADD', input.value));
+			dispatch(action('@tasks/ADD_TASK', input.value));
 			event.currentTarget.reset();
 		},
 		[dispatch]
 	);
 
+	const onTitleChange: IEditableTextProps['onConfirm'] = value => {
+		dispatch(action('@tasks/RENAME_LIST', value));
+	};
+
 	return (
 		<div className={taskListBlock()}>
-			<form onSubmit={addTask}>
-				<input type='text' />
+			<H1 className={taskListElement('title')}>
+				<EditableText
+					defaultValue={taskList.get('title')}
+					confirmOnEnterKey
+					selectAllOnFocus
+					onConfirm={onTitleChange}
+				/>
+			</H1>
+			<form onSubmit={addTask} className={taskListElement('form')}>
+				<input
+					type='text'
+					className={taskListElement(
+						'input',
+						null,
+						Classes.INPUT,
+						Classes.FILL
+					)}
+					placeholder='New task...'
+				/>
 			</form>
 			<div>
-				{tasks.toArray().map(([key, task]) => (
-					<TaskItem key={key} task={task} />
-				))}
+				{taskList
+					.get('tasks')
+					.toArray()
+					.map(([key, task]) => (
+						<TaskItem key={key} task={task} />
+					))}
 			</div>
 		</div>
 	);
