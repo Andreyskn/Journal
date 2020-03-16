@@ -18,7 +18,7 @@ type SelectedData = {
 export const Browser: React.FC<BrowserProps> = props => {
 	const { activeTabId, tabs, taskList } = useSelector<AppState, SelectedData>(
 		state => ({
-			taskList: state.taskLists.get(0)!,
+			taskList: state.taskLists.get('0')!,
 			tabs: state.tabs,
 			activeTabId: state.activeTabId,
 		})

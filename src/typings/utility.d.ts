@@ -12,4 +12,14 @@ declare global {
 	type KeyOf<T, U extends keyof T> = Extract<keyof T, U>;
 
 	type Updater<T> = (data: T) => T;
+
+	type AnyObject = Record<string | number, any>;
+
+	type TypedObject<D extends AnyObject, T extends string> = D & {
+		_type: T;
+	};
+
+	type Stringified<
+		T extends { toString: (...args: any[]) => string }
+	> = ReturnType<T['toString']>;
 }

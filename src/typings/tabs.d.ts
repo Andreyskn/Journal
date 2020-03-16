@@ -1,4 +1,4 @@
-import { Record, OrderedMap } from 'immutable';
+import Immutable from 'immutable';
 
 type TabsKey = KeyOf<TabsState, 'tabs'>;
 type ActiveTabKey = KeyOf<TabsState, 'activeTabId'>;
@@ -10,10 +10,12 @@ declare global {
 		contentId: number;
 	};
 
-	type ImmutableTab = Record<Tab>;
+	type TypedTab = TypedObject<Tab, 'tab'>;
+
+	type ImmutableTab = Immutable.Record<TypedTab>;
 
 	type TabsState = {
-		tabs: OrderedMap<Tab['id'], ImmutableTab>;
+		tabs: Immutable.OrderedMap<Stringified<Tab['id']>, ImmutableTab>;
 		activeTabId: number;
 	};
 

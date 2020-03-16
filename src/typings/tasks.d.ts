@@ -1,4 +1,4 @@
-import { Record, OrderedMap, Map } from 'immutable';
+import Immutable from 'immutable';
 
 type TaskListsKey = KeyOf<TasksState, 'taskLists'>;
 type TasksKey = KeyOf<TaskList, 'tasks'>;
@@ -10,18 +10,28 @@ declare global {
 		done: boolean;
 	};
 
-	type ImmutableTask = Record<Task>;
+	type TypedTask = TypedObject<Task, 'task'>;
+
+	type ImmutableTask = Immutable.Record<TypedTask>;
 
 	type TaskList = {
 		id: number;
 		title: string;
-		tasks: OrderedMap<Task['timestamp'], ImmutableTask>;
+		tasks: Immutable.OrderedMap<
+			Stringified<Task['timestamp']>,
+			ImmutableTask
+		>;
 	};
 
-	type ImmutableTaskList = Record<TaskList>;
+	type TypedTaskList = TypedObject<TaskList, 'task-list'>;
+
+	type ImmutableTaskList = Immutable.Record<TypedTaskList>;
 
 	type TasksState = {
-		taskLists: Map<TaskList['id'], ImmutableTaskList>;
+		taskLists: Immutable.Map<
+			Stringified<TaskList['id']>,
+			ImmutableTaskList
+		>;
 	};
 
 	interface ImmutableAppState {

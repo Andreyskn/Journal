@@ -1,32 +1,73 @@
 import { Reducer } from 'redux';
-import { Record, OrderedMap, Map } from 'immutable';
+import Immutable from 'immutable';
 
-const createTaskList = Record<TaskList>({
+export const TaskListRecord = Immutable.Record<TypedTaskList>({
+	_type: 'task-list',
 	id: 0,
-	tasks: OrderedMap(),
+	tasks: Immutable.OrderedMap(),
 	title: 'Task List',
 });
 
-const createTask = Record<Task>({
+export const TaskRecord = Immutable.Record<TypedTask>({
+	_type: 'task',
 	timestamp: 0,
 	text: '',
 	done: false,
 });
 
-const createTab = Record<Tab>({
+export const TabRecord = Immutable.Record<TypedTab>({
+	_type: 'tab',
 	id: 0,
 	contentId: 0,
 	contentType: 'taskLists',
 });
 
-const initialState = Record<AppState>({
-	taskLists: Map([[0, createTaskList()]]),
-	tabs: OrderedMap([[0, createTab()]]),
+export const AppStateRecord = Immutable.Record<AppState>({
+	taskLists: Immutable.Map([['0', TaskListRecord()]]),
+	tabs: Immutable.OrderedMap([['0', TabRecord()]]),
 	activeTabId: 0,
-})();
+});
+
+const appStateReviver = (
+	key: string | number,
+	value: Immutable.Collection.Keyed<string, any>
+) => {
+	switch (key) {
+		case '':
+			return AppStateRecord(value);
+		case 'taskLists':
+			return value.toMap();
+		case 'tasks':
+		case 'tabs':
+			return value.toOrderedMap();
+	}
+
+	switch (value.get('_type')) {
+		case 'task':
+			return TaskRecord(value);
+		case 'task-list':
+			return TaskListRecord(value);
+		case 'tab':
+			return TabRecord(value);
+	}
+
+	throw Error();
+};
+
+const getInitialState = () => {
+	const savedState = localStorage.getItem('state');
+
+	const a = savedState
+		? Immutable.fromJS(JSON.parse(savedState), appStateReviver as any)
+		: AppStateRecord();
+
+	console.log(!!savedState, a, a.toJS());
+
+	return a;
+};
 
 export const reducer: Reducer<ImmutableAppState, AppAction> = (
-	state = initialState,
+	state = getInitialState(),
 	action
 ) => {
 	switch (action.type) {
@@ -35,8 +76,8 @@ export const reducer: Reducer<ImmutableAppState, AppAction> = (
 
 			return state.updateIn(['taskLists', 0, 'tasks'], tasks =>
 				tasks.set(
-					timestamp,
-					createTask({ text: action.payload, timestamp })
+					timestamp.toString(),
+					TaskRecord({ text: action.payload, timestamp })
 				)
 			);
 		}
@@ -50,7 +91,7 @@ export const reducer: Reducer<ImmutableAppState, AppAction> = (
 
 		case '@tasks/DELETE_TASK': {
 			return state.updateIn(['taskLists', 0, 'tasks'], tasks =>
-				tasks.delete(action.payload)
+				tasks.delete(action.payload.toString())
 			);
 		}
 
@@ -64,8 +105,8 @@ export const reducer: Reducer<ImmutableAppState, AppAction> = (
 			const id = Date.now();
 			return state.updateIn(['tabs'], tabs =>
 				tabs.set(
-					id,
-					createTab({ contentType: 'taskLists', id, contentId: 1 })
+					id.toString(),
+					TabRecord({ contentType: 'taskLists', id, contentId: 1 })
 				)
 			);
 		}
