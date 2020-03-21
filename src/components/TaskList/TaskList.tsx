@@ -1,9 +1,8 @@
 import React, { useCallback } from 'react';
 import './task-list.scss';
 import { useBEM } from '../../utils';
-import { useDispatch } from 'react-redux';
 import { TaskItem } from '../TaskItem';
-import { action } from '../../store';
+import { useStore } from '../../store';
 import {
 	Classes,
 	EditableText,
@@ -18,7 +17,7 @@ export type TaskListProps = {
 const [taskListBlock, taskListElement] = useBEM('task-list');
 
 export const TaskList: React.FC<TaskListProps> = ({ taskList }) => {
-	const dispatch = useDispatch<TaskDispatch>();
+	const { dispatch } = useStore();
 
 	const addTask = useCallback(
 		(event: React.FormEvent<HTMLFormElement>) => {
@@ -28,14 +27,14 @@ export const TaskList: React.FC<TaskListProps> = ({ taskList }) => {
 
 			if (!input.value) return;
 
-			dispatch(action('@tasks/ADD_TASK', input.value));
+			dispatch.tasksAction('@tasks/ADD_TASK', input.value);
 			event.currentTarget.reset();
 		},
 		[dispatch]
 	);
 
 	const onTitleChange: IEditableTextProps['onConfirm'] = value => {
-		dispatch(action('@tasks/RENAME_LIST', value));
+		dispatch.tasksAction('@tasks/RENAME_LIST', value);
 	};
 
 	return (

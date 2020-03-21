@@ -11,22 +11,23 @@ const [browserBlock, browserElement] = useBEM('browser');
 
 type SelectedData = {
 	taskList: ImmutableTaskList;
-	tabs: TabsState['tabs'];
+	tabsList: TabsState['tabsList'];
 	activeTabId: TabsState['activeTabId'];
 };
 
 export const Browser: React.FC<BrowserProps> = props => {
-	const { activeTabId, tabs, taskList } = useSelector<AppState, SelectedData>(
-		state => ({
-			taskList: state.taskLists.get('0')!,
-			tabs: state.tabs,
-			activeTabId: state.activeTabId,
-		})
-	);
+	const { activeTabId, tabsList, taskList } = useSelector<
+		AppState,
+		SelectedData
+	>(state => ({
+		taskList: state.tasks.taskLists.get('0')!,
+		tabsList: state.tabs.tabsList,
+		activeTabId: state.tabs.activeTabId,
+	}));
 
 	return (
 		<div className={browserBlock()}>
-			<Tabs tabs={tabs} activeTabId={activeTabId} />
+			<Tabs tabsList={tabsList} activeTabId={activeTabId} />
 			<TaskList taskList={taskList} />
 		</div>
 	);

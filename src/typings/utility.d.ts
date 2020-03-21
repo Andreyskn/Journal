@@ -15,11 +15,20 @@ declare global {
 
 	type AnyObject = Record<string | number, any>;
 
-	type TypedObject<O extends AnyObject, T extends string> = O & {
+	type RecordType =
+		| 'task'
+		| 'task-list'
+		| 'tab'
+		| 'tasks-state'
+		| 'tabs-state';
+
+	type TypedRecord<O extends AnyObject, T extends RecordType> = O & {
 		_type: T;
 	};
 
 	type Stringified<T extends { toString: () => string }> = ReturnType<
 		T['toString']
 	>;
+
+	type Reducer<S, A extends AppAction> = (state: S, action: A) => S;
 }

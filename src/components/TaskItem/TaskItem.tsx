@@ -1,9 +1,8 @@
 import React, { useCallback } from 'react';
 import './task-item.scss';
 import { useBEM } from '../../utils';
-import { useDispatch } from 'react-redux';
 import { Switch, Button } from '@blueprintjs/core';
-import { action } from '../../store';
+import { useStore } from '../../store';
 
 export type TaskItemProps = {
 	task: ImmutableTask;
@@ -12,14 +11,14 @@ export type TaskItemProps = {
 const [taskItemBlock, taskItemElement] = useBEM('task-item');
 
 export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
-	const dispatch = useDispatch<TaskDispatch>();
+	const { dispatch } = useStore();
 
 	const toggleDoneStatus = useCallback(() => {
-		dispatch(action('@tasks/TOGGLE_DONE', task.get('timestamp')));
+		dispatch.tasksAction('@tasks/TOGGLE_DONE', task.get('timestamp'));
 	}, []);
 
 	const deleteTask = useCallback(() => {
-		dispatch(action('@tasks/DELETE_TASK', task.get('timestamp')));
+		dispatch.tasksAction('@tasks/DELETE_TASK', task.get('timestamp'));
 	}, []);
 
 	return (

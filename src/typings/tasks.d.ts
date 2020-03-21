@@ -13,7 +13,7 @@ declare global {
 		done: boolean;
 	};
 
-	type TypedTask = TypedObject<Task, 'task'>;
+	type TypedTask = TypedRecord<Task, 'task'>;
 
 	type ImmutableTask = Immutable.Record<TypedTask>;
 
@@ -23,7 +23,7 @@ declare global {
 		tasks: Immutable.OrderedMap<Task_Id_String, ImmutableTask>;
 	};
 
-	type TypedTaskList = TypedObject<TaskList, 'task-list'>;
+	type TypedTaskList = TypedRecord<TaskList, 'task-list'>;
 
 	type ImmutableTaskList = Immutable.Record<TypedTaskList>;
 
@@ -31,7 +31,12 @@ declare global {
 		taskLists: Immutable.Map<Task_List_Id_String, ImmutableTaskList>;
 	};
 
-	interface ImmutableAppState {
+	type TypedTasksState = TypedRecord<TasksState, 'tasks-state'>;
+
+	type Tasks_Immutable_Non_Record_Key = TaskListsKey | TasksKey;
+
+	interface ImmutableTasksState
+		extends OmitType<Immutable.Record<TypedTasksState>, 'updateIn'> {
 		updateIn(
 			keyPath: [TaskListsKey],
 			updater: Updater<TasksState['taskLists']>
