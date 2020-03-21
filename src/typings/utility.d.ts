@@ -15,11 +15,11 @@ declare global {
 
 	type AnyObject = Record<string | number, any>;
 
-	type TypedObject<D extends AnyObject, T extends string> = D & {
+	type TypedObject<O extends AnyObject, T extends string> = O & {
 		_type: T;
 	};
 
-	type Stringified<
-		T extends { toString: (...args: any[]) => string }
-	> = ReturnType<T['toString']>;
+	type Stringified<T extends { toString: () => string }> = ReturnType<
+		T['toString']
+	>;
 }

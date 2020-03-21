@@ -29,7 +29,7 @@ export const AppStateRecord = Immutable.Record<AppState>({
 });
 
 const appStateReviver = (
-	key: string | number,
+	key: string,
 	value: Immutable.Collection.Keyed<string, any>
 ) => {
 	switch (key) {
@@ -57,13 +57,9 @@ const appStateReviver = (
 const getInitialState = () => {
 	const savedState = localStorage.getItem('state');
 
-	const a = savedState
+	return savedState
 		? Immutable.fromJS(JSON.parse(savedState), appStateReviver as any)
 		: AppStateRecord();
-
-	console.log(!!savedState, a, a.toJS());
-
-	return a;
 };
 
 export const reducer: Reducer<ImmutableAppState, AppAction> = (
@@ -74,7 +70,7 @@ export const reducer: Reducer<ImmutableAppState, AppAction> = (
 		case '@tasks/ADD_TASK': {
 			const timestamp = Date.now();
 
-			return state.updateIn(['taskLists', 0, 'tasks'], tasks =>
+			return state.updateIn(['taskLists', '0', 'tasks'], tasks =>
 				tasks.set(
 					timestamp.toString(),
 					TaskRecord({ text: action.payload, timestamp })
@@ -84,19 +80,19 @@ export const reducer: Reducer<ImmutableAppState, AppAction> = (
 
 		case '@tasks/TOGGLE_DONE': {
 			return state.updateIn(
-				['taskLists', 0, 'tasks', action.payload],
+				['taskLists', '0', 'tasks', action.payload.toString()],
 				task => task.update('done', done => !done)
 			);
 		}
 
 		case '@tasks/DELETE_TASK': {
-			return state.updateIn(['taskLists', 0, 'tasks'], tasks =>
+			return state.updateIn(['taskLists', '0', 'tasks'], tasks =>
 				tasks.delete(action.payload.toString())
 			);
 		}
 
 		case '@tasks/RENAME_LIST': {
-			return state.updateIn(['taskLists', 0], taskList =>
+			return state.updateIn(['taskLists', '0'], taskList =>
 				taskList.set('title', action.payload)
 			);
 		}

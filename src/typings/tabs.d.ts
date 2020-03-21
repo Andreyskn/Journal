@@ -3,6 +3,8 @@ import Immutable from 'immutable';
 type TabsKey = KeyOf<TabsState, 'tabs'>;
 type ActiveTabKey = KeyOf<TabsState, 'activeTabId'>;
 
+type Tab_Id_String = Stringified<Tab['id']>;
+
 declare global {
 	type Tab = {
 		id: number;
@@ -15,7 +17,7 @@ declare global {
 	type ImmutableTab = Immutable.Record<TypedTab>;
 
 	type TabsState = {
-		tabs: Immutable.OrderedMap<Stringified<Tab['id']>, ImmutableTab>;
+		tabs: Immutable.OrderedMap<Tab_Id_String, ImmutableTab>;
 		activeTabId: number;
 	};
 
