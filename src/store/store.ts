@@ -1,5 +1,6 @@
-import { createStore } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
 import { combineReducers } from 'redux-immutable';
+import thunk from 'redux-thunk';
 import { devToolsEnhancer } from 'redux-devtools-extension';
 
 import { tabsReducer } from './tabs';
@@ -15,4 +16,7 @@ const rootReducer = combineReducers(combinedReducer as any, getInitialState);
 
 const devTools = devToolsEnhancer({ name: 'Journal' });
 
-export const store = createStore(rootReducer, devTools);
+export const store = createStore(
+	rootReducer,
+	compose(applyMiddleware(thunk), devTools)
+);

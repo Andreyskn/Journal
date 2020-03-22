@@ -1,33 +1,53 @@
 import React from 'react';
 import './tabs.scss';
-import { useBEM } from '../../utils';
-import { Button } from '@blueprintjs/core';
+import { useBEM, generateId } from '../../utils';
+import { Button, Menu, MenuItem, Popover, Position } from '@blueprintjs/core';
 import { useStore } from '../../store';
 
 export type TabsProps = {
-	tabsList: TabsState['tabsList'];
-	activeTabId: TabsState['activeTabId'];
+	tabs: TabsState;
 };
 
 const [tabsBlock, tabsElement] = useBEM('tabs');
 
-export const Tabs: React.FC<TabsProps> = ({ activeTabId, tabsList }) => {
+export const Tabs: React.FC<TabsProps> = ({
+	tabs: { activeTabId, tabsList },
+}) => {
 	const { dispatch } = useStore();
 
-	const addTab = () => {
-		dispatch.tabsAction('@tabs/ADD_TAB');
+	const addTab = (contentType: 'tasks') => () => {
+		dispatch.thunk.addTab();
 	};
+
+	const setActiveTab = (id: Tab['id']) => () => {
+		if (activeTabId !== id) {
+			dispatch.tabsAction('@tabs/SET_ACTIVE_TAB', id);
+		}
+	};
+
+	const createTabMenu = (
+		<Menu>
+			<MenuItem
+				icon='tick'
+				text='New Task List'
+				onClick={addTab('tasks')}
+			/>
+		</Menu>
+	);
 
 	return (
 		<div className={tabsBlock()}>
 			{tabsList.toArray().map(([key, tab]) => (
 				<Button
 					key={key}
-					text={tab.get('contentType') + tab.get('contentId')}
+					text={tab.get('contentPath').join('_')}
 					intent={tab.get('id') === activeTabId ? 'success' : 'none'}
+					onClick={setActiveTab(tab.get('id'))}
 				/>
 			))}
-			<Button icon='add' onClick={addTab} />
+			<Popover content={createTabMenu} position='bottom-left' minimal>
+				<Button icon='add' />
+			</Popover>
 		</div>
 	);
 };

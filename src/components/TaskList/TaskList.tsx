@@ -27,14 +27,14 @@ export const TaskList: React.FC<TaskListProps> = ({ taskList }) => {
 
 			if (!input.value) return;
 
-			dispatch.tasksAction('@tasks/ADD_TASK', input.value);
+			dispatch.thunk.addTask(input.value);
 			event.currentTarget.reset();
 		},
 		[dispatch]
 	);
 
 	const onTitleChange: IEditableTextProps['onConfirm'] = value => {
-		dispatch.tasksAction('@tasks/RENAME_LIST', value);
+		dispatch.thunk.renameTaskList(value);
 	};
 
 	return (
@@ -61,7 +61,7 @@ export const TaskList: React.FC<TaskListProps> = ({ taskList }) => {
 			</form>
 			<div>
 				{taskList
-					.get('tasks')
+					.get('items')
 					.toArray()
 					.map(([key, task]) => (
 						<TaskItem key={key} task={task} />

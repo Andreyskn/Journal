@@ -1,39 +1,44 @@
 import Immutable from 'immutable';
+import { generateId } from '../../utils';
+import { defaultTaskListId } from '../tasks';
+
+export const defaultTabId = generateId();
 
 export const TabRecord = Immutable.Record<TypedTab>({
 	_type: 'tab',
-	id: 0,
-	contentId: 0,
-	contentType: 'taskLists',
+	id: defaultTabId,
+	contentPath: ['tasks', 'taskLists', defaultTaskListId],
 });
 
 export const TabsStateRecord = Immutable.Record<TypedTabsState>({
 	_type: 'tabs-state',
-	activeTabId: 0,
-	tabsList: Immutable.OrderedMap([['0', TabRecord()]]),
+	activeTabId: defaultTabId,
+	tabsList: Immutable.OrderedMap([[defaultTabId, TabRecord()]]),
 });
 
-// @ts-ignore FIXME:
 export const tabsReducer: Reducer<ImmutableTabsState, TabAction> = (
-	state,
+	tabsState,
 	action
 ) => {
 	switch (action.type) {
 		case '@tabs/ADD_TAB': {
-			const id = Date.now();
-			return state.updateIn(['tabsList'], tabsList =>
-				tabsList.set(
-					id.toString(),
-					TabRecord({ contentType: 'taskLists', id, contentId: 1 })
-				)
-			);
+			const contentPath = action.payload;
+			const id = generateId();
+
+			return tabsState.withMutations(tabsState => {
+				tabsState
+					.updateIn(['tabsList'], tabsList =>
+						tabsList.set(id, TabRecord({ id, contentPath }))
+					)
+					.set('activeTabId', id);
+			});
 		}
 
-		default: {
-			// if (process.env.NODE_ENV === 'development') {
-			// 	const unhandled: never = action;
-			// }
-			return state;
+		case '@tabs/SET_ACTIVE_TAB': {
+			return tabsState.set('activeTabId', action.payload);
 		}
+
+		default:
+			return tabsState;
 	}
 };

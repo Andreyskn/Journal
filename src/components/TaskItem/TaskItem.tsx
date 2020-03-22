@@ -14,11 +14,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
 	const { dispatch } = useStore();
 
 	const toggleDoneStatus = useCallback(() => {
-		dispatch.tasksAction('@tasks/TOGGLE_DONE', task.get('timestamp'));
+		dispatch.thunk.toggleDoneStatus(task.get('id'));
 	}, []);
 
 	const deleteTask = useCallback(() => {
-		dispatch.tasksAction('@tasks/DELETE_TASK', task.get('timestamp'));
+		dispatch.thunk.deleteTask(task.get('id'));
 	}, []);
 
 	return (

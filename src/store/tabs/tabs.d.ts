@@ -1,15 +1,11 @@
 import Immutable from 'immutable';
 
 type TabsListKey = KeyOf<TabsState, 'tabsList'>;
-type ActiveTabKey = KeyOf<TabsState, 'activeTabId'>;
-
-type Tab_Id_String = Stringified<Tab['id']>;
 
 declare global {
 	type Tab = {
-		id: number;
-		contentType: KeyOf<TasksState, 'taskLists'>;
-		contentId: number;
+		id: string;
+		contentPath: Concat<RootPath['toTasks'], TasksPath['toTaskList']>;
 	};
 
 	type TypedTab = TypedRecord<Tab, 'tab'>;
@@ -17,19 +13,25 @@ declare global {
 	type ImmutableTab = Immutable.Record<TypedTab>;
 
 	type TabsState = {
-		tabsList: Immutable.OrderedMap<Tab_Id_String, ImmutableTab>;
-		activeTabId: number;
+		tabsList: Immutable.OrderedMap<Tab['id'], ImmutableTab>;
+		activeTabId: Tab['id'];
 	};
 
 	type TypedTabsState = TypedRecord<TabsState, 'tabs-state'>;
 
 	type Tabs_Immutable_Non_Record_Key = TabsListKey;
 
+	interface TabsPath {
+		toTabsList: [TabsListKey];
+		toActiveTabId: [KeyOf<TabsState, 'activeTabId'>];
+		toTab: [TabsListKey, Tab['id']];
+	}
+
 	interface ImmutableTabsState
 		extends OmitType<Immutable.Record<TypedTabsState>, 'updateIn'> {
 		updateIn(
-			keyPath: [TabsListKey],
+			keyPath: TabsPath['toTabsList'],
 			updater: Updater<TabsState['tabsList']>
-		): ImmutableAppState;
+		): ImmutableTabsState;
 	}
 }

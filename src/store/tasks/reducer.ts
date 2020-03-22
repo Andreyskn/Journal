@@ -1,65 +1,86 @@
 import Immutable from 'immutable';
+import { generateId } from '../../utils';
+
+export const defaultTaskListId = generateId();
 
 export const TaskListRecord = Immutable.Record<TypedTaskList>({
 	_type: 'task-list',
-	id: 0,
-	tasks: Immutable.OrderedMap(),
+	id: defaultTaskListId,
+	items: Immutable.OrderedMap(),
 	title: 'Task List',
 });
 
 export const TaskRecord = Immutable.Record<TypedTask>({
 	_type: 'task',
-	timestamp: 0,
-	text: '',
+	id: '*',
+	createdAt: 0,
+	text: '*',
 	done: false,
 });
 
 export const TasksStateRecord = Immutable.Record<TypedTasksState>({
 	_type: 'tasks-state',
-	taskLists: Immutable.Map([['0', TaskListRecord()]]),
+	taskLists: Immutable.Map([[defaultTaskListId, TaskListRecord()]]),
 });
 
-// @ts-ignore FIXME:
 export const tasksReducer: Reducer<ImmutableTasksState, TaskAction> = (
-	state,
+	tasksState,
 	action
 ) => {
 	switch (action.type) {
 		case '@tasks/ADD_TASK': {
-			const timestamp = Date.now();
+			const { taskListId, taskText } = action.payload;
+			const taskId = generateId();
 
-			return state.updateIn(['taskLists', '0', 'tasks'], tasks =>
-				tasks.set(
-					timestamp.toString(),
-					TaskRecord({ text: action.payload, timestamp })
-				)
+			return tasksState.updateIn(
+				['taskLists', taskListId, 'items'],
+				tasks =>
+					tasks.set(
+						taskId,
+						TaskRecord({
+							text: taskText,
+							createdAt: Date.now(),
+							id: taskId,
+						})
+					)
 			);
 		}
 
 		case '@tasks/TOGGLE_DONE': {
-			return state.updateIn(
-				['taskLists', '0', 'tasks', action.payload.toString()],
-				task => task.update('done', (done: boolean) => !done)
+			const { taskListId, taskId } = action.payload;
+
+			return tasksState.updateIn(
+				['taskLists', taskListId, 'items', taskId],
+				task => task.update('done', done => !done)
 			);
 		}
 
 		case '@tasks/DELETE_TASK': {
-			return state.updateIn(['taskLists', '0', 'tasks'], tasks =>
-				tasks.delete(action.payload.toString())
+			const { taskListId, taskId } = action.payload;
+
+			return tasksState.updateIn(
+				['taskLists', taskListId, 'items'],
+				tasks => tasks.delete(taskId)
 			);
 		}
 
-		case '@tasks/RENAME_LIST': {
-			return state.updateIn(['taskLists', '0'], taskList =>
-				taskList.set('title', action.payload)
+		case '@tasks/ADD_TASK_LIST': {
+			const id = action.payload;
+
+			return tasksState.updateIn(['taskLists'], taskLists =>
+				taskLists.set(id, TaskListRecord({ id }))
 			);
 		}
 
-		default: {
-			if (process.env.NODE_ENV === 'development') {
-				const unhandled: never = action;
-			}
-			return state;
+		case '@tasks/RENAME_TASK_LIST': {
+			const { taskListId, title } = action.payload;
+
+			return tasksState.updateIn(['taskLists', taskListId], taskList =>
+				taskList.set('title', title)
+			);
 		}
+
+		default:
+			return tasksState;
 	}
 };

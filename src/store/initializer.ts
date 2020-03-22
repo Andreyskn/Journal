@@ -12,7 +12,7 @@ const appStateReviver = (
 	key: string,
 	value: Immutable.Collection.Keyed<string, any>
 ) => {
-	const objectType: RecordType | undefined = value.get('_type');
+	const objectType: Maybe<RecordType> = value.get('_type');
 
 	switch (objectType) {
 		case 'task':
@@ -27,15 +27,17 @@ const appStateReviver = (
 			return TabsStateRecord(value);
 	}
 
-	switch (key as Immutable_Non_Record_Key) {
+	switch (key as Maybe<Immutable_Non_Record_Key>) {
 		case '':
 			return AppStateRecord(value);
 		case 'taskLists':
 			return value.toMap();
-		case 'tasks':
+		case 'items':
 		case 'tabsList':
 			return value.toOrderedMap();
 	}
+
+	return value;
 };
 
 export const getInitialState = () => {

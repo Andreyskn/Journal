@@ -1,21 +1,24 @@
-import { Dispatch as ReduxDispatch } from 'redux';
+import { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-declare global {
-	interface Dispatch {}
-}
+import { getThunks } from './thunks';
 
 export const useStore = () => {
 	const _dispatch = useDispatch();
 
-	const action = (type: string, payload: any) => {
-		_dispatch(payload === undefined ? { type } : { type, payload });
+	const dispatchAction = (
+		type: AppAction['type'],
+		payload: AppAction['payload']
+	) => {
+		_dispatch({ type, payload });
 	};
 
-	// TODO: fix types
+	const thunk = useMemo(() => getThunks(_dispatch), []);
+
 	const dispatch: Dispatch = {
-		tasksAction: action as any,
-		tabsAction: action as any,
+		// tasksAction: dispatchAction,
+		tabsAction: dispatchAction,
+		thunk,
 	};
 
 	return { dispatch };
