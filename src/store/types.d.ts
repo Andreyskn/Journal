@@ -1,4 +1,5 @@
 import Immutable from 'immutable';
+import { ThunkDispatch } from 'redux-thunk';
 
 declare global {
 	type AppState = {
@@ -13,7 +14,7 @@ declare global {
 
 	type AppAction = TaskAction | TabAction;
 
-	type ImmutableAppState = Immutable.Record<AppState>;
+	type ImmutableAppState = ImmutableRecord<AppState>;
 
 	type App_Immutable_Non_Record_Key = '';
 
@@ -33,6 +34,9 @@ declare global {
 		_type: T;
 	};
 
+	type ImmutableRecord<T extends AnyObject> = Immutable.Record<T> &
+		Omit<T, '_type'>;
+
 	type Reducer<S, A extends AppAction> = (state: S, action: A) => S;
 
 	type Updater<T> = (data: T) => T;
@@ -40,4 +44,9 @@ declare global {
 	type Action<T extends string | number, P = undefined> = P extends undefined
 		? { type: T }
 		: { type: T; payload: P };
+
+	type ThunkAction = (
+		dispatch: ThunkDispatch<ImmutableAppState, undefined, AppAction>,
+		getState: () => ImmutableAppState
+	) => void;
 }

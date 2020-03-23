@@ -5,18 +5,13 @@ import { generateId } from '../utils';
 // TODO: split by state slice, get rid of thunksInstance
 
 const getActiveTaskListId = (state: ImmutableAppState) => {
-	const tabsState = state.get('tabs');
+	const tabsState = state.tabs;
 	const activeTab = tabsState.tabsList.get(tabsState.activeTabId)!;
 	return state.getIn(activeTab.get('contentPath')).id;
 };
 
-type ThunkAction = (
-	dispatch: ThunkDispatch<ImmutableAppState, undefined, AppAction>,
-	getState: () => ImmutableAppState
-) => void;
-
 const thunks = {
-	addTab: (): ThunkAction => dispatch => {
+	addTaskList: (): ThunkAction => dispatch => {
 		const contentId = generateId();
 		dispatch({ type: '@tasks/ADD_TASK_LIST', payload: contentId });
 		dispatch({

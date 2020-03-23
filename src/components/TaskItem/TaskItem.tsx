@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import './task-item.scss';
 import { useBEM } from '../../utils';
 import { Switch, Button } from '@blueprintjs/core';
-import { useStore } from '../../store';
+import { useDispatch } from '../../store';
 
 export type TaskItemProps = {
 	task: ImmutableTask;
@@ -11,21 +11,21 @@ export type TaskItemProps = {
 const [taskItemBlock, taskItemElement] = useBEM('task-item');
 
 export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
-	const { dispatch } = useStore();
+	const dispatch = useDispatch();
 
 	const toggleDoneStatus = useCallback(() => {
-		dispatch.thunk.toggleDoneStatus(task.get('id'));
+		dispatch.thunk.toggleDoneStatus(task.id);
 	}, []);
 
 	const deleteTask = useCallback(() => {
-		dispatch.thunk.deleteTask(task.get('id'));
+		dispatch.thunk.deleteTask(task.id);
 	}, []);
 
 	return (
 		<div className={taskItemBlock()}>
 			<Switch
-				checked={task.get('done')}
-				label={task.get('text')}
+				checked={task.done}
+				label={task.text}
 				onChange={toggleDoneStatus}
 				large
 			/>

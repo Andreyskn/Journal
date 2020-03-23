@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import './task-list.scss';
 import { useBEM } from '../../utils';
 import { TaskItem } from '../TaskItem';
-import { useStore } from '../../store';
+import { useDispatch } from '../../store';
 import {
 	Classes,
 	EditableText,
@@ -17,7 +17,7 @@ export type TaskListProps = {
 const [taskListBlock, taskListElement] = useBEM('task-list');
 
 export const TaskList: React.FC<TaskListProps> = ({ taskList }) => {
-	const { dispatch } = useStore();
+	const dispatch = useDispatch();
 
 	const addTask = useCallback(
 		(event: React.FormEvent<HTMLFormElement>) => {
@@ -41,7 +41,7 @@ export const TaskList: React.FC<TaskListProps> = ({ taskList }) => {
 		<div className={taskListBlock()}>
 			<H1 className={taskListElement('title')}>
 				<EditableText
-					defaultValue={taskList.get('title')}
+					defaultValue={taskList.title}
 					confirmOnEnterKey
 					selectAllOnFocus
 					onConfirm={onTitleChange}
@@ -60,12 +60,9 @@ export const TaskList: React.FC<TaskListProps> = ({ taskList }) => {
 				/>
 			</form>
 			<div>
-				{taskList
-					.get('items')
-					.toArray()
-					.map(([key, task]) => (
-						<TaskItem key={key} task={task} />
-					))}
+				{taskList.items.toArray().map(([key, task]) => (
+					<TaskItem key={key} task={task} />
+				))}
 			</div>
 		</div>
 	);

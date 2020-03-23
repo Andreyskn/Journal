@@ -13,7 +13,7 @@ declare global {
 
 	type TypedTask = TypedRecord<Task, 'task'>;
 
-	type ImmutableTask = Immutable.Record<TypedTask>;
+	type ImmutableTask = ImmutableRecord<TypedTask>;
 
 	type TaskList = {
 		id: string;
@@ -23,7 +23,7 @@ declare global {
 
 	type TypedTaskList = TypedRecord<TaskList, 'task-list'>;
 
-	type ImmutableTaskList = Immutable.Record<TypedTaskList>;
+	type ImmutableTaskList = ImmutableRecord<TypedTaskList>;
 
 	type TasksState = {
 		taskLists: Immutable.Map<TaskList['id'], ImmutableTaskList>;
@@ -41,7 +41,7 @@ declare global {
 	};
 
 	interface ImmutableTasksState
-		extends OmitType<Immutable.Record<TypedTasksState>, 'updateIn'> {
+		extends OmitType<ImmutableRecord<TypedTasksState>, 'updateIn'> {
 		updateIn(
 			keyPath: TasksPath['toTaskLists'],
 			updater: Updater<TasksState['taskLists']>

@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch as useReduxDispatch } from 'react-redux';
 
 import { getThunks } from './thunks';
 
-export const useStore = () => {
-	const _dispatch = useDispatch();
+export const useDispatch = (): Dispatch => {
+	const _dispatch = useReduxDispatch();
 
 	const dispatchAction = (
 		type: AppAction['type'],
@@ -15,11 +15,9 @@ export const useStore = () => {
 
 	const thunk = useMemo(() => getThunks(_dispatch), []);
 
-	const dispatch: Dispatch = {
+	return {
 		// tasksAction: dispatchAction,
 		tabsAction: dispatchAction,
 		thunk,
 	};
-
-	return { dispatch };
 };

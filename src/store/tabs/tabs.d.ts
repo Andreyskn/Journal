@@ -10,7 +10,7 @@ declare global {
 
 	type TypedTab = TypedRecord<Tab, 'tab'>;
 
-	type ImmutableTab = Immutable.Record<TypedTab>;
+	type ImmutableTab = ImmutableRecord<TypedTab>;
 
 	type TabsState = {
 		tabsList: Immutable.OrderedMap<Tab['id'], ImmutableTab>;
@@ -28,7 +28,7 @@ declare global {
 	}
 
 	interface ImmutableTabsState
-		extends OmitType<Immutable.Record<TypedTabsState>, 'updateIn'> {
+		extends OmitType<ImmutableRecord<TypedTabsState>, 'updateIn'> {
 		updateIn(
 			keyPath: TabsPath['toTabsList'],
 			updater: Updater<TabsState['tabsList']>
