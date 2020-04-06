@@ -8,21 +8,21 @@ export type TaskItemProps = {
 	task: ImmutableTask;
 };
 
-const [taskItemBlock, taskItemElement] = useBEM('task-item');
+const [itemBlock, itemElement] = useBEM('task-item');
 
 export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
 	const dispatch = useDispatch();
 
 	const toggleDoneStatus = useCallback(() => {
-		dispatch.thunk.toggleDoneStatus(task.id);
+		dispatch.tasksAction.toggleDoneStatus(task.id);
 	}, []);
 
 	const deleteTask = useCallback(() => {
-		dispatch.thunk.deleteTask(task.id);
+		dispatch.tasksAction.deleteTask(task.id);
 	}, []);
 
 	return (
-		<div className={taskItemBlock()}>
+		<div className={itemBlock()}>
 			<Switch
 				checked={task.done}
 				label={task.text}
@@ -33,7 +33,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
 				icon='delete'
 				intent='danger'
 				minimal
-				className={taskItemElement('delete-btn')}
+				className={itemElement('delete-btn')}
 				onClick={deleteTask}
 			/>
 		</div>

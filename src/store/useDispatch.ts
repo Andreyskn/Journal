@@ -1,23 +1,35 @@
-import { useMemo } from 'react';
 import { useDispatch as useReduxDispatch } from 'react-redux';
 
-import { getThunks } from './thunks';
+import { tasksActions } from './tasks/actions';
+import { tabsActions } from './tabs/actions';
+
+const thunksMap = new Map<Thunks, Thunks>();
+
+const getThunks = <T extends Thunks>(dispatch: ThunkDispatch, thunks: T) => {
+	const existingThunks = thunksMap.get(thunks);
+	if (existingThunks) return existingThunks as T;
+
+	const withDispatch = <F extends AnyFunction>(func: F) =>
+		((...args: any[]) => {
+			dispatch(func(...args));
+		}) as F;
+
+	const wrappedThunks = (Object.entries(thunks) as [
+		keyof T,
+		T[keyof T]
+	][]).reduce((result, [thunkName, thunkBody]) => {
+		result[thunkName] = withDispatch(thunkBody);
+		return result;
+	}, {} as T);
+
+	return wrappedThunks;
+};
 
 export const useDispatch = (): Dispatch => {
 	const _dispatch = useReduxDispatch();
 
-	const dispatchAction = (
-		type: AppAction['type'],
-		payload: AppAction['payload']
-	) => {
-		_dispatch({ type, payload });
-	};
-
-	const thunk = useMemo(() => getThunks(_dispatch), []);
-
 	return {
-		// tasksAction: dispatchAction,
-		tabsAction: dispatchAction,
-		thunk,
+		tabsAction: getThunks(_dispatch, tabsActions),
+		tasksAction: getThunks(_dispatch, tasksActions),
 	};
 };

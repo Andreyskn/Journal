@@ -16,12 +16,12 @@ export const Tabs: React.FC<TabsProps> = ({
 	const dispatch = useDispatch();
 
 	const addTab = (contentType: 'tasks') => () => {
-		dispatch.thunk.addTaskList();
+		dispatch.tasksAction.addTaskList();
 	};
 
 	const setActiveTab = (id: Tab['id']) => () => {
 		if (activeTabId !== id) {
-			dispatch.tabsAction('@tabs/SET_ACTIVE_TAB', id);
+			dispatch.tabsAction.setActiveTab(id);
 		}
 	};
 

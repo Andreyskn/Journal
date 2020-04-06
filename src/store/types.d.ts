@@ -1,5 +1,5 @@
 import Immutable from 'immutable';
-import { ThunkDispatch } from 'redux-thunk';
+import { ThunkDispatch as ReduxThunkDispatch } from 'redux-thunk';
 
 declare global {
 	type AppState = {
@@ -14,7 +14,12 @@ declare global {
 
 	type AppAction = TaskAction | TabAction;
 
-	type ImmutableAppState = ImmutableRecord<AppState>;
+	interface ImmutableAppState
+		extends OmitType<ImmutableRecord<AppState>, 'getIn'> {
+		getIn(
+			path: Concat<RootPath['toTasks'], TasksPath['toTaskList']>
+		): ImmutableTaskList;
+	}
 
 	type App_Immutable_Non_Record_Key = '';
 
@@ -45,8 +50,16 @@ declare global {
 		? { type: T }
 		: { type: T; payload: P };
 
+	type ThunkDispatch<A extends AppAction = AppAction> = ReduxThunkDispatch<
+		ImmutableAppState,
+		undefined,
+		A
+	>;
+
 	type ThunkAction = (
-		dispatch: ThunkDispatch<ImmutableAppState, undefined, AppAction>,
+		dispatch: ThunkDispatch,
 		getState: () => ImmutableAppState
 	) => void;
+
+	type Thunks = Record<string, AnyFunction>;
 }

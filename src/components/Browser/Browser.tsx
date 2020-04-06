@@ -19,7 +19,6 @@ export const Browser: React.FC<BrowserProps> = props => {
 		state => state
 	);
 
-	// TODO: types for get method
 	const tabsState = state.tabs;
 	const activeTab = tabsState.tabsList.get(tabsState.activeTabId)!;
 	const content = state.getIn(activeTab.get('contentPath'));
