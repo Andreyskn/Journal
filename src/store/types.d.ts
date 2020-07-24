@@ -5,20 +5,25 @@ declare global {
 	type AppState = {
 		tasks: TasksState;
 		tabs: TabsState;
+		activeDocument: ActiveDocument;
 	};
 
 	interface RootPath {
 		toTasks: [KeyOf<AppState, 'tasks'>];
 		toTabs: [KeyOf<AppState, 'tabs'>];
+		toActiveDocument: [KeyOf<AppState, 'activeDocument'>];
 	}
 
-	type AppAction = TaskAction | TabAction;
+	type AppAction = TaskAction | TabAction | SetActiveDocument;
 
 	interface ImmutableAppState
 		extends OmitType<ImmutableRecord<AppState>, 'getIn'> {
 		getIn(
 			path: Concat<RootPath['toTasks'], TasksPath['toTaskList']>
 		): ImmutableTaskList;
+		getIn(
+			path: Concat<RootPath['toTasks'], TasksPath['toTaskLists']>
+		): TasksState['taskLists'];
 	}
 
 	type App_Immutable_Non_Record_Key = '';
@@ -33,7 +38,8 @@ declare global {
 		| 'task-list'
 		| 'tab'
 		| 'tasks-state'
-		| 'tabs-state';
+		| 'tabs-state'
+		| 'active-document';
 
 	type TypedRecord<O extends AnyObject, T extends RecordType> = O & {
 		_type: T;

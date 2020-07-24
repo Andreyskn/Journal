@@ -1,21 +1,22 @@
 import React from 'react';
 import './tabs.scss';
-import { useBEM, generateId } from '../../utils';
-import { Button, Menu, MenuItem, Popover, Position } from '@blueprintjs/core';
+import { useBEM } from '../../utils';
+import { Button, Menu, MenuItem, Popover } from '@blueprintjs/core';
 import { useDispatch } from '../../store';
 
 export type TabsProps = {
-	tabs: TabsState;
+	state: ImmutableAppState;
 };
 
 const [tabsBlock, tabsElement] = useBEM('tabs');
 
-export const Tabs: React.FC<TabsProps> = ({
-	tabs: { activeTabId, tabsList },
-}) => {
+export const useTabs = () => {};
+
+export const Tabs: React.FC<TabsProps> = ({ state }) => {
+	const { activeTabId, tabsList } = state.tabs;
 	const dispatch = useDispatch();
 
-	const addTab = (contentType: 'tasks') => () => {
+	const addTab = (contentType: Tab['contentType']) => () => {
 		dispatch.tasksAction.addTaskList();
 	};
 
@@ -40,7 +41,7 @@ export const Tabs: React.FC<TabsProps> = ({
 			{tabsList.toArray().map(([key, tab]) => (
 				<Button
 					key={key}
-					text={tab.contentPath.join('_')}
+					text={state.getIn(tab.contentPath).title}
 					intent={tab.id === activeTabId ? 'success' : 'none'}
 					onClick={setActiveTab(tab.id)}
 				/>

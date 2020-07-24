@@ -5,6 +5,7 @@ type TabsListKey = KeyOf<TabsState, 'tabsList'>;
 declare global {
 	type Tab = {
 		id: string;
+		contentType: 'tasks';
 		contentPath: Concat<RootPath['toTasks'], TasksPath['toTaskList']>;
 	};
 

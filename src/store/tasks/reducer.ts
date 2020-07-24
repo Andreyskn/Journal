@@ -10,6 +10,8 @@ export const TaskListRecord = Immutable.Record<TypedTaskList>({
 	title: 'Task List',
 });
 
+export const defaultTaskList = TaskListRecord();
+
 export const TaskRecord = Immutable.Record<TypedTask>({
 	_type: 'task',
 	id: '*',
@@ -20,7 +22,7 @@ export const TaskRecord = Immutable.Record<TypedTask>({
 
 export const TasksStateRecord = Immutable.Record<TypedTasksState>({
 	_type: 'tasks-state',
-	taskLists: Immutable.Map([[defaultTaskListId, TaskListRecord()]]),
+	taskLists: Immutable.OrderedMap([[defaultTaskListId, defaultTaskList]]),
 });
 
 export const tasksReducer: Reducer<ImmutableTasksState, TaskAction> = (

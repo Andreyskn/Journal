@@ -26,7 +26,7 @@ declare global {
 	type ImmutableTaskList = ImmutableRecord<TypedTaskList>;
 
 	type TasksState = {
-		taskLists: Immutable.Map<TaskList['id'], ImmutableTaskList>;
+		taskLists: Immutable.OrderedMap<TaskList['id'], ImmutableTaskList>;
 	};
 
 	type TypedTasksState = TypedRecord<TasksState, 'tasks-state'>;

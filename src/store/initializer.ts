@@ -2,10 +2,12 @@ import Immutable from 'immutable';
 
 import { TasksStateRecord, TaskRecord, TaskListRecord } from './tasks';
 import { TabsStateRecord, TabRecord } from './tabs';
+import { ActiveDocumentRecord } from './activeDocument';
 
 const AppStateRecord = Immutable.Record<AppState>({
 	tasks: TasksStateRecord(),
 	tabs: TabsStateRecord(),
+	activeDocument: ActiveDocumentRecord(),
 });
 
 const appStateReviver = (
@@ -31,7 +33,7 @@ const appStateReviver = (
 		case '':
 			return AppStateRecord(value);
 		case 'taskLists':
-			return value.toMap();
+			return value.toOrderedMap();
 		case 'items':
 		case 'tabsList':
 			return value.toOrderedMap();

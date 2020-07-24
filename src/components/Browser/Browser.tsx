@@ -9,11 +9,6 @@ export type BrowserProps = {};
 
 const [browserBlock, browserElement] = useBEM('browser');
 
-type SelectedData = {
-	taskList: ImmutableTaskList;
-	tabs: TabsState;
-};
-
 export const Browser: React.FC<BrowserProps> = props => {
 	const state = useSelector<ImmutableAppState, ImmutableAppState>(
 		state => state
@@ -21,11 +16,11 @@ export const Browser: React.FC<BrowserProps> = props => {
 
 	const tabsState = state.tabs;
 	const activeTab = tabsState.tabsList.get(tabsState.activeTabId)!;
-	const content = state.getIn(activeTab.get('contentPath'));
+	const content = state.getIn(activeTab.contentPath);
 
 	return (
 		<div className={browserBlock()}>
-			<Tabs tabs={tabsState} />
+			<Tabs state={state} />
 			<TaskList taskList={content} key={content.id} />
 		</div>
 	);

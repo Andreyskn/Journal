@@ -7,6 +7,7 @@ export const defaultTabId = generateId();
 export const TabRecord = Immutable.Record<TypedTab>({
 	_type: 'tab',
 	id: defaultTabId,
+	contentType: 'tasks',
 	contentPath: ['tasks', 'taskLists', defaultTaskListId],
 });
 

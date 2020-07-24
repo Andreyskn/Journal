@@ -2,6 +2,7 @@ import { useDispatch as useReduxDispatch } from 'react-redux';
 
 import { tasksActions } from './tasks/actions';
 import { tabsActions } from './tabs/actions';
+import { activeDocumentActions } from './activeDocument/actions';
 
 const thunksMap = new Map<Thunks, Thunks>();
 
@@ -31,5 +32,6 @@ export const useDispatch = (): Dispatch => {
 	return {
 		tabsAction: getThunks(_dispatch, tabsActions),
 		tasksAction: getThunks(_dispatch, tasksActions),
+		activeDocumentAction: getThunks(_dispatch, activeDocumentActions),
 	};
 };

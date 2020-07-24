@@ -43,6 +43,10 @@ export const tasksActions = {
 			type: '@tabs/ADD_TAB',
 			payload: ['tasks', 'taskLists', contentId],
 		});
+		dispatch<SetActiveDocument>({
+			type: '@active/SET',
+			payload: contentId,
+		});
 	},
 
 	addTask: (taskText: Task['text']): ThunkAction => (dispatch, getState) => {
