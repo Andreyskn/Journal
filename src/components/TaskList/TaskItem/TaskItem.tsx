@@ -1,24 +1,23 @@
 import React, { useCallback } from 'react';
 import './task-item.scss';
-import { useBEM } from '../../utils';
+import { useBEM } from '../../../utils';
 import { Switch, Button } from '@blueprintjs/core';
-import { useDispatch } from '../../store';
+import { TaskListAction } from '../TaskList';
 
 export type TaskItemProps = {
 	task: ImmutableTask;
+	onAction: (action: TaskListAction) => void;
 };
 
 const [itemBlock, itemElement] = useBEM('task-item');
 
-export const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
-	const dispatch = useDispatch();
-
+export const TaskItem: React.FC<TaskItemProps> = ({ task, onAction }) => {
 	const toggleDoneStatus = useCallback(() => {
-		dispatch.tasksAction.toggleDoneStatus(task.id);
+		onAction({ type: 'TOGGLE_TASK_DONE', payload: task.id });
 	}, []);
 
 	const deleteTask = useCallback(() => {
-		dispatch.tasksAction.deleteTask(task.id);
+		onAction({ type: 'DELETE_TASK', payload: task.id });
 	}, []);
 
 	return (

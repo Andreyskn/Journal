@@ -1,13 +1,11 @@
 import Immutable from 'immutable';
 
-import { TasksStateRecord, TaskRecord, TaskListRecord } from './tasks';
-import { TabsStateRecord, TabRecord } from './tabs';
-import { ActiveDocumentRecord } from './activeDocument';
+import { defaultTasksState, TaskRecord, TaskListRecord } from './tasks';
+import { defaultTabsState, TabRecord } from './tabs';
 
 const AppStateRecord = Immutable.Record<AppState>({
-	tasks: TasksStateRecord(),
-	tabs: TabsStateRecord(),
-	activeDocument: ActiveDocumentRecord(),
+	...defaultTasksState,
+	...defaultTabsState,
 });
 
 const appStateReviver = (
@@ -23,10 +21,6 @@ const appStateReviver = (
 			return TaskListRecord(value);
 		case 'tab':
 			return TabRecord(value);
-		case 'tasks-state':
-			return TasksStateRecord(value);
-		case 'tabs-state':
-			return TabsStateRecord(value);
 	}
 
 	switch (key as Maybe<Immutable_Non_Record_Key>) {
@@ -42,7 +36,7 @@ const appStateReviver = (
 	return value;
 };
 
-export const getInitialState = () => {
+export const getInitialState = (): ImmutableAppState => {
 	const savedState = localStorage.getItem('state');
 
 	return savedState

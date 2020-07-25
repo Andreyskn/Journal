@@ -1,1 +1,1 @@
-export * from './Tabs'
+export { TabsConnector as Tabs } from './TabsConnector';

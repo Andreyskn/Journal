@@ -2,29 +2,12 @@ import Immutable from 'immutable';
 import { ThunkDispatch as ReduxThunkDispatch } from 'redux-thunk';
 
 declare global {
-	type AppState = {
-		tasks: TasksState;
-		tabs: TabsState;
-		activeDocument: ActiveDocument;
-	};
+	type AppState = TasksState & TabsState;
 
-	interface RootPath {
-		toTasks: [KeyOf<AppState, 'tasks'>];
-		toTabs: [KeyOf<AppState, 'tabs'>];
-		toActiveDocument: [KeyOf<AppState, 'activeDocument'>];
-	}
-
-	type AppAction = TaskAction | TabAction | SetActiveDocument;
+	type AppAction = TaskAction | TabAction;
 
 	interface ImmutableAppState
-		extends OmitType<ImmutableRecord<AppState>, 'getIn'> {
-		getIn(
-			path: Concat<RootPath['toTasks'], TasksPath['toTaskList']>
-		): ImmutableTaskList;
-		getIn(
-			path: Concat<RootPath['toTasks'], TasksPath['toTaskLists']>
-		): TasksState['taskLists'];
-	}
+		extends OmitType<ImmutableRecord<AppState>, 'updateIn'> {}
 
 	type App_Immutable_Non_Record_Key = '';
 
@@ -52,9 +35,22 @@ declare global {
 
 	type Updater<T> = (data: T) => T;
 
-	type Action<T extends string | number, P = undefined> = P extends undefined
-		? { type: T }
-		: { type: T; payload: P };
+	type ActionBase<T extends string | number | symbol, P = undefined> = {
+		type: T;
+		payload: P;
+	};
+
+	type Handler<P = undefined> = (
+		state: ImmutableAppState,
+		action: ActionBase<string, P>
+	) => ImmutableAppState;
+
+	type AnyHandlers = Record<string, Handler<any>>;
+
+	type Action<H extends AnyHandlers, T extends keyof H> = ActionBase<
+		T,
+		Parameters<H[T]>[1]['payload']
+	>;
 
 	type ThunkDispatch<A extends AppAction = AppAction> = ReduxThunkDispatch<
 		ImmutableAppState,

@@ -29,8 +29,6 @@ declare global {
 		taskLists: Immutable.OrderedMap<TaskList['id'], ImmutableTaskList>;
 	};
 
-	type TypedTasksState = TypedRecord<TasksState, 'tasks-state'>;
-
 	type Tasks_Immutable_Non_Record_Key = TaskListsKey | TaskListItemsKey;
 
 	type TasksPath = {
@@ -40,23 +38,22 @@ declare global {
 		toTask: [TaskListsKey, TaskList['id'], TaskListItemsKey, Task['id']];
 	};
 
-	interface ImmutableTasksState
-		extends OmitType<ImmutableRecord<TypedTasksState>, 'updateIn'> {
+	interface ImmutableAppState {
 		updateIn(
 			keyPath: TasksPath['toTaskLists'],
 			updater: Updater<TasksState['taskLists']>
-		): ImmutableTasksState;
+		): ImmutableAppState;
 		updateIn(
 			keyPath: TasksPath['toTaskList'],
 			updater: Updater<ImmutableTaskList>
-		): ImmutableTasksState;
+		): ImmutableAppState;
 		updateIn(
 			keyPath: TasksPath['toTasksListItems'],
 			updater: Updater<TaskList['items']>
-		): ImmutableTasksState;
+		): ImmutableAppState;
 		updateIn(
 			keyPath: TasksPath['toTask'],
 			updater: Updater<ImmutableTask>
-		): ImmutableTasksState;
+		): ImmutableAppState;
 	}
 }

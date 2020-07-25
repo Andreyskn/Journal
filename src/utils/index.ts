@@ -1,2 +1,2 @@
 export * from './useBEM';
-export * from './idGenerator';
+export * from './helpers';

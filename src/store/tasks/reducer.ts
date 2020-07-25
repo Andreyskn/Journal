@@ -20,69 +20,76 @@ export const TaskRecord = Immutable.Record<TypedTask>({
 	done: false,
 });
 
-export const TasksStateRecord = Immutable.Record<TypedTasksState>({
-	_type: 'tasks-state',
+export const defaultTasksState: TasksState = {
 	taskLists: Immutable.OrderedMap([[defaultTaskListId, defaultTaskList]]),
-});
-
-export const tasksReducer: Reducer<ImmutableTasksState, TaskAction> = (
-	tasksState,
-	action
-) => {
-	switch (action.type) {
-		case '@tasks/ADD_TASK': {
-			const { taskListId, taskText } = action.payload;
-			const taskId = generateId();
-
-			return tasksState.updateIn(
-				['taskLists', taskListId, 'items'],
-				tasks =>
-					tasks.set(
-						taskId,
-						TaskRecord({
-							text: taskText,
-							createdAt: Date.now(),
-							id: taskId,
-						})
-					)
-			);
-		}
-
-		case '@tasks/TOGGLE_DONE': {
-			const { taskListId, taskId } = action.payload;
-
-			return tasksState.updateIn(
-				['taskLists', taskListId, 'items', taskId],
-				task => task.update('done', done => !done)
-			);
-		}
-
-		case '@tasks/DELETE_TASK': {
-			const { taskListId, taskId } = action.payload;
-
-			return tasksState.updateIn(
-				['taskLists', taskListId, 'items'],
-				tasks => tasks.delete(taskId)
-			);
-		}
-
-		case '@tasks/ADD_TASK_LIST': {
-			const id = action.payload;
-
-			return tasksState.updateIn(['taskLists'], taskLists =>
-				taskLists.set(id, TaskListRecord({ id }))
-			);
-		}
-
-		case '@tasks/RENAME_TASK_LIST': {
-			const { taskListId, title } = action.payload;
-
-			return tasksState.updateIn(['taskLists', taskListId], taskList =>
-				taskList.set('title', title)
-			);
-		}
-
-		default:
-			return tasksState;
-	}
 };
+
+const addTask: Handler<{
+	taskListId: TaskList['id'];
+	taskText: Task['text'];
+}> = (state, action) => {
+	const { taskListId, taskText } = action.payload;
+	const taskId = generateId();
+
+	return state.updateIn(['taskLists', taskListId, 'items'], tasks =>
+		tasks.set(
+			taskId,
+			TaskRecord({
+				text: taskText,
+				createdAt: Date.now(),
+				id: taskId,
+			})
+		)
+	);
+};
+
+const toggleDone: Handler<{
+	taskListId: TaskList['id'];
+	taskId: Task['id'];
+}> = (state, action) => {
+	const { taskListId, taskId } = action.payload;
+
+	return state.updateIn(['taskLists', taskListId, 'items', taskId], task =>
+		task.update('done', done => !done)
+	);
+};
+
+const deleteTask: Handler<{
+	taskListId: TaskList['id'];
+	taskId: Task['id'];
+}> = (state, action) => {
+	const { taskListId, taskId } = action.payload;
+
+	return state.updateIn(['taskLists', taskListId, 'items'], tasks =>
+		tasks.delete(taskId)
+	);
+};
+
+const addTaskList: Handler<TaskList['id']> = (state, action) => {
+	const id = action.payload;
+
+	return state.updateIn(['taskLists'], taskLists =>
+		taskLists.set(id, TaskListRecord({ id }))
+	);
+};
+
+const renameTaskList: Handler<{
+	taskListId: TaskList['id'];
+	title: TaskList['title'];
+}> = (state, action) => {
+	const { taskListId, title } = action.payload;
+
+	return state.updateIn(['taskLists', taskListId], taskList =>
+		taskList.set('title', title)
+	);
+};
+
+export const tasksHandlers = {
+	'@tasks/ADD_TASK': addTask,
+	'@tasks/TOGGLE_DONE': toggleDone,
+	'@tasks/DELETE_TASK': deleteTask,
+	'@tasks/ADD_TASK_LIST': addTaskList,
+	'@tasks/RENAME_TASK_LIST': renameTaskList,
+};
+
+export type TasksHandlers = typeof tasksHandlers;

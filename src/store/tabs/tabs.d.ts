@@ -6,7 +6,7 @@ declare global {
 	type Tab = {
 		id: string;
 		contentType: 'tasks';
-		contentPath: Concat<RootPath['toTasks'], TasksPath['toTaskList']>;
+		contentPath: TasksPath['toTaskList'];
 	};
 
 	type TypedTab = TypedRecord<Tab, 'tab'>;
@@ -18,8 +18,6 @@ declare global {
 		activeTabId: Tab['id'];
 	};
 
-	type TypedTabsState = TypedRecord<TabsState, 'tabs-state'>;
-
 	type Tabs_Immutable_Non_Record_Key = TabsListKey;
 
 	interface TabsPath {
@@ -28,11 +26,10 @@ declare global {
 		toTab: [TabsListKey, Tab['id']];
 	}
 
-	interface ImmutableTabsState
-		extends OmitType<ImmutableRecord<TypedTabsState>, 'updateIn'> {
+	interface ImmutableAppState {
 		updateIn(
 			keyPath: TabsPath['toTabsList'],
 			updater: Updater<TabsState['tabsList']>
-		): ImmutableTabsState;
+		): ImmutableAppState;
 	}
 }

@@ -1,4 +1,4 @@
-import { ConcatImpl } from './concat';
+export {};
 
 declare global {
 	type Maybe<T> = T | undefined | null;
@@ -12,9 +12,4 @@ declare global {
 	type AnyFunction = (...args: any[]) => any;
 
 	type Timestamp = number;
-
-	type Concat<
-		ArrT extends readonly any[],
-		OtherT extends readonly any[]
-	> = ConcatImpl<ArrT, OtherT>;
 }

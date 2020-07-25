@@ -1,24 +1,28 @@
 import { createStore, applyMiddleware, compose } from 'redux';
-import { combineReducers } from 'redux-immutable';
 import thunk from 'redux-thunk';
 import { devToolsEnhancer } from 'redux-devtools-extension';
 
 import { getInitialState } from './initializer';
-import { tabsReducer } from './tabs';
-import { tasksReducer } from './tasks';
-import { activeDocumentReducer } from './activeDocument';
+import { tabsHandlers } from './tabs';
+import { tasksHandlers } from './tasks';
 
-const combinedReducer: Record<keyof AppState, Reducer<any, any>> = {
-	tasks: tasksReducer,
-	tabs: tabsReducer,
-	activeDocument: activeDocumentReducer,
+const handlers: AnyHandlers = {
+	...tabsHandlers,
+	...tasksHandlers,
 };
-
-const rootReducer = combineReducers(combinedReducer as any, getInitialState);
 
 const devTools = devToolsEnhancer({ name: 'Journal' });
 
+const reducer: Reducer<ImmutableAppState, ActionBase<any, any>> = (
+	state,
+	action
+) => {
+	const handler = handlers[action.type] as Handler<any> | undefined;
+	return handler ? handler(state, action) : state;
+};
+
 export const store = createStore(
-	rootReducer,
+	reducer as any,
+	getInitialState(),
 	compose(applyMiddleware(thunk), devTools)
 );
