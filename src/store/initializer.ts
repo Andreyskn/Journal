@@ -2,17 +2,19 @@ import Immutable from 'immutable';
 
 import { defaultTasksState, TaskRecord, TaskListRecord } from './tasks';
 import { defaultTabsState, TabRecord } from './tabs';
+import { defaultFileSystem } from './fileSystem';
 
-const AppStateRecord = Immutable.Record<AppState>({
+const AppStateRecord = Immutable.Record<Model.AppState>({
 	...defaultTasksState,
 	...defaultTabsState,
+	...defaultFileSystem,
 });
 
 const appStateReviver = (
 	key: string,
 	value: Immutable.Collection.Keyed<string, any>
 ) => {
-	const objectType: Maybe<RecordType> = value.get('_type');
+	const objectType: Maybe<Model.RecordType> = value.get('_tag');
 
 	switch (objectType) {
 		case 'task':
@@ -23,20 +25,20 @@ const appStateReviver = (
 			return TabRecord(value);
 	}
 
-	switch (key as Maybe<Immutable_Non_Record_Key>) {
+	switch (key as Maybe<Model.Immutable_Non_Record_Key>) {
 		case '':
 			return AppStateRecord(value);
 		case 'taskLists':
 			return value.toOrderedMap();
 		case 'items':
-		case 'tabsList':
+		case 'tabs':
 			return value.toOrderedMap();
 	}
 
 	return value;
 };
 
-export const getInitialState = (): ImmutableAppState => {
+export const getInitialState = (): Model.ImmutableAppState => {
 	const savedState = localStorage.getItem('state');
 
 	return savedState

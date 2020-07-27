@@ -3,14 +3,14 @@ import { hot } from 'react-hot-loader/root';
 import { Classes } from '@blueprintjs/core';
 import './app.scss';
 import { useBEM } from '../../utils';
-// import { FileTree } from '../FileTree';
+import { FileTree } from '../FileTree';
 import { Browser } from '../Browser';
 import { useSelector } from 'react-redux';
 
 const [appBlock] = useBEM('app');
 
 export const App: React.FC = hot(() => {
-	const state = useSelector<ImmutableAppState, ImmutableAppState>(
+	const state = useSelector<Model.ImmutableAppState, Model.ImmutableAppState>(
 		state => state
 	);
 
@@ -21,7 +21,7 @@ export const App: React.FC = hot(() => {
 
 	return (
 		<div className={appBlock(null, Classes.DARK)}>
-			{/* <FileTree /> */}
+			<FileTree />
 			<Browser />
 		</div>
 	);

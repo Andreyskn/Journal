@@ -5,15 +5,17 @@ import { devToolsEnhancer } from 'redux-devtools-extension';
 import { getInitialState } from './initializer';
 import { tabsHandlers } from './tabs';
 import { tasksHandlers } from './tasks';
+import { fileSystemHandlers } from './fileSystem';
 
 const handlers: AnyHandlers = {
 	...tabsHandlers,
 	...tasksHandlers,
+	...fileSystemHandlers,
 };
 
 const devTools = devToolsEnhancer({ name: 'Journal' });
 
-const reducer: Reducer<ImmutableAppState, ActionBase<any, any>> = (
+const reducer: Reducer<Model.ImmutableAppState, ActionBase<any, any>> = (
 	state,
 	action
 ) => {

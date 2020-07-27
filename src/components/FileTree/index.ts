@@ -1,1 +1,1 @@
-// export * from './FileTree'
+export * from './FileTree';

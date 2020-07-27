@@ -1,50 +1,62 @@
 import React from 'react';
 import './tabs.scss';
-import { useBEM } from '../../utils';
+import { useBEM, fileIcons } from '../../utils';
 import { Button, Menu, MenuItem, Popover } from '@blueprintjs/core';
+import { TabsDispatch } from './tabsDispatch';
 
 const [tabsBlock, tabsElement] = useBEM('tabs');
 
-type AddTab = ActionBase<'ADD_TAB', Tab['contentType']>;
-type SetActive = ActionBase<'SET_ACTIVE', Tab['id']>;
-
-type TabsAction = AddTab | SetActive;
-
-export type TabsProps = TabsState & {
-	onAction: (action: TabsAction) => void;
+export type TabsProps = Pick<
+	Model.FileSystemState,
+	'activeFilePath' | 'files'
+> & {
+	dispatch: TabsDispatch;
+	tabs: Model.Tab[];
 };
 
 export const Tabs: React.FC<TabsProps> = React.memo(
-	({ activeTabId, tabsList, onAction }) => {
-		const addTab = (contentType: Tab['contentType']) => () => {
-			onAction({ type: 'ADD_TAB', payload: contentType });
+	({ tabs, files, activeFilePath, dispatch }) => {
+		const addTab = (fileType: Model.File['type']) => () => {
+			dispatch.addTab();
 		};
 
-		const setActiveTab = (id: Tab['id']) => () => {
-			if (activeTabId === id) return;
-			onAction({ type: 'SET_ACTIVE', payload: id });
+		const setActiveTab = (filePath: Model.Tab['filePath']) => () => {
+			if (activeFilePath === filePath) return;
+			dispatch.setActiveTab(filePath);
 		};
 
 		const createTabMenu = (
 			<Menu>
 				<MenuItem
-					icon='tick'
+					icon={fileIcons.tasks}
 					text='New Task List'
 					onClick={addTab('tasks')}
+				/>
+				<MenuItem
+					icon={fileIcons.notes}
+					text='New Notes'
+					onClick={addTab('notes')}
 				/>
 			</Menu>
 		);
 
+		const renderTab = ({ filePath }: Model.Tab) => {
+			const file = files.get(filePath)!;
+
+			return (
+				<Button
+					key={filePath}
+					text={file.name}
+					icon={fileIcons[file.type]}
+					intent={filePath === activeFilePath ? 'success' : 'none'}
+					onClick={setActiveTab(filePath)}
+				/>
+			);
+		};
+
 		return (
 			<div className={tabsBlock()}>
-				{tabsList.toArray().map(([key, tab]) => (
-					<Button
-						key={key}
-						text={tab.get('id')}
-						intent={tab.id === activeTabId ? 'success' : 'none'}
-						onClick={setActiveTab(tab.id)}
-					/>
-				))}
+				{tabs.map(renderTab)}
 				<Popover content={createTabMenu} position='bottom-left' minimal>
 					<Button icon='add' />
 				</Popover>

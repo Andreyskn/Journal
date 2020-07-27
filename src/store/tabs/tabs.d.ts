@@ -1,35 +1,23 @@
 import Immutable from 'immutable';
 
-type TabsListKey = KeyOf<TabsState, 'tabsList'>;
+type TabsKey = KeyOf<Model.TabsState, 'tabs'>;
 
 declare global {
-	type Tab = {
-		id: string;
-		contentType: 'tasks';
-		contentPath: TasksPath['toTaskList'];
-	};
+	namespace Model {
+		type Tab = {
+			filePath: File['path']['absolute'];
+		};
+		type TaggedTab = TaggedRecord<Tab, 'tab'>;
+		type ImmutableTab = ImmutableRecord<TaggedTab>;
 
-	type TypedTab = TypedRecord<Tab, 'tab'>;
+		type TabsState = {
+			tabs: Immutable.List<ImmutableTab>;
+		};
 
-	type ImmutableTab = ImmutableRecord<TypedTab>;
+		type Tabs_Immutable_Non_Record_Key = TabsKey;
 
-	type TabsState = {
-		tabsList: Immutable.OrderedMap<Tab['id'], ImmutableTab>;
-		activeTabId: Tab['id'];
-	};
-
-	type Tabs_Immutable_Non_Record_Key = TabsListKey;
-
-	interface TabsPath {
-		toTabsList: [TabsListKey];
-		toActiveTabId: [KeyOf<TabsState, 'activeTabId'>];
-		toTab: [TabsListKey, Tab['id']];
-	}
-
-	interface ImmutableAppState {
-		updateIn(
-			keyPath: TabsPath['toTabsList'],
-			updater: Updater<TabsState['tabsList']>
-		): ImmutableAppState;
+		interface Path {
+			toTabs: [TabsKey];
+		}
 	}
 }
