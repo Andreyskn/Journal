@@ -1,1 +1,1 @@
-export * from './FileTree';
+export { FileTreeConnector as FileTree } from './FileTreeConnector';

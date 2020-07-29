@@ -6,12 +6,6 @@ export type HandlerDeps = {
 };
 
 const addTab = ({ store: { dispatch, getState } }: HandlerDeps) => () => {
-	/*
-	1. create task list
-	2. create file
-	3. create tab
-	*/
-
 	const id = generateId();
 
 	dispatch<AddTaskList>({ type: '@tasks/ADD_TASK_LIST', payload: id });
@@ -19,7 +13,6 @@ const addTab = ({ store: { dispatch, getState } }: HandlerDeps) => () => {
 	dispatch<CreateFile>({
 		type: '@fs/CREATE_FILE',
 		payload: {
-			name: 'Untitled',
 			type: 'tasks',
 			contentPath: ['taskLists', id],
 		},
@@ -31,9 +24,11 @@ const addTab = ({ store: { dispatch, getState } }: HandlerDeps) => () => {
 	});
 };
 
-const setActiveTab = ({ store }: HandlerDeps) => (
+const setActiveTab = ({ store: { dispatch } }: HandlerDeps) => (
 	filePath: Model.Tab['filePath']
-) => {};
+) => {
+	dispatch<SetActiveFile>({ type: '@fs/SET_ACTIVE_FILE', payload: filePath });
+};
 
 export const createDispatch = (deps: HandlerDeps) => ({
 	addTab: addTab(deps),

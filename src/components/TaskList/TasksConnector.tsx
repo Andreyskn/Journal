@@ -1,8 +1,11 @@
 import React, { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { createDispatch } from './tasksDispatch';
+import { createDispatch } from './tasksDispatcher';
 import { TaskList } from './TaskList';
+import { withErrorBoundary } from '../../utils';
+
+const WrappedTaskList = withErrorBoundary(TaskList);
 
 export type TaskConnectorProps = {
 	taskList: Model.ImmutableTaskList;
@@ -18,7 +21,7 @@ export const TasksConnector: React.FC<TaskConnectorProps> = ({ taskList }) => {
 	);
 
 	return (
-		<TaskList
+		<WrappedTaskList
 			taskList={taskList}
 			dispatch={tasksDispatch}
 			key={taskListId}

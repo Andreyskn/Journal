@@ -1,13 +1,16 @@
 import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { hot } from 'react-hot-loader/root';
-import { Classes } from '@blueprintjs/core';
+
 import './app.scss';
+
+import { Classes } from '@blueprintjs/core';
 import { useBEM } from '../../utils';
 import { FileTree } from '../FileTree';
-import { Browser } from '../Browser';
-import { useSelector } from 'react-redux';
+import { TaskList } from '../TaskList';
+import { Tabs } from '../Tabs';
 
-const [appBlock] = useBEM('app');
+const [appBlock, appElement] = useBEM('app');
 
 export const App: React.FC = hot(() => {
 	const state = useSelector<Model.ImmutableAppState, Model.ImmutableAppState>(
@@ -19,10 +22,22 @@ export const App: React.FC = hot(() => {
 			localStorage.setItem('state', JSON.stringify(state));
 	}, [state]);
 
+	// TODO: add selectors with error handling
+	const activeFile =
+		state.activeFilePath &&
+		state.getIn(state.files.get(state.activeFilePath)!.path.content);
+
 	return (
 		<div className={appBlock(null, Classes.DARK)}>
-			<FileTree />
-			<Browser />
+			<div className={appElement('file-tree')}>
+				<FileTree />
+			</div>
+			<div className={appElement('tabs')}>
+				<Tabs />
+			</div>
+			<div className={appElement('workspace')}>
+				{activeFile && <TaskList taskList={activeFile} />}
+			</div>
 		</div>
 	);
 });

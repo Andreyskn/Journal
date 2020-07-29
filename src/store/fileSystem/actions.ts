@@ -5,10 +5,12 @@ declare global {
 	type DeleteFile = Action<FileSystemHandlers, '@fs/DELETE_FILE'>;
 	type RenameFile = Action<FileSystemHandlers, '@fs/RENAME_FILE'>;
 	type SetActiveFile = Action<FileSystemHandlers, '@fs/SET_ACTIVE_FILE'>;
+	type SetCurrentDir = Action<FileSystemHandlers, '@fs/SET_CWD'>;
 
 	type FileSystemAction =
 		| CreateFile
 		| DeleteFile
 		| RenameFile
-		| SetActiveFile;
+		| SetActiveFile
+		| SetCurrentDir;
 }

@@ -1,5 +1,4 @@
 import Immutable from 'immutable';
-import { ThunkDispatch as ReduxThunkDispatch } from 'redux-thunk';
 
 declare global {
 	namespace Model {
@@ -17,10 +16,10 @@ declare global {
 			| Tasks_Immutable_Non_Record_Key
 			| Tabs_Immutable_Non_Record_Key;
 
-		type RecordType = 'task' | 'task-list' | 'tab' | 'folder' | 'file';
+		type RecordTag = 'task' | 'task-list' | 'tab' | 'folder' | 'file';
 	}
 
-	type TaggedRecord<O extends AnyObject, T extends Model.RecordType> = O & {
+	type TaggedRecord<O extends AnyObject, T extends Model.RecordTag> = O & {
 		_tag: T;
 	};
 
@@ -31,10 +30,15 @@ declare global {
 
 	type Updater<T> = (data: T) => T;
 
-	type ActionBase<T extends string | number | symbol, P = undefined> = {
-		type: T;
-		payload: P;
-	};
+	type ActionBase<
+		T extends string | number | symbol,
+		P = undefined
+	> = P extends undefined
+		? { type: T }
+		: {
+				type: T;
+				payload: P;
+		  };
 
 	type Handler<P = undefined> = (
 		state: Model.ImmutableAppState,
@@ -45,17 +49,8 @@ declare global {
 
 	type Action<H extends AnyHandlers, T extends keyof H> = ActionBase<
 		T,
-		Parameters<H[T]>[1]['payload']
+		Parameters<H[T]>[1] extends { payload: any }
+			? Parameters<H[T]>[1]['payload']
+			: undefined
 	>;
-
-	type ThunkDispatch<
-		A extends Model.AppAction = Model.AppAction
-	> = ReduxThunkDispatch<Model.ImmutableAppState, undefined, A>;
-
-	type ThunkAction = (
-		dispatch: ThunkDispatch,
-		getState: () => Model.ImmutableAppState
-	) => void;
-
-	type Thunks = Record<string, AnyFunction>;
 }

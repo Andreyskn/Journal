@@ -1,5 +1,4 @@
 import { createStore, applyMiddleware, compose } from 'redux';
-import thunk from 'redux-thunk';
 import { devToolsEnhancer } from 'redux-devtools-extension';
 
 import { getInitialState } from './initializer';
@@ -23,8 +22,4 @@ const reducer: Reducer<Model.ImmutableAppState, ActionBase<any, any>> = (
 	return handler ? handler(state, action) : state;
 };
 
-export const store = createStore(
-	reducer as any,
-	getInitialState(),
-	compose(applyMiddleware(thunk), devTools)
-);
+export const store = createStore(reducer as any, getInitialState(), devTools);

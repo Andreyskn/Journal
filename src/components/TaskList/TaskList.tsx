@@ -8,7 +8,7 @@ import {
 	H1,
 	IEditableTextProps,
 } from '@blueprintjs/core';
-import { TasksDispatch } from './tasksDispatch';
+import { TasksDispatch } from './tasksDispatcher';
 
 export type TaskListProps = {
 	taskList: Model.ImmutableTaskList;

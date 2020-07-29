@@ -16,7 +16,6 @@ export const Browser: React.FC<BrowserProps> = () => {
 		state => state
 	);
 
-	// TODO: add selectors with error handling
 	const activeFile =
 		state.activeFilePath &&
 		state.getIn(state.files.get(state.activeFilePath)!.path.content);

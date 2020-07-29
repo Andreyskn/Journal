@@ -2,19 +2,19 @@ import Immutable from 'immutable';
 
 import { defaultTasksState, TaskRecord, TaskListRecord } from './tasks';
 import { defaultTabsState, TabRecord } from './tabs';
-import { defaultFileSystem } from './fileSystem';
+import { defaultFileSystemState } from './fileSystem';
 
 const AppStateRecord = Immutable.Record<Model.AppState>({
 	...defaultTasksState,
 	...defaultTabsState,
-	...defaultFileSystem,
+	...defaultFileSystemState,
 });
 
 const appStateReviver = (
 	key: string,
 	value: Immutable.Collection.Keyed<string, any>
 ) => {
-	const objectType: Maybe<Model.RecordType> = value.get('_tag');
+	const objectType: Maybe<Model.RecordTag> = value.get('_tag');
 
 	switch (objectType) {
 		case 'task':

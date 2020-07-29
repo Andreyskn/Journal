@@ -5,6 +5,10 @@ declare global {
 		type Folder = {
 			name: string;
 			path: string;
+			content: {
+				folders: Immutable.List<Folder['path']>;
+				files: Immutable.List<File['path']['absolute']>;
+			};
 		};
 		type TaggedFolder = TaggedRecord<Folder, 'folder'>;
 		type ImmutableFolder = ImmutableRecord<TaggedFolder>;
@@ -24,11 +28,9 @@ declare global {
 
 		type FileSystemState = {
 			folders: Immutable.OrderedMap<Folder['path'], ImmutableFolder>;
-			files: Immutable.OrderedMap<
-				File['path']['absolute'],
-				ImmutableFile
-			>;
+			files: Immutable.Map<File['path']['absolute'], ImmutableFile>;
 			activeFilePath: File['path']['absolute'] | null;
+			cwd: Folder['path'];
 		};
 	}
 }

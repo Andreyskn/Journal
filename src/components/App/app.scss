@@ -4,7 +4,35 @@
 }
 
 .app {
-	display: flex;
+	display: grid;
 
 	height: 100vh;
+
+	grid-template: "file-tree tabs" auto
+	"file-tree workspace" minmax(0, 1fr) /
+	200px minmax(0, 1fr);
+
+	&__file-tree {
+		background-color: var(--secondary-background);
+
+		grid-area: file-tree;
+	}
+
+	&__tabs {
+		background-color: var(--primary-background);
+
+		grid-area: tabs;
+	}
+
+	&__workspace {
+		background-color: var(--primary-background);
+
+		grid-area: workspace;
+	}
+}
+
+.error-boundary {
+	height: 100%;
+
+	border: 1px solid black;
 }
