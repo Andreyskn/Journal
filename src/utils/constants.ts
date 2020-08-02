@@ -10,4 +10,8 @@ export const extensions: Record<Model.File['type'], string> = {
 	notes: '.n',
 };
 
-export const defaultFileName = 'Untitled';
+export const DEFAULT_FILE_NAME = 'Untitled';
+
+export const PATH_DELIMITER = '/';
+
+export const ROOT_FOLDER_PATH = PATH_DELIMITER;

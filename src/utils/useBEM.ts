@@ -1,4 +1,4 @@
-type Modifiers = Record<string, boolean>;
+type Modifiers = Record<string, any>;
 
 const applyModifiers = (className: string, modifiers: Modifiers) => {
 	const classes = [className];

@@ -27,10 +27,9 @@ declare global {
 		type ImmutableFile = ImmutableRecord<TaggedFile>;
 
 		type FileSystemState = {
-			folders: Immutable.OrderedMap<Folder['path'], ImmutableFolder>;
+			folders: Immutable.Map<Folder['path'], ImmutableFolder>;
 			files: Immutable.Map<File['path']['absolute'], ImmutableFile>;
-			activeFilePath: File['path']['absolute'] | null;
-			cwd: Folder['path'];
+			activeFilePath: File['path']['absolute'] | Folder['path'] | null;
 		};
 	}
 }

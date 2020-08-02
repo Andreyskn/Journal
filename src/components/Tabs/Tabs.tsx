@@ -2,22 +2,20 @@ import React from 'react';
 import './tabs.scss';
 import { useBEM, fileIcons } from '../../utils';
 import { Button, Menu, MenuItem, Popover } from '@blueprintjs/core';
-import { TabsDispatch } from './tabsDispatcher';
+import { TabsDispatch } from './dispatcher';
 
 const [tabsBlock, tabsElement] = useBEM('tabs');
 
-export type TabsProps = Pick<
-	Model.FileSystemState,
-	'activeFilePath' | 'files'
-> & {
+export type TabsProps = Pick<Model.FileSystemState, 'files'> & {
 	dispatch: TabsDispatch;
 	tabs: Model.Tab[];
+	activeFile: Model.ImmutableFile;
 };
 
 export const Tabs: React.FC<TabsProps> = ({
 	tabs,
 	files,
-	activeFilePath,
+	activeFile,
 	dispatch,
 }) => {
 	const addTab = (fileType: Model.File['type']) => () => {
@@ -25,7 +23,6 @@ export const Tabs: React.FC<TabsProps> = ({
 	};
 
 	const setActiveTab = (filePath: Model.Tab['filePath']) => () => {
-		if (activeFilePath === filePath) return;
 		dispatch.setActiveTab(filePath);
 	};
 
@@ -46,14 +43,15 @@ export const Tabs: React.FC<TabsProps> = ({
 
 	const renderTab = ({ filePath }: Model.Tab) => {
 		const file = files.get(filePath)!;
+		const isActive = filePath === activeFile.path.absolute;
 
 		return (
 			<Button
 				key={filePath}
 				text={file.name}
 				icon={fileIcons[file.type]}
-				intent={filePath === activeFilePath ? 'success' : 'none'}
-				onClick={setActiveTab(filePath)}
+				intent={isActive ? 'success' : 'none'}
+				onClick={isActive ? undefined : setActiveTab(filePath)}
 			/>
 		);
 	};

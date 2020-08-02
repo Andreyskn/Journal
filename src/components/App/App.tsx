@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { hot } from 'react-hot-loader/root';
 
 import './app.scss';
 
 import { Classes } from '@blueprintjs/core';
-import { useBEM } from '../../utils';
+import { useBEM, isFolderPath } from '../../utils';
 import { FileTree } from '../FileTree';
 import { TaskList } from '../TaskList';
 import { Tabs } from '../Tabs';
@@ -22,10 +22,21 @@ export const App: React.FC = hot(() => {
 			localStorage.setItem('state', JSON.stringify(state));
 	}, [state]);
 
-	// TODO: add selectors with error handling
-	const activeFile =
-		state.activeFilePath &&
-		state.getIn(state.files.get(state.activeFilePath)!.path.content);
+	const [
+		activeDocument,
+		setActiveDocument,
+	] = useState<Model.ImmutableTaskList | null>(null);
+
+	const getActiveDocument = () => {
+		const selectedPath = state.activeFilePath;
+		if (!selectedPath) return null;
+		if (isFolderPath(selectedPath)) return activeDocument;
+		return state.getIn(state.files.get(selectedPath)!.path.content);
+	};
+
+	useEffect(() => {
+		setActiveDocument(getActiveDocument());
+	}, [state.activeFilePath]);
 
 	return (
 		<div className={appBlock(null, Classes.DARK)}>
@@ -36,7 +47,7 @@ export const App: React.FC = hot(() => {
 				<Tabs />
 			</div>
 			<div className={appElement('workspace')}>
-				{activeFile && <TaskList taskList={activeFile} />}
+				{activeDocument && <TaskList taskList={activeDocument} />}
 			</div>
 		</div>
 	);

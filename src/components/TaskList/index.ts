@@ -1,1 +1,1 @@
-export { TasksConnector as TaskList } from './TasksConnector';
+export { TasksConnector as TaskList } from './Connector';

@@ -1,38 +1,50 @@
 import Immutable from 'immutable';
 import { defaultTaskListId } from '../tasks';
-import { extensions, defaultFileName } from '../../utils';
+import {
+	extensions,
+	DEFAULT_FILE_NAME,
+	ROOT_FOLDER_PATH,
+	PATH_DELIMITER,
+} from '../../utils';
 
 const defaultTasksFile: Model.File = {
 	name: 'Tasks',
 	type: 'tasks',
 	path: {
-		absolute: `/Tasks${extensions.tasks}`,
+		absolute: `${ROOT_FOLDER_PATH}Tasks${extensions.tasks}`,
 		base: `Tasks${extensions.tasks}`,
-		dir: '/',
+		dir: ROOT_FOLDER_PATH,
 		content: ['taskLists', defaultTaskListId],
 	},
 };
 
-const rootFolder: Model.TaggedFolder = {
-	_tag: 'folder',
+const rootFolder: Model.Folder = {
 	name: '',
-	path: '/',
+	path: ROOT_FOLDER_PATH,
 	content: {
 		folders: Immutable.List(),
 		files: Immutable.List([defaultTasksFile.path.absolute]),
 	},
 };
 
-export const FolderRecord = Immutable.Record<Model.TaggedFolder>(rootFolder);
+export const FolderRecord = Immutable.Record<Model.TaggedFolder>({
+	_tag: 'folder',
+	name: '',
+	path: '',
+	content: {
+		folders: Immutable.List(),
+		files: Immutable.List(),
+	},
+});
 
 export const FileRecord = Immutable.Record<Model.TaggedFile>({
 	_tag: 'file',
-	name: defaultFileName,
+	name: DEFAULT_FILE_NAME,
 	type: 'tasks',
 	path: {
-		absolute: `/${defaultFileName}${extensions.tasks}`,
-		base: `${defaultFileName}${extensions.tasks}`,
-		dir: '/',
+		absolute: `${ROOT_FOLDER_PATH}${DEFAULT_FILE_NAME}${extensions.tasks}`,
+		base: `${DEFAULT_FILE_NAME}${extensions.tasks}`,
+		dir: ROOT_FOLDER_PATH,
 		content: ['taskLists', defaultTaskListId],
 	},
 });
@@ -40,41 +52,11 @@ export const FileRecord = Immutable.Record<Model.TaggedFile>({
 export const defaultActiveFilePath = defaultTasksFile.path.absolute;
 
 export const defaultFileSystemState: Model.FileSystemState = {
-	folders: Immutable.OrderedMap([
-		[
-			rootFolder.path,
-			FolderRecord({
-				content: {
-					...rootFolder.content,
-					folders: Immutable.List(['/Folder/']),
-				},
-			}),
-		],
-		[
-			'/Folder/',
-			FolderRecord({
-				name: 'Folder',
-				path: '/Folder/',
-				content: {
-					files: Immutable.List(),
-					folders: Immutable.List(['/Folder2/']),
-				},
-			}),
-		],
-		[
-			'/Folder2/',
-			FolderRecord({
-				name: 'Folder2',
-				path: '/Folder2/',
-				content: { files: Immutable.List(), folders: Immutable.List() },
-			}),
-		],
-	]),
-	files: Immutable.OrderedMap([
-		[defaultTasksFile.path.absolute, FileRecord(defaultTasksFile)],
+	folders: Immutable.Map([[rootFolder.path, FolderRecord(rootFolder)]]),
+	files: Immutable.Map([
+		[defaultActiveFilePath, FileRecord(defaultTasksFile)],
 	]),
 	activeFilePath: defaultActiveFilePath,
-	cwd: rootFolder.path,
 };
 
 const generateName = (
@@ -89,7 +71,7 @@ const generateName = (
 
 	let i = 1;
 	while (true) {
-		const fileName = defaultFileName + (i > 1 ? `_${i}` : '');
+		const fileName = DEFAULT_FILE_NAME + (i > 1 ? `_${i}` : '');
 		const baseName = `${fileName}${extensions[type]}`.toLowerCase();
 
 		if (!usedBaseNames.has(baseName)) {
@@ -101,12 +83,17 @@ const generateName = (
 };
 
 const createFile: Handler<{
-	name?: Model.File['name'];
+	name?: Model.FileSystemState['activeFilePath'];
 	folderPath?: Model.Folder['path'];
 	type: Model.File['type'];
 	contentPath: Model.File['path']['content'];
 }> = (state, action) => {
-	const { name, type, contentPath, folderPath = state.cwd } = action.payload;
+	const {
+		name,
+		type,
+		contentPath,
+		folderPath = ROOT_FOLDER_PATH,
+	} = action.payload;
 
 	const fileName = name || generateName(state, folderPath, type);
 	const baseName = `${fileName}${extensions[type]}`;
@@ -151,13 +138,32 @@ const setActiveFile: Handler<Model.File['path']['absolute']> = (
 	return state.set('activeFilePath', action.payload);
 };
 
-const setCurrentDir: Handler<Model.Folder['path']> = (state, action) => {
-	return state.set('cwd', action.payload);
-};
+const createFolder: Handler<{
+	name: string;
+	parentPath: Model.Folder['path'];
+}> = (state, action) => {
+	const { name, parentPath } = action.payload;
 
-// const createFolder: Handler = (state, action) => {
-// 	return state;
-// };
+	const path = `${parentPath}${name}${PATH_DELIMITER}`;
+
+	return state.withMutations(state => {
+		state.update('folders', folders =>
+			folders.set(
+				path,
+				FolderRecord({
+					name,
+					path,
+				})
+			)
+		);
+		(state as any).updateIn(
+			['folders', parentPath, 'content', 'folders'],
+			(folders: Model.Folder['content']['folders']) =>
+				folders.push(path).sort()
+		);
+		state.set('activeFilePath', path);
+	});
+};
 
 // const deleteFolder: Handler = (state, action) => {
 // 	return state;
@@ -172,8 +178,7 @@ export const fileSystemHandlers = {
 	'@fs/DELETE_FILE': deleteFile,
 	'@fs/RENAME_FILE': renameFile,
 	'@fs/SET_ACTIVE_FILE': setActiveFile,
-	'@fs/SET_CWD': setCurrentDir,
-	// '@fs/CREATE_FOLDER': createFile,
+	'@fs/CREATE_FOLDER': createFolder,
 	// '@fs/DELETE_FOLDER': createFile,
 	// '@fs/RENAME_FOLDER': createFile,
 };

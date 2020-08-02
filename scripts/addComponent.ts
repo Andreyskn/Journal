@@ -53,7 +53,9 @@ fs.writeFileSync(
 fs.writeFileSync(
 	path.join(component.dir, `${component.name}.tsx`),
 	`import React from 'react';
+
 import './${component.stylesFileName}';
+
 import { useBEM } from '../../utils';
 
 export type ${component.name}Props = {

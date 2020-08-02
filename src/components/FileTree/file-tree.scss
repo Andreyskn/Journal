@@ -1,2 +1,12 @@
-.file-tree {
+$tree: ".file-tree";
+$node: "#{$tree}__node";
+
+#{$tree} {
+	user-select: none;
+
+	&--insert {
+		#{$node}:not(#{$node}--new) > .bp3-tree-node-content {
+			opacity: 0.5;
+		}
+	}
 }

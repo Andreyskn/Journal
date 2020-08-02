@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { createDispatch } from './tasksDispatcher';
+import { createDispatch } from './dispatcher';
 import { TaskList } from './TaskList';
 import { withErrorBoundary } from '../../utils';
 
