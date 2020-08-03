@@ -3,7 +3,7 @@ import { generateId } from '../../utils';
 
 export const defaultTaskListId = generateId();
 
-export const TaskListRecord = Immutable.Record<Model.TaggedTaskList>({
+export const TaskListRecord = Immutable.Record<Store.TaggedTaskList>({
 	_tag: 'task-list',
 	id: defaultTaskListId,
 	items: Immutable.OrderedMap(),
@@ -12,7 +12,7 @@ export const TaskListRecord = Immutable.Record<Model.TaggedTaskList>({
 
 export const defaultTaskList = TaskListRecord();
 
-export const TaskRecord = Immutable.Record<Model.TaggedTask>({
+export const TaskRecord = Immutable.Record<Store.TaggedTask>({
 	_tag: 'task',
 	id: '*',
 	createdAt: 0,
@@ -20,13 +20,13 @@ export const TaskRecord = Immutable.Record<Model.TaggedTask>({
 	done: false,
 });
 
-export const defaultTasksState: Model.TasksState = {
-	taskLists: Immutable.OrderedMap([[defaultTaskListId, defaultTaskList]]),
+export const defaultTasksState: Store.TasksState = {
+	taskLists: Immutable.Map([[defaultTaskListId, defaultTaskList]]),
 };
 
-const addTask: Handler<{
-	taskListId: Model.TaskList['id'];
-	taskText: Model.Task['text'];
+const addTask: Store.Handler<{
+	taskListId: Store.TaskList['id'];
+	taskText: Store.Task['text'];
 }> = (state, action) => {
 	const { taskListId, taskText } = action.payload;
 	const taskId = generateId();
@@ -43,9 +43,9 @@ const addTask: Handler<{
 	);
 };
 
-const toggleDone: Handler<{
-	taskListId: Model.TaskList['id'];
-	taskId: Model.Task['id'];
+const toggleDone: Store.Handler<{
+	taskListId: Store.TaskList['id'];
+	taskId: Store.Task['id'];
 }> = (state, action) => {
 	const { taskListId, taskId } = action.payload;
 
@@ -54,9 +54,9 @@ const toggleDone: Handler<{
 	);
 };
 
-const deleteTask: Handler<{
-	taskListId: Model.TaskList['id'];
-	taskId: Model.Task['id'];
+const deleteTask: Store.Handler<{
+	taskListId: Store.TaskList['id'];
+	taskId: Store.Task['id'];
 }> = (state, action) => {
 	const { taskListId, taskId } = action.payload;
 
@@ -65,17 +65,17 @@ const deleteTask: Handler<{
 	);
 };
 
-const addTaskList: Handler<Model.TaskList['id']> = (state, action) => {
+const addTaskList: Store.Handler<Store.TaskList['id']> = (state, action) => {
 	const id = action.payload;
 
-	return state.updateIn(['taskLists'], taskLists =>
+	return state.update('taskLists', taskLists =>
 		taskLists.set(id, TaskListRecord({ id }))
 	);
 };
 
-const renameTaskList: Handler<{
-	taskListId: Model.TaskList['id'];
-	title: Model.TaskList['title'];
+const renameTaskList: Store.Handler<{
+	taskListId: Store.TaskList['id'];
+	title: Store.TaskList['title'];
 }> = (state, action) => {
 	const { taskListId, title } = action.payload;
 

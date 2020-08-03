@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { ITreeProps, ITreeNode } from '@blueprintjs/core';
-import { fileIcons } from '../../utils';
+import { fileIcons, ROOT_FOLDER_PATH } from '../../utils';
 import { FileTreeProps } from './FileTree';
 import { NewItemProps, NewItem } from './NewItem';
 import { fileTreeElement, NewItemData } from './common';
@@ -28,18 +28,22 @@ type InnerNode<T> = LeafNode<T> & {
 };
 type TreeNode = LeafNode<NodeData> | InnerNode<NodeData>;
 
-type FolderNodeData = { parent: FolderNode | null };
-type FileNodeData = undefined;
+type FolderNodeData = { type: 'folder'; parent: FolderNode | null };
+type FileNodeData = { type: 'file'; parent: FolderNode };
 type NodeData = FolderNodeData | FileNodeData;
 
 type FolderNode = InnerNode<FolderNodeData>;
 type FileNode = LeafNode<FileNodeData>;
 type Node = FolderNode | FileNode;
 
-type FolderNodesMap = Map<Model.Folder['path'], FolderNode>;
+type NodesMap = {
+	folders: Map<Path, FolderNode>;
+	files: Map<Path, FileNode>;
+};
 
-const getNodeClass = (isNew: boolean) =>
-	fileTreeElement('node', { new: isNew });
+const getNodeClass = (isNew: boolean) => {
+	return fileTreeElement('node', { new: isNew });
+};
 
 const createFolderNode = ({
 	label = '',
@@ -50,14 +54,15 @@ const createFolderNode = ({
 	parent,
 }: Partial<
 	Pick<FolderNode, 'label' | 'id' | 'isExpanded' | 'isSelected' | 'className'>
-> & { isNew?: boolean; parent: FolderNode }): FolderNode => ({
+> & { isNew?: boolean; parent: FolderNode | null }): FolderNode => ({
 	id,
 	label,
 	isExpanded,
 	isSelected,
 	childNodes: [],
-	nodeData: { parent },
+	nodeData: { type: 'folder', parent },
 	icon: isExpanded ? 'folder-open' : 'folder-close',
+	hasCaret: !isNew,
 	className: getNodeClass(isNew),
 });
 
@@ -66,20 +71,21 @@ const createFileNode = ({
 	id = '',
 	isSelected = false,
 	type,
+	parent,
 	isNew = false,
 }: Partial<
 	Pick<FileNode, 'id' | 'label' | 'isSelected' | 'className'> &
-		Pick<Model.File, 'type'>
-> & { isNew?: boolean }): FileNode => ({
+		Pick<Store.File, 'type'>
+> & { isNew?: boolean; parent: FolderNode }): FileNode => ({
 	id,
 	label,
 	isSelected,
-	nodeData: undefined, // TODO: remove property
+	nodeData: { type: 'file', parent },
 	icon: type ? fileIcons[type] : 'document',
 	className: getNodeClass(isNew),
 });
 
-const expandParentFolders = (parent: FolderNode | null) => {
+export const expandParentFolders = ({ nodeData: { parent } }: Node) => {
 	while (parent) {
 		parent.isExpanded = true;
 		parent = parent.nodeData.parent;
@@ -92,42 +98,39 @@ const maybeAppendNewItem = (
 	newItem: NewItemData
 ) => {
 	if (!newItem || folder.id !== newItem.cwd || type !== newItem.type) return;
+
 	const createNode = type === 'folder' ? createFolderNode : createFileNode;
-	folder.childNodes.push(
-		createNode({
-			label: <NewItem {...newItem} />,
-			isNew: true,
-			parent: folder,
-		})
-	);
-	expandParentFolders(folder);
+	const newItemNode = createNode({
+		label: <NewItem {...newItem} />,
+		isNew: true,
+		parent: folder,
+	});
+
+	folder.childNodes.push(newItemNode);
+	expandParentFolders(newItemNode);
 };
 
 export const isFolderNode = (node: Node): node is FolderNode => {
-	return Boolean(node.nodeData);
+	return node.nodeData.type === 'folder';
 };
 
 export const useTree = (
-	{ folders, files, activeFilePath }: FileTreeProps,
-	newItem: NewItemData
+	{ folders, files }: FileTreeProps,
+	newItem: NewItemData,
+	selectedPath: string | null
 ) => {
-	const prevFolderNodeMap = useRef<FolderNodesMap | undefined>();
+	const prevNodesMap = useRef<NodesMap | undefined>();
 	const rootFolder = folders.first(null)!;
-	const rootNode: FolderNode = {
-		id: rootFolder.path,
-		label: '',
-		childNodes: [],
-		isExpanded: true,
-		nodeData: { parent: null },
+	const rootNode = createFolderNode({ id: ROOT_FOLDER_PATH, parent: null });
+	const nodesMap: NodesMap = {
+		folders: new Map([[rootFolder.path, rootNode]]),
+		files: new Map(),
 	};
-	const folderNodesMap: FolderNodesMap = new Map([
-		[rootFolder.path, rootNode],
-	]);
 
-	const isSelected = (path: string) => !newItem && path === activeFilePath;
+	const isSelected = (path: string) => !newItem && path === selectedPath;
 
 	folders.forEach(folder => {
-		const folderNode = folderNodesMap.get(folder.path)!;
+		const folderNode = nodesMap.folders.get(folder.path)!;
 
 		maybeAppendNewItem('folder', folderNode, newItem);
 
@@ -137,12 +140,12 @@ export const useTree = (
 			const childFolderNode = createFolderNode({
 				id: path,
 				label: childFolder.name,
-				isExpanded: prevFolderNodeMap.current?.get(path)?.isExpanded,
+				isExpanded: prevNodesMap.current?.folders.get(path)?.isExpanded,
 				isSelected: isSelected(path),
 				parent: folderNode,
 			});
 
-			folderNodesMap.set(path, childFolderNode);
+			nodesMap.folders.set(path, childFolderNode);
 			folderNode.childNodes.push(childFolderNode);
 		});
 
@@ -156,15 +159,15 @@ export const useTree = (
 				label: file.path.base,
 				isSelected: isSelected(path),
 				type: file.type,
+				parent: folderNode,
 			});
 
-			if (fileNode.isSelected) {
-				expandParentFolders(folderNode);
-			}
+			nodesMap.files.set(path, fileNode);
 			folderNode.childNodes.push(fileNode);
 		});
 	});
 
-	prevFolderNodeMap.current = folderNodesMap;
-	return rootNode.childNodes;
+	prevNodesMap.current = nodesMap;
+
+	return { contents: rootNode.childNodes, nodesMap };
 };

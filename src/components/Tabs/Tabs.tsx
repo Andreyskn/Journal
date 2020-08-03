@@ -6,23 +6,25 @@ import { TabsDispatch } from './dispatcher';
 
 const [tabsBlock, tabsElement] = useBEM('tabs');
 
-export type TabsProps = Pick<Model.FileSystemState, 'files'> & {
+export type TabsProps = Pick<
+	Store.FileSystemState,
+	'activeFilePath' | 'files'
+> & {
 	dispatch: TabsDispatch;
-	tabs: Model.Tab[];
-	activeFile: Model.ImmutableFile;
+	tabs: Store.Tab[];
 };
 
 export const Tabs: React.FC<TabsProps> = ({
 	tabs,
 	files,
-	activeFile,
+	activeFilePath,
 	dispatch,
 }) => {
-	const addTab = (fileType: Model.File['type']) => () => {
+	const addTab = (fileType: Store.File['type']) => () => {
 		dispatch.addTab();
 	};
 
-	const setActiveTab = (filePath: Model.Tab['filePath']) => () => {
+	const setActiveTab = (filePath: Store.Tab['filePath']) => () => {
 		dispatch.setActiveTab(filePath);
 	};
 
@@ -41,9 +43,9 @@ export const Tabs: React.FC<TabsProps> = ({
 		</Menu>
 	);
 
-	const renderTab = ({ filePath }: Model.Tab) => {
+	const renderTab = ({ filePath }: Store.Tab) => {
 		const file = files.get(filePath)!;
-		const isActive = filePath === activeFile.path.absolute;
+		const isActive = filePath === activeFilePath;
 
 		return (
 			<Button

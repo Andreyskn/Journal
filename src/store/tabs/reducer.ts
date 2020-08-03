@@ -4,16 +4,16 @@ import { defaultActiveFilePath } from '../fileSystem';
 
 export const defaultTabId = generateId();
 
-export const TabRecord = Immutable.Record<Model.TaggedTab>({
+export const TabRecord = Immutable.Record<Store.TaggedTab>({
 	_tag: 'tab',
 	filePath: defaultActiveFilePath,
 });
 
-export const defaultTabsState: Model.TabsState = {
+export const defaultTabsState: Store.TabsState = {
 	tabs: Immutable.List([TabRecord()]),
 };
 
-const addTab: Handler<Model.Tab['filePath']> = (state, action) => {
+const addTab: Store.Handler<Store.Tab['filePath']> = (state, action) => {
 	return state.update('tabs', tabs =>
 		tabs.push(TabRecord({ filePath: action.payload }))
 	);

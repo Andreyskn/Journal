@@ -8,7 +8,7 @@ import { withErrorBoundary } from '../../utils';
 const WrappedTaskList = withErrorBoundary(TaskList);
 
 export type TaskConnectorProps = {
-	taskList: Model.ImmutableTaskList;
+	taskList: Store.ImmutableTaskList;
 };
 
 export const TasksConnector: React.FC<TaskConnectorProps> = ({ taskList }) => {

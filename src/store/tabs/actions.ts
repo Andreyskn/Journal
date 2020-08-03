@@ -1,7 +1,9 @@
 import { TabsHandlers } from './reducer';
 
 declare global {
-	type AddTab = Action<TabsHandlers, '@tabs/ADD_TAB'>;
+	namespace Actions {
+		type AddTab = Store.Action<TabsHandlers, '@tabs/ADD_TAB'>;
 
-	type TabAction = AddTab;
+		type TabAction = AddTab;
+	}
 }

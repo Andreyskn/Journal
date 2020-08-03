@@ -12,4 +12,6 @@ declare global {
 	type AnyFunction = (...args: any[]) => any;
 
 	type Timestamp = number;
+
+	type Path = string;
 }

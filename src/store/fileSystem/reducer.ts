@@ -4,10 +4,10 @@ import {
 	extensions,
 	DEFAULT_FILE_NAME,
 	ROOT_FOLDER_PATH,
-	PATH_DELIMITER,
+	getFolderPath,
 } from '../../utils';
 
-const defaultTasksFile: Model.File = {
+const defaultTasksFile: Store.File = {
 	name: 'Tasks',
 	type: 'tasks',
 	path: {
@@ -18,7 +18,7 @@ const defaultTasksFile: Model.File = {
 	},
 };
 
-const rootFolder: Model.Folder = {
+const rootFolder: Store.Folder = {
 	name: '',
 	path: ROOT_FOLDER_PATH,
 	content: {
@@ -27,7 +27,7 @@ const rootFolder: Model.Folder = {
 	},
 };
 
-export const FolderRecord = Immutable.Record<Model.TaggedFolder>({
+export const FolderRecord = Immutable.Record<Store.TaggedFolder>({
 	_tag: 'folder',
 	name: '',
 	path: '',
@@ -37,7 +37,7 @@ export const FolderRecord = Immutable.Record<Model.TaggedFolder>({
 	},
 });
 
-export const FileRecord = Immutable.Record<Model.TaggedFile>({
+export const FileRecord = Immutable.Record<Store.TaggedFile>({
 	_tag: 'file',
 	name: DEFAULT_FILE_NAME,
 	type: 'tasks',
@@ -51,7 +51,7 @@ export const FileRecord = Immutable.Record<Model.TaggedFile>({
 
 export const defaultActiveFilePath = defaultTasksFile.path.absolute;
 
-export const defaultFileSystemState: Model.FileSystemState = {
+export const defaultFileSystemState: Store.FileSystemState = {
 	folders: Immutable.Map([[rootFolder.path, FolderRecord(rootFolder)]]),
 	files: Immutable.Map([
 		[defaultActiveFilePath, FileRecord(defaultTasksFile)],
@@ -60,9 +60,9 @@ export const defaultFileSystemState: Model.FileSystemState = {
 };
 
 const generateName = (
-	state: Model.ImmutableAppState,
+	state: Store.ImmutableAppState,
 	folderPath: string,
-	type: Model.File['type']
+	type: Store.File['type']
 ) => {
 	const siblingFilePaths = state.folders.get(folderPath)!.content.files;
 	const usedBaseNames = siblingFilePaths
@@ -82,11 +82,11 @@ const generateName = (
 	}
 };
 
-const createFile: Handler<{
-	name?: Model.FileSystemState['activeFilePath'];
-	folderPath?: Model.Folder['path'];
-	type: Model.File['type'];
-	contentPath: Model.File['path']['content'];
+const createFile: Store.Handler<{
+	name?: Store.File['name'];
+	folderPath?: Store.Folder['path'];
+	type: Store.File['type'];
+	contentPath: Store.File['path']['content'];
 }> = (state, action) => {
 	const {
 		name,
@@ -99,7 +99,7 @@ const createFile: Handler<{
 	const baseName = `${fileName}${extensions[type]}`;
 	const absolutePath = `${folderPath}${baseName}`;
 
-	const newFile: Model.File = {
+	const newFile: Store.File = {
 		name: fileName,
 		type,
 		path: {
@@ -114,37 +114,37 @@ const createFile: Handler<{
 		state.update('files', files =>
 			files.set(newFile.path.absolute, FileRecord(newFile))
 		);
-		(state as any).updateIn(
+		state.updateIn(
 			['folders', folderPath, 'content', 'files'],
-			(files: Model.Folder['content']['files']) =>
+			(files: Store.Folder['content']['files']) =>
 				files.push(absolutePath).sort()
 		);
 		state.set('activeFilePath', newFile.path.absolute);
 	});
 };
 
-const deleteFile: Handler = (state, action) => {
+const deleteFile: Store.Handler = (state, action) => {
 	return state;
 };
 
-const renameFile: Handler = (state, action) => {
+const renameFile: Store.Handler = (state, action) => {
 	return state;
 };
 
-const setActiveFile: Handler<Model.File['path']['absolute']> = (
+const setActiveFile: Store.Handler<Store.File['path']['absolute']> = (
 	state,
 	action
 ) => {
 	return state.set('activeFilePath', action.payload);
 };
 
-const createFolder: Handler<{
+const createFolder: Store.Handler<{
 	name: string;
-	parentPath: Model.Folder['path'];
+	parentPath: Store.Folder['path'];
 }> = (state, action) => {
 	const { name, parentPath } = action.payload;
 
-	const path = `${parentPath}${name}${PATH_DELIMITER}`;
+	const path = getFolderPath(parentPath, name);
 
 	return state.withMutations(state => {
 		state.update('folders', folders =>
@@ -156,20 +156,19 @@ const createFolder: Handler<{
 				})
 			)
 		);
-		(state as any).updateIn(
+		state.updateIn(
 			['folders', parentPath, 'content', 'folders'],
-			(folders: Model.Folder['content']['folders']) =>
+			(folders: Store.Folder['content']['folders']) =>
 				folders.push(path).sort()
 		);
-		state.set('activeFilePath', path);
 	});
 };
 
-// const deleteFolder: Handler = (state, action) => {
+// const deleteFolder: Store.Handler = (state, action) => {
 // 	return state;
 // };
 
-// const renameFolder: Handler = (state, action) => {
+// const renameFolder: Store.Handler = (state, action) => {
 // 	return state;
 // };
 

@@ -11,7 +11,7 @@ import {
 import { TasksDispatch } from './dispatcher';
 
 export type TaskListProps = {
-	taskList: Model.ImmutableTaskList;
+	taskList: Store.ImmutableTaskList;
 	dispatch: TasksDispatch;
 };
 

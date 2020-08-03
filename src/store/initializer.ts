@@ -4,7 +4,7 @@ import { defaultTasksState, TaskRecord, TaskListRecord } from './tasks';
 import { defaultTabsState, TabRecord } from './tabs';
 import { defaultFileSystemState } from './fileSystem';
 
-const AppStateRecord = Immutable.Record<Model.AppState>({
+const AppStateRecord = Immutable.Record<Store.AppState>({
 	...defaultTasksState,
 	...defaultTabsState,
 	...defaultFileSystemState,
@@ -14,7 +14,7 @@ const appStateReviver = (
 	key: string,
 	value: Immutable.Collection.Keyed<string, any>
 ) => {
-	const objectType: Maybe<Model.RecordTag> = value.get('_tag');
+	const objectType: Maybe<Store.RecordTag> = value.get('_tag');
 
 	switch (objectType) {
 		case 'task':
@@ -25,7 +25,7 @@ const appStateReviver = (
 			return TabRecord(value);
 	}
 
-	switch (key as Maybe<Model.Immutable_Non_Record_Key>) {
+	switch (key as Maybe<Store.ImmutableNonRecordKey>) {
 		case '':
 			return AppStateRecord(value);
 		case 'taskLists':
@@ -38,7 +38,7 @@ const appStateReviver = (
 	return value;
 };
 
-export const getInitialState = (): Model.ImmutableAppState => {
+export const getInitialState = (): Store.ImmutableAppState => {
 	const savedState = localStorage.getItem('state');
 
 	return savedState

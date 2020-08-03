@@ -8,11 +8,11 @@ import { createDispatch } from './dispatcher';
 const WrappedFileTree = React.memo(withErrorBoundary(FileTree));
 
 export const FileTreeConnector: React.FC = () => {
-	const store = useStore<Model.ImmutableAppState, Model.AppAction>();
+	const store = useStore<Store.ImmutableAppState, Actions.AppAction>();
 
 	const { activeFilePath, files, folders } = useSelector<
-		Model.ImmutableAppState,
-		Model.FileSystemState
+		Store.ImmutableAppState,
+		Store.FileSystemState
 	>(state => ({
 		activeFilePath: state.activeFilePath,
 		files: state.files,

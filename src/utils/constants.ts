@@ -1,11 +1,11 @@
 import { IconName } from '@blueprintjs/core';
 
-export const fileIcons: Record<Model.File['type'], IconName> = {
+export const fileIcons: Record<Store.File['type'], IconName> = {
 	tasks: 'form',
 	notes: 'manual',
 };
 
-export const extensions: Record<Model.File['type'], string> = {
+export const extensions: Record<Store.File['type'], string> = {
 	tasks: '.t',
 	notes: '.n',
 };

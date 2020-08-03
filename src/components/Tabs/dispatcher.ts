@@ -1,16 +1,19 @@
-import { Store } from 'redux';
+import { Store as ReduxStore } from 'redux';
 import { generateId } from '../../utils';
 
 export type HandlerDeps = {
-	store: Store<Model.ImmutableAppState, Model.AppAction>;
+	store: ReduxStore<Store.ImmutableAppState, Actions.AppAction>;
 };
 
 const addTab = ({ store: { dispatch, getState } }: HandlerDeps) => () => {
 	const id = generateId();
 
-	dispatch<AddTaskList>({ type: '@tasks/ADD_TASK_LIST', payload: id });
+	dispatch<Actions.AddTaskList>({
+		type: '@tasks/ADD_TASK_LIST',
+		payload: id,
+	});
 
-	dispatch<CreateFile>({
+	dispatch<Actions.CreateFile>({
 		type: '@fs/CREATE_FILE',
 		payload: {
 			type: 'tasks',
@@ -18,16 +21,19 @@ const addTab = ({ store: { dispatch, getState } }: HandlerDeps) => () => {
 		},
 	});
 
-	dispatch<AddTab>({
+	dispatch<Actions.AddTab>({
 		type: '@tabs/ADD_TAB',
 		payload: getState().activeFilePath!,
 	});
 };
 
 const setActiveTab = ({ store: { dispatch } }: HandlerDeps) => (
-	filePath: Model.Tab['filePath']
+	filePath: Store.Tab['filePath']
 ) => {
-	dispatch<SetActiveFile>({ type: '@fs/SET_ACTIVE_FILE', payload: filePath });
+	dispatch<Actions.SetActiveFile>({
+		type: '@fs/SET_ACTIVE_FILE',
+		payload: filePath,
+	});
 };
 
 export const createDispatch = (deps: HandlerDeps) => ({

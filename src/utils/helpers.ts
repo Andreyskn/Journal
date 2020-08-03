@@ -7,6 +7,10 @@ export const generateId = () => {
 
 export const isFolderPath = (path: string) => path.endsWith(PATH_DELIMITER);
 
+export const getFolderPath = (base: Path, folderName: string) => {
+	return `${base}${folderName}${PATH_DELIMITER}`;
+};
+
 export const useForceUpdate = () => {
 	const [, forceUpdate] = useReducer(s => s + 1, 0);
 	return { forceUpdate };

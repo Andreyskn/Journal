@@ -1,11 +1,11 @@
 import Immutable from 'immutable';
 
-type TabsKey = KeyOf<Model.TabsState, 'tabs'>;
+type TabsKey = KeyOf<Store.TabsState, 'tabs'>;
 
 declare global {
-	namespace Model {
+	namespace Store {
 		type Tab = {
-			filePath: File['path']['absolute'];
+			filePath: Path;
 		};
 		type TaggedTab = TaggedRecord<Tab, 'tab'>;
 		type ImmutableTab = ImmutableRecord<TaggedTab>;
@@ -14,10 +14,10 @@ declare global {
 			tabs: Immutable.List<ImmutableTab>;
 		};
 
-		type Tabs_Immutable_Non_Record_Key = TabsKey;
+		type TabsImmutableNonRecordKey = TabsKey;
 
-		interface Path {
-			toTabs: [TabsKey];
+		interface PathTo {
+			tabs: [TabsKey];
 		}
 	}
 }

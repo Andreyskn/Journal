@@ -1,10 +1,10 @@
 import Immutable from 'immutable';
 
-type TaskListsKey = KeyOf<Model.TasksState, 'taskLists'>;
-type TaskListItemsKey = KeyOf<Model.TaskList, 'items'>;
+type TaskListsKey = KeyOf<Store.TasksState, 'taskLists'>;
+type TaskListItemsKey = KeyOf<Store.TaskList, 'items'>;
 
 declare global {
-	namespace Model {
+	namespace Store {
 		type Task = {
 			id: string;
 			createdAt: Timestamp;
@@ -23,41 +23,31 @@ declare global {
 		type ImmutableTaskList = ImmutableRecord<TaggedTaskList>;
 
 		type TasksState = {
-			taskLists: Immutable.OrderedMap<TaskList['id'], ImmutableTaskList>;
-		};
-
-		type Tasks_Immutable_Non_Record_Key = TaskListsKey | TaskListItemsKey;
-
-		type TasksPath = {
-			toTaskLists: [TaskListsKey];
-			toTaskList: [TaskListsKey, TaskList['id']];
-			toTasksListItems: [TaskListsKey, TaskList['id'], TaskListItemsKey];
-			toTask: [
-				TaskListsKey,
-				TaskList['id'],
-				TaskListItemsKey,
-				Task['id']
-			];
+			taskLists: Immutable.Map<TaskList['id'], ImmutableTaskList>;
 		};
 
 		interface ImmutableAppState {
-			getIn(path: TasksPath['toTaskList']): ImmutableTaskList;
+			getIn(path: PathTo['taskList']): ImmutableTaskList;
 			updateIn(
-				keyPath: TasksPath['toTaskLists'],
-				updater: Updater<TasksState['taskLists']>
-			): ImmutableAppState;
-			updateIn(
-				keyPath: TasksPath['toTaskList'],
+				path: PathTo['taskList'],
 				updater: Updater<ImmutableTaskList>
 			): ImmutableAppState;
 			updateIn(
-				keyPath: TasksPath['toTasksListItems'],
+				path: PathTo['tasksListItems'],
 				updater: Updater<TaskList['items']>
 			): ImmutableAppState;
 			updateIn(
-				keyPath: TasksPath['toTask'],
+				path: PathTo['task'],
 				updater: Updater<ImmutableTask>
 			): ImmutableAppState;
+		}
+
+		type TasksImmutableNonRecordKey = TaskListsKey | TaskListItemsKey;
+
+		interface PathTo {
+			taskList: [TaskListsKey, TaskList['id']];
+			tasksListItems: [TaskListsKey, TaskList['id'], TaskListItemsKey];
+			task: [TaskListsKey, TaskList['id'], TaskListItemsKey, Task['id']];
 		}
 	}
 }

@@ -7,7 +7,8 @@ import { FileTreeDispatch } from '../dispatcher';
 
 export type NewItemProps = {
 	type: 'file' | 'folder';
-	cwd: Model.Folder['path'];
+	cwd: Store.Folder['path'];
+	onCreate: (name: string) => void;
 	onDismiss: () => void;
 	dispatch: FileTreeDispatch;
 };
@@ -17,14 +18,17 @@ const [newItemBlock, newItemElement] = useBEM('new-item');
 export const NewItem: React.FC<NewItemProps> = ({
 	type,
 	cwd,
-	onDismiss,
 	dispatch,
+	onDismiss,
+	onCreate,
 }) => {
 	const form = useRef<HTMLFormElement | null>(null);
 
 	const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const input = event.currentTarget.elements[0] as HTMLTextAreaElement;
+
+		// TODO: validation
 
 		if (input.value) {
 			switch (type) {
@@ -35,6 +39,7 @@ export const NewItem: React.FC<NewItemProps> = ({
 					dispatch.createFolder(input.value, cwd);
 					break;
 			}
+			onCreate(input.value);
 		}
 
 		onDismiss();

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { hot } from 'react-hot-loader/root';
 
 import './app.scss';
 
 import { Classes } from '@blueprintjs/core';
-import { useBEM, isFolderPath } from '../../utils';
+import { useBEM } from '../../utils';
 import { FileTree } from '../FileTree';
 import { TaskList } from '../TaskList';
 import { Tabs } from '../Tabs';
@@ -13,7 +13,7 @@ import { Tabs } from '../Tabs';
 const [appBlock, appElement] = useBEM('app');
 
 export const App: React.FC = hot(() => {
-	const state = useSelector<Model.ImmutableAppState, Model.ImmutableAppState>(
+	const state = useSelector<Store.ImmutableAppState, Store.ImmutableAppState>(
 		state => state
 	);
 
@@ -22,21 +22,10 @@ export const App: React.FC = hot(() => {
 			localStorage.setItem('state', JSON.stringify(state));
 	}, [state]);
 
-	const [
-		activeDocument,
-		setActiveDocument,
-	] = useState<Model.ImmutableTaskList | null>(null);
-
-	const getActiveDocument = () => {
-		const selectedPath = state.activeFilePath;
-		if (!selectedPath) return null;
-		if (isFolderPath(selectedPath)) return activeDocument;
-		return state.getIn(state.files.get(selectedPath)!.path.content);
-	};
-
-	useEffect(() => {
-		setActiveDocument(getActiveDocument());
-	}, [state.activeFilePath]);
+	// TODO: add selectors with error handling
+	const activeDocument =
+		state.activeFilePath &&
+		state.getIn(state.files.get(state.activeFilePath)!.path.content);
 
 	return (
 		<div className={appBlock(null, Classes.DARK)}>

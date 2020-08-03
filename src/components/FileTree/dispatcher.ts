@@ -1,14 +1,14 @@
-import { Store } from 'redux';
+import { Store as ReduxStore } from 'redux';
 import { generateId } from '../../utils';
 
 export type HandlerDeps = {
-	store: Store<Model.ImmutableAppState, Model.AppAction>;
+	store: ReduxStore<Store.ImmutableAppState, Actions.AppAction>;
 };
 
 const setActiveFile = ({ store: { dispatch } }: HandlerDeps) => (
-	filePath: Model.File['path']['absolute']
+	filePath: Store.File['path']['absolute']
 ) => {
-	dispatch<SetActiveFile>({
+	dispatch<Actions.SetActiveFile>({
 		type: '@fs/SET_ACTIVE_FILE',
 		payload: filePath,
 	});
@@ -16,13 +16,17 @@ const setActiveFile = ({ store: { dispatch } }: HandlerDeps) => (
 
 const createFile = ({ store: { dispatch, getState } }: HandlerDeps) => (
 	name: string,
-	folderPath: Model.Folder['path']
+	folderPath: Store.Folder['path']
 ) => {
+	// TODO: Introduce a compound action handlers that will process data from different sub-domains
 	const id = generateId();
 
-	dispatch<AddTaskList>({ type: '@tasks/ADD_TASK_LIST', payload: id });
+	dispatch<Actions.AddTaskList>({
+		type: '@tasks/ADD_TASK_LIST',
+		payload: id,
+	});
 
-	dispatch<CreateFile>({
+	dispatch<Actions.CreateFile>({
 		type: '@fs/CREATE_FILE',
 		payload: {
 			type: 'tasks',
@@ -32,7 +36,7 @@ const createFile = ({ store: { dispatch, getState } }: HandlerDeps) => (
 		},
 	});
 
-	dispatch<AddTab>({
+	dispatch<Actions.AddTab>({
 		type: '@tabs/ADD_TAB',
 		payload: getState().activeFilePath!,
 	});
@@ -40,9 +44,9 @@ const createFile = ({ store: { dispatch, getState } }: HandlerDeps) => (
 
 const createFolder = ({ store: { dispatch } }: HandlerDeps) => (
 	name: string,
-	parentPath: Model.Folder['path']
+	parentPath: Store.Folder['path']
 ) => {
-	dispatch<CreateFolder>({
+	dispatch<Actions.CreateFolder>({
 		type: '@fs/CREATE_FOLDER',
 		payload: { name, parentPath },
 	});
