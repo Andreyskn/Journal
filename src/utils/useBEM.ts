@@ -13,7 +13,7 @@ const applyModifiers = (className: string, modifiers: Modifiers) => {
 const getClassName = (
 	className: string,
 	modifiers: Maybe<Modifiers>,
-	extraClasses: Maybe<string>[]
+	extraClasses: Maybe<any>[]
 ) => {
 	const bemClass = modifiers
 		? applyModifiers(className, modifiers)
@@ -26,12 +26,12 @@ const getClassName = (
 
 export const useBEM = (blockName: string) =>
 	[
-		(modifiers?: Maybe<Modifiers>, ...extraClasses: Maybe<string>[]) =>
+		(modifiers?: Maybe<Modifiers>, ...extraClasses: Maybe<any>[]) =>
 			getClassName(blockName, modifiers, extraClasses),
 		(
 			elementName: string,
 			modifiers?: Maybe<Modifiers>,
-			...extraClasses: Maybe<string>[]
+			...extraClasses: Maybe<any>[]
 		) => {
 			const elementClass = `${blockName}__${elementName}`;
 			return getClassName(elementClass, modifiers, extraClasses);

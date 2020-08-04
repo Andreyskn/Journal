@@ -10,3 +10,41 @@ $node: "#{$tree}__node";
 		}
 	}
 }
+
+$explorer: ".file-explorer";
+$controls: "#{$explorer}__controls";
+$treeContainer: "#{$explorer}__tree-container";
+$filler: "#{$explorer}__filler";
+
+#{$explorer} {
+	height: 100%;
+
+	#{$controls} {
+		display: flex;
+
+		height: 30px;
+
+		justify-content: flex-end;
+	}
+
+	#{$treeContainer} {
+		display: flex;
+		flex-direction: column;
+
+		height: calc(100% - 32px);
+
+		&--selected {
+			box-shadow: inset 0 0 0 1px var(--color-accent);
+		}
+
+		#{$tree} {
+			flex: 1 1 auto;
+		}
+
+		#{$filler} {
+			flex: 1 1 100%;
+
+			height: 0;
+		}
+	}
+}

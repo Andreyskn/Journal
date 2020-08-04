@@ -18,7 +18,6 @@ const createFile = ({ store: { dispatch, getState } }: HandlerDeps) => (
 	name: string,
 	folderPath: Store.Folder['path']
 ) => {
-	// TODO: Introduce a compound action handlers that will process data from different sub-domains
 	const id = generateId();
 
 	dispatch<Actions.AddTaskList>({

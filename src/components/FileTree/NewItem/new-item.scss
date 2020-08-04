@@ -1,4 +1,22 @@
 .new-item {
+	&__form {
+		display: grid;
+
+		height: 30px;
+
+		place-items: center;
+	}
+
 	&__input {
+		width: calc(100% - 2px);
+		height: 26px;
+	}
+
+	&__error {
+		width: 142px;
+		padding: 5px;
+
+		border-radius: 3px;
+		background-color: var(--color-error);
 	}
 }

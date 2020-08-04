@@ -9,5 +9,6 @@
 		"jsx": "react",
 		"allowSyntheticDefaultImports": true,
 		"outDir": "./build"
+		// "noUnusedLocals": true
 	}
 }

@@ -5,7 +5,7 @@ export const fileIcons: Record<Store.File['type'], IconName> = {
 	notes: 'manual',
 };
 
-export const extensions: Record<Store.File['type'], string> = {
+export const extensions: Record<Store.File['type'], Store.FileExtension> = {
 	tasks: '.t',
 	notes: '.n',
 };

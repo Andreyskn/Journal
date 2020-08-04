@@ -6,6 +6,7 @@ import {
 	isFolderPath,
 	getFolderPath,
 	useForceUpdate,
+	useBEM,
 } from '../../utils';
 import { FileTreeDispatch } from './dispatcher';
 import {
@@ -16,19 +17,29 @@ import {
 } from './useTree';
 import { fileTreeBlock, NewItemData } from './common';
 
+const [explorerBlock, explorerElement] = useBEM('file-explorer');
+
 export type FileTreeProps = Store.FileSystemState & {
 	dispatch: FileTreeDispatch;
 };
 
-export const FileTree: React.FC<FileTreeProps> = props => {
-	const { dispatch, files, activeFilePath } = props;
-
+export const FileTree: React.FC<FileTreeProps> = ({
+	dispatch,
+	files,
+	folders,
+	activeFilePath,
+}) => {
 	const [selected, setSelected] = useState<{ path: string | null }>({
-		path: null,
+		path: activeFilePath,
 	});
 	const [newItemData, setNewItemData] = useState<NewItemData>(null);
 
-	const { contents, nodesMap } = useTree(props, newItemData, selected.path);
+	const { contents, nodesMap } = useTree(
+		folders,
+		files,
+		newItemData,
+		selected.path
+	);
 	const { forceUpdate } = useForceUpdate();
 
 	useLayoutEffect(() => {
@@ -70,6 +81,7 @@ export const FileTree: React.FC<FileTreeProps> = props => {
 			type,
 			dispatch,
 			cwd,
+			folders,
 			onCreate: name =>
 				type === 'folder' &&
 				setSelected({ path: getFolderPath(cwd, name) }),
@@ -84,6 +96,11 @@ export const FileTree: React.FC<FileTreeProps> = props => {
 		forceUpdate();
 	};
 
+	const onRootSelect = () => {
+		setSelected({ path: ROOT_FOLDER_PATH });
+		// TODO: handle click outside
+	};
+
 	const treeProps: TreeProps = {
 		contents,
 		onNodeClick,
@@ -93,11 +110,39 @@ export const FileTree: React.FC<FileTreeProps> = props => {
 	};
 
 	return (
-		<div>
-			<Button text='New File' onClick={onAddItem('file')} />
-			<Button text='New Folder' onClick={onAddItem('folder')} />
-			<Button text='Collapse Folders' onClick={onCollapseAll} />
-			<Tree {...(treeProps as ITreeProps<any>)} />
+		<div className={explorerBlock()}>
+			<div className={explorerElement('controls')}>
+				<Button
+					minimal
+					icon='document'
+					title='New File'
+					onClick={onAddItem('file')}
+				/>
+				<Button
+					minimal
+					icon='folder-new'
+					title='New Folder'
+					onClick={onAddItem('folder')}
+				/>
+				<Button
+					minimal
+					icon='collapse-all'
+					title='Collapse Folders'
+					onClick={onCollapseAll}
+				/>
+			</div>
+			<div
+				className={explorerElement('tree-container', {
+					selected:
+						!newItemData && selected.path === ROOT_FOLDER_PATH,
+				})}
+			>
+				<Tree {...(treeProps as ITreeProps<any>)} />
+				<div
+					className={explorerElement('filler')}
+					onClick={onRootSelect}
+				/>
+			</div>
 		</div>
 	);
 };

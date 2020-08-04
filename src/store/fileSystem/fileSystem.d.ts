@@ -34,6 +34,8 @@ declare global {
 		type TaggedFile = TaggedRecord<File, 'file'>;
 		type ImmutableFile = ImmutableRecord<TaggedFile>;
 
+		type FileExtension = '.t' | '.n';
+
 		type FileSystemState = {
 			folders: Immutable.Map<Folder['path'], ImmutableFolder>;
 			files: Immutable.Map<File['path']['absolute'], ImmutableFile>;

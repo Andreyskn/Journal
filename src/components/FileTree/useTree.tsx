@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { ITreeProps, ITreeNode } from '@blueprintjs/core';
 import { fileIcons, ROOT_FOLDER_PATH } from '../../utils';
 import { FileTreeProps } from './FileTree';
-import { NewItemProps, NewItem } from './NewItem';
+import { NewItem } from './NewItem';
 import { fileTreeElement, NewItemData } from './common';
 
 export type TreeProps = OmitType<
@@ -92,14 +92,11 @@ export const expandParentFolders = ({ nodeData: { parent } }: Node) => {
 	}
 };
 
-const maybeAppendNewItem = (
-	type: NewItemProps['type'],
-	folder: FolderNode,
-	newItem: NewItemData
-) => {
-	if (!newItem || folder.id !== newItem.cwd || type !== newItem.type) return;
+const maybeAppendNewItem = (folder: FolderNode, newItem: NewItemData) => {
+	if (!newItem || folder.id !== newItem.cwd) return;
 
-	const createNode = type === 'folder' ? createFolderNode : createFileNode;
+	const createNode =
+		newItem.type === 'folder' ? createFolderNode : createFileNode;
 	const newItemNode = createNode({
 		label: <NewItem {...newItem} />,
 		isNew: true,
@@ -115,7 +112,8 @@ export const isFolderNode = (node: Node): node is FolderNode => {
 };
 
 export const useTree = (
-	{ folders, files }: FileTreeProps,
+	folders: FileTreeProps['folders'],
+	files: FileTreeProps['files'],
 	newItem: NewItemData,
 	selectedPath: string | null
 ) => {
@@ -132,8 +130,6 @@ export const useTree = (
 	folders.forEach(folder => {
 		const folderNode = nodesMap.folders.get(folder.path)!;
 
-		maybeAppendNewItem('folder', folderNode, newItem);
-
 		folder.content.folders.forEach(path => {
 			const childFolder = folders.get(path)!;
 
@@ -149,7 +145,7 @@ export const useTree = (
 			folderNode.childNodes.push(childFolderNode);
 		});
 
-		maybeAppendNewItem('file', folderNode, newItem);
+		maybeAppendNewItem(folderNode, newItem);
 
 		folder.content.files.forEach(path => {
 			const file = files.get(path)!;
