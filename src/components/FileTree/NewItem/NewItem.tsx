@@ -2,9 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import './new-item.scss';
 
-import { useBEM, getFolderPath, extensions } from '../../../utils';
+import { useBEM } from '../../../utils';
 import { FileTreeDispatch } from '../dispatcher';
 import { Classes, Popover, Position } from '@blueprintjs/core';
+import { useValidation } from './useValidation';
+import { useAutocomplete } from './useAutocomplete';
 
 export type NewItemProps = Pick<Store.FileSystemState, 'folders'> & {
 	type: 'file' | 'folder';
@@ -16,144 +18,86 @@ export type NewItemProps = Pick<Store.FileSystemState, 'folders'> & {
 
 const [newItemBlock, newItemElement] = useBEM('new-item');
 
-const ErrorMessage: React.FC = ({ children }) => (
-	<div className={newItemElement('error')}>{children}</div>
-);
+export const NewItem: React.FC<NewItemProps> = props => {
+	const { type, cwd, dispatch, onDismiss, onCreate } = props;
 
-const errors = {
-	noName: (type: 'file' | 'folder') => (
-		<ErrorMessage>A {type} name must be provided.</ErrorMessage>
-	),
-	existingName: (name: string, type: 'file' | 'folder') => (
-		<ErrorMessage>
-			A {type} <b>{name}</b> already exists in this location. Please
-			choose a different name.
-		</ErrorMessage>
-	),
-	invalidName: (name: string) => (
-		<ErrorMessage>
-			The name <b>{name}</b> is not valid as a file name. Please choose a
-			different name.
-		</ErrorMessage>
-	),
-};
-
-const fileNameRegex = new RegExp(
-	`^(?<name>[^\\.]+)(?:\\.|(?<ext>\\${Object.values(extensions).join(
-		'|\\'
-	)}))?$`
-);
-
-type FileNameRegexExec = OmitType<RegExpExecArray, 'groups'> & {
-	groups: {
-		name: string;
-		ext: Store.FileExtension;
-	};
-};
-
-export const NewItem: React.FC<NewItemProps> = ({
-	type,
-	cwd,
-	folders,
-	dispatch,
-	onDismiss,
-	onCreate,
-}) => {
 	const form = useRef<HTMLFormElement | null>(null);
 	const input = useRef<HTMLInputElement | null>(null);
-	const [error, setError] = useState<JSX.Element | undefined>();
+	const popover = useRef<Popover | null>(null);
+	const [inputValue, setInputValue] = useState('');
 
-	const createItem = (name?: string) => {
-		if (!name || error) return;
+	const validation = useValidation(props);
+	const autocomplete = useAutocomplete(ext => {
+		const value = inputValue + ext;
+		setInputValue(value);
+		validation.onChange(value);
+	}, inputValue);
 
-		switch (type) {
-			case 'file':
-				dispatch.createFile(name, cwd);
-				break;
-			case 'folder':
-				dispatch.createFolder(name, cwd);
-				break;
+	const tryCreateItem = () => {
+		const validationResult = validation.onCreate();
+		if (!validationResult.isValid) return;
+
+		const { name, extension } = validationResult;
+
+		if (type === 'file') {
+			dispatch.createFile(name, extension!, cwd);
+		} else {
+			dispatch.createFolder(name, cwd);
 		}
 
 		onCreate(name);
 	};
 
-	const validateInput = (value: string) => {
-		switch (type) {
-			case 'file': {
-				if (!value) {
-					return setError(errors.noName(type));
-				}
-
-				const matchPattern = fileNameRegex.exec(
-					value
-				) as FileNameRegexExec | null;
-
-				if (!matchPattern) {
-					return setError(errors.invalidName(value));
-				}
-
-				const {
-					groups: { name, ext = '.t' },
-				} = matchPattern;
-
-				const isAlreadyExists = folders
-					.get(cwd)!
-					.content.files.find(
-						existingName =>
-							existingName.toLowerCase() ===
-							`${cwd}${name}${ext}`.toLowerCase()
-					);
-
-				if (isAlreadyExists) {
-					return setError(errors.existingName(value, type));
-				}
-				break;
-			}
-			case 'folder': {
-				if (!value) {
-					return setError(errors.noName(type));
-				}
-
-				const isAlreadyExists = folders
-					.get(cwd)!
-					.content.folders.find(
-						existingName =>
-							existingName.toLowerCase() ===
-							getFolderPath(cwd, value).toLowerCase()
-					);
-
-				if (isAlreadyExists) {
-					return setError(errors.existingName(value, type));
-				}
-				break;
-			}
-		}
-
-		setError(undefined);
-	};
-
 	const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		validateInput(e.target.value.trim());
+		const value = e.target.value.trim();
+		setInputValue(value);
+		const validationResult = validation.onChange(value);
+
+		if (type === 'file') {
+			autocomplete.setState(validationResult);
+		}
 	};
 
 	const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-		if (e.key === 'Escape') {
-			onDismiss();
+		switch (e.key) {
+			case 'Escape': {
+				onDismiss();
+				break;
+			}
+			case 'ArrowDown': {
+				if (autocomplete.content) {
+					e.preventDefault();
+					autocomplete.next();
+				}
+				break;
+			}
+			case 'ArrowUp': {
+				if (autocomplete.content) {
+					e.preventDefault();
+					autocomplete.prev();
+				}
+				break;
+			}
 		}
 	};
 
 	const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		createItem(input.current?.value.trim());
-		onDismiss();
+		if (autocomplete.content) {
+			autocomplete.selectCurrent();
+		} else {
+			tryCreateItem();
+		}
 	};
 
 	const onClickOutside = ({ target }: MouseEvent) => {
-		if (!form.current?.contains(target as Node)) {
-			createItem(input.current?.value.trim());
-			onDismiss();
-		}
+		if (
+			popover.current?.popoverElement.contains(target as Node) ||
+			form.current?.contains(target as Node)
+		)
+			return;
+		tryCreateItem();
+		onDismiss();
 	};
 
 	useEffect(() => {
@@ -164,12 +108,16 @@ export const NewItem: React.FC<NewItemProps> = ({
 	return (
 		<div className={newItemBlock()} key={type}>
 			<Popover
-				isOpen={Boolean(error)}
-				content={error}
+				isOpen={
+					Boolean(validation.error) || Boolean(autocomplete.content)
+				}
+				content={validation.error || autocomplete.content}
 				position={Position.BOTTOM_LEFT}
 				autoFocus={false}
 				fill
 				minimal
+				ref={popover}
+				popoverClassName={newItemElement('popover')}
 			>
 				<form
 					ref={form}
@@ -177,6 +125,7 @@ export const NewItem: React.FC<NewItemProps> = ({
 					className={newItemElement('form')}
 				>
 					<input
+						value={inputValue}
 						onChange={onChange}
 						onKeyDown={onKeyDown}
 						ref={input}
@@ -184,7 +133,7 @@ export const NewItem: React.FC<NewItemProps> = ({
 							'input',
 							null,
 							Classes.INPUT,
-							error && Classes.INTENT_DANGER
+							validation.error && Classes.INTENT_DANGER
 						)}
 						type='text'
 						autoFocus

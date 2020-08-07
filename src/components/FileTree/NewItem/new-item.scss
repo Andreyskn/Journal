@@ -8,15 +8,24 @@
 	}
 
 	&__input {
-		width: calc(100% - 2px);
+		width: calc(100% - 4px);
 		height: 26px;
 	}
 
-	&__error {
+	&__popover {
 		width: 142px;
-		padding: 5px;
 
-		border-radius: 3px;
-		background-color: var(--color-error);
+		box-shadow: none !important;
 	}
+}
+
+.validation-popover {
+	padding: 5px;
+
+	border-radius: 3px;
+	background-color: var(--color-error);
+}
+
+.autocomplete-popover {
+	min-width: auto;
 }

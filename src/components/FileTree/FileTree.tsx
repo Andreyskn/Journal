@@ -16,6 +16,7 @@ import {
 	expandParentFolders,
 } from './useTree';
 import { fileTreeBlock, NewItemData } from './common';
+import { NewItemProps } from './NewItem';
 
 const [explorerBlock, explorerElement] = useBEM('file-explorer');
 
@@ -73,19 +74,24 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	};
 
 	const onAddItem = (
-		type: NonNullable<NewItemData>['type']
+		type: NewItemProps['type']
 	): IButtonProps['onClick'] => () => {
 		const cwd = getCwd();
+		const onDismiss = () => setNewItemData(null);
+		const onCreate: NewItemProps['onCreate'] = name => {
+			if (type === 'folder') {
+				setSelected({ path: getFolderPath(cwd, name) });
+			}
+			onDismiss();
+		};
 
 		setNewItemData({
 			type,
 			dispatch,
 			cwd,
 			folders,
-			onCreate: name =>
-				type === 'folder' &&
-				setSelected({ path: getFolderPath(cwd, name) }),
-			onDismiss: () => setNewItemData(null),
+			onCreate,
+			onDismiss,
 		});
 	};
 

@@ -5,9 +5,22 @@ export const fileIcons: Record<Store.File['type'], IconName> = {
 	notes: 'manual',
 };
 
-export const extensions: Record<Store.File['type'], Store.FileExtension> = {
+export const fileExtensions = ['.t', '.n'] as const;
+
+export const extensionByType: Record<
+	Store.File['type'],
+	Store.FileExtension
+> = {
 	tasks: '.t',
 	notes: '.n',
+};
+
+export const typeByExtension: Record<
+	Store.FileExtension,
+	Store.File['type']
+> = {
+	'.t': 'tasks',
+	'.n': 'notes',
 };
 
 export const DEFAULT_FILE_NAME = 'Untitled';

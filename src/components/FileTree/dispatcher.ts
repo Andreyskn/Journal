@@ -16,6 +16,7 @@ const setActiveFile = ({ store: { dispatch } }: HandlerDeps) => (
 
 const createFile = ({ store: { dispatch, getState } }: HandlerDeps) => (
 	name: string,
+	extension: Store.FileExtension,
 	folderPath: Store.Folder['path']
 ) => {
 	const id = generateId();
@@ -28,7 +29,7 @@ const createFile = ({ store: { dispatch, getState } }: HandlerDeps) => (
 	dispatch<Actions.CreateFile>({
 		type: '@fs/CREATE_FILE',
 		payload: {
-			type: 'tasks',
+			extension,
 			contentPath: ['taskLists', id],
 			folderPath,
 			name,

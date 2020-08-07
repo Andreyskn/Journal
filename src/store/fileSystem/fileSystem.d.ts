@@ -1,4 +1,5 @@
 import Immutable from 'immutable';
+import { fileExtensions } from '../../utils';
 
 type FoldersKey = KeyOf<Store.FileSystemState, 'folders'>;
 type FilesKey = KeyOf<Store.FileSystemState, 'files'>;
@@ -34,7 +35,7 @@ declare global {
 		type TaggedFile = TaggedRecord<File, 'file'>;
 		type ImmutableFile = ImmutableRecord<TaggedFile>;
 
-		type FileExtension = '.t' | '.n';
+		type FileExtension = typeof fileExtensions[number];
 
 		type FileSystemState = {
 			folders: Immutable.Map<Folder['path'], ImmutableFolder>;

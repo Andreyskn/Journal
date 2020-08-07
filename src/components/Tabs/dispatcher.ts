@@ -16,7 +16,7 @@ const addTab = ({ store: { dispatch, getState } }: HandlerDeps) => () => {
 	dispatch<Actions.CreateFile>({
 		type: '@fs/CREATE_FILE',
 		payload: {
-			type: 'tasks',
+			extension: '.t',
 			contentPath: ['taskLists', id],
 		},
 	});

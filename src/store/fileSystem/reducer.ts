@@ -1,18 +1,19 @@
 import Immutable from 'immutable';
 import { defaultTaskListId } from '../tasks';
 import {
-	extensions,
+	extensionByType,
 	DEFAULT_FILE_NAME,
 	ROOT_FOLDER_PATH,
 	getFolderPath,
+	typeByExtension,
 } from '../../utils';
 
 const defaultTasksFile: Store.File = {
 	name: 'Tasks',
 	type: 'tasks',
 	path: {
-		absolute: `${ROOT_FOLDER_PATH}Tasks${extensions.tasks}`,
-		base: `Tasks${extensions.tasks}`,
+		absolute: `${ROOT_FOLDER_PATH}Tasks${extensionByType.tasks}`,
+		base: `Tasks${extensionByType.tasks}`,
 		dir: ROOT_FOLDER_PATH,
 		content: ['taskLists', defaultTaskListId],
 	},
@@ -42,8 +43,8 @@ export const FileRecord = Immutable.Record<Store.TaggedFile>({
 	name: DEFAULT_FILE_NAME,
 	type: 'tasks',
 	path: {
-		absolute: `${ROOT_FOLDER_PATH}${DEFAULT_FILE_NAME}${extensions.tasks}`,
-		base: `${DEFAULT_FILE_NAME}${extensions.tasks}`,
+		absolute: `${ROOT_FOLDER_PATH}${DEFAULT_FILE_NAME}${extensionByType.tasks}`,
+		base: `${DEFAULT_FILE_NAME}${extensionByType.tasks}`,
 		dir: ROOT_FOLDER_PATH,
 		content: ['taskLists', defaultTaskListId],
 	},
@@ -62,7 +63,7 @@ export const defaultFileSystemState: Store.FileSystemState = {
 const generateName = (
 	state: Store.ImmutableAppState,
 	folderPath: string,
-	type: Store.File['type']
+	extension: Store.FileExtension
 ) => {
 	const siblingFilePaths = state.folders.get(folderPath)!.content.files;
 	const usedBaseNames = siblingFilePaths
@@ -72,7 +73,7 @@ const generateName = (
 	let i = 1;
 	while (true) {
 		const fileName = DEFAULT_FILE_NAME + (i > 1 ? `_${i}` : '');
-		const baseName = `${fileName}${extensions[type]}`.toLowerCase();
+		const baseName = `${fileName}${extension}`.toLowerCase();
 
 		if (!usedBaseNames.has(baseName)) {
 			return fileName;
@@ -85,23 +86,23 @@ const generateName = (
 const createFile: Store.Handler<{
 	name?: Store.File['name'];
 	folderPath?: Store.Folder['path'];
-	type: Store.File['type'];
+	extension: Store.FileExtension;
 	contentPath: Store.File['path']['content'];
 }> = (state, action) => {
 	const {
 		name,
-		type,
+		extension,
 		contentPath,
 		folderPath = ROOT_FOLDER_PATH,
 	} = action.payload;
 
-	const fileName = name || generateName(state, folderPath, type);
-	const baseName = `${fileName}${extensions[type]}`;
+	const fileName = name || generateName(state, folderPath, extension);
+	const baseName = `${fileName}${extension}`;
 	const absolutePath = `${folderPath}${baseName}`;
 
 	const newFile: Store.File = {
 		name: fileName,
-		type,
+		type: typeByExtension[extension],
 		path: {
 			absolute: absolutePath,
 			base: baseName,
