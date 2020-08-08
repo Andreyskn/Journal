@@ -18,7 +18,9 @@ export type NewItemProps = Pick<Store.FileSystemState, 'folders'> & {
 
 const [newItemBlock, newItemElement] = useBEM('new-item');
 
-export const NewItem: React.FC<NewItemProps> = props => {
+// TODO: use validation and autocomplete as effects on changing the input value
+
+export const NewItem: React.FC<NewItemProps> = (props) => {
 	const { type, cwd, dispatch, onDismiss, onCreate } = props;
 
 	const form = useRef<HTMLFormElement | null>(null);
@@ -27,11 +29,16 @@ export const NewItem: React.FC<NewItemProps> = props => {
 	const [inputValue, setInputValue] = useState('');
 
 	const validation = useValidation(props);
-	const autocomplete = useAutocomplete(ext => {
-		const value = inputValue + ext;
-		setInputValue(value);
-		validation.onChange(value);
-	}, inputValue);
+	const autocomplete = useAutocomplete(
+		(ext) => {
+			const value = inputValue + ext;
+			setInputValue(value);
+			validation.onChange(value);
+			tryCreateItem();
+		},
+		inputValue,
+		type
+	);
 
 	const tryCreateItem = () => {
 		const validationResult = validation.onCreate();
@@ -52,10 +59,7 @@ export const NewItem: React.FC<NewItemProps> = props => {
 		const value = e.target.value.trim();
 		setInputValue(value);
 		const validationResult = validation.onChange(value);
-
-		if (type === 'file') {
-			autocomplete.setState(validationResult);
-		}
+		autocomplete.setState(validationResult);
 	};
 
 	const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -65,17 +69,11 @@ export const NewItem: React.FC<NewItemProps> = props => {
 				break;
 			}
 			case 'ArrowDown': {
-				if (autocomplete.content) {
-					e.preventDefault();
-					autocomplete.next();
-				}
+				autocomplete.next(e);
 				break;
 			}
 			case 'ArrowUp': {
-				if (autocomplete.content) {
-					e.preventDefault();
-					autocomplete.prev();
-				}
+				autocomplete.prev(e);
 				break;
 			}
 		}
@@ -92,7 +90,7 @@ export const NewItem: React.FC<NewItemProps> = props => {
 
 	const onClickOutside = ({ target }: MouseEvent) => {
 		if (
-			popover.current?.popoverElement.contains(target as Node) ||
+			popover.current?.popoverElement?.contains(target as Node) ||
 			form.current?.contains(target as Node)
 		)
 			return;

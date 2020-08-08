@@ -42,6 +42,15 @@ const createFile = ({ store: { dispatch, getState } }: HandlerDeps) => (
 	});
 };
 
+const deleteFile = ({ store: { dispatch } }: HandlerDeps) => (
+	filePath: string
+) => {
+	dispatch<Actions.DeleteFile>({
+		type: '@fs/DELETE_FILE',
+		payload: { filePath },
+	});
+};
+
 const createFolder = ({ store: { dispatch } }: HandlerDeps) => (
 	name: string,
 	parentPath: Store.Folder['path']
@@ -55,6 +64,7 @@ const createFolder = ({ store: { dispatch } }: HandlerDeps) => (
 export const createDispatch = (deps: HandlerDeps) => ({
 	setActiveFile: setActiveFile(deps),
 	createFile: createFile(deps),
+	deleteFile: deleteFile(deps),
 	createFolder: createFolder(deps),
 });
 

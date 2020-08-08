@@ -52,6 +52,7 @@ declare global {
 				path: PathTo['filesInFolder'],
 				updater: Updater<FolderContent['files']>
 			): ImmutableAppState;
+			getIn(path: PathTo['file']): ImmutableFile;
 		}
 
 		interface PathTo {

@@ -8,12 +8,19 @@ import React, {
 import { Menu, MenuItem, IPopoverProps } from '@blueprintjs/core';
 import { ValidationResult } from './useValidation';
 import { fileExtensions, useBEM } from '../../../utils';
+import { NewItemProps } from './NewItem';
 
-const [autocompleteBlock] = useBEM('autocomplete-popover');
+const [autocompleteBlock, autocompleteElement] = useBEM('autocomplete-popover');
+
+const labels: Record<Store.FileExtension, string> = {
+	'.t': 'Task List',
+	'.n': 'Note',
+};
 
 export const useAutocomplete = (
 	onSelectProp: (value: string) => void,
-	inputValue: string
+	inputValue: string,
+	type: NewItemProps['type']
 ) => {
 	const autocompleteRef = useRef<AutocompleteRef | null>(null);
 	const [isVisible, setVisibility] = useState(false);
@@ -29,6 +36,7 @@ export const useAutocomplete = (
 
 	const setState = (validationResult: ValidationResult) => {
 		if (
+			type === 'folder' ||
 			!validationResult.isValid ||
 			!validationResult.name ||
 			validationResult.extension
@@ -39,7 +47,7 @@ export const useAutocomplete = (
 
 		const { blockedExtensions } = validationResult;
 		const extensions = fileExtensions.filter(
-			ext => !blockedExtensions.includes(ext)
+			(ext) => !blockedExtensions.includes(ext)
 		);
 
 		setExtensions(extensions);
@@ -52,15 +60,23 @@ export const useAutocomplete = (
 			items={extensions}
 			onSelect={onSelect}
 		/>
-	) : (
-		undefined
-	);
+	) : undefined;
+
+	const onMoveFocus = (direction: 'next' | 'prev') => (
+		e?: React.KeyboardEvent<HTMLInputElement>
+	) => {
+		if (!autocompleteRef.current) return;
+		e?.preventDefault();
+		direction === 'next'
+			? autocompleteRef.current.focusNext()
+			: autocompleteRef.current.focusPrev();
+	};
 
 	return {
 		setState,
 		content,
-		next: () => autocompleteRef.current?.focusNext(),
-		prev: () => autocompleteRef.current?.focusPrev(),
+		next: onMoveFocus('next'),
+		prev: onMoveFocus('prev'),
 		selectCurrent: onSelect,
 	};
 };
@@ -101,7 +117,11 @@ export const Autocomplete = React.forwardRef<
 			{items.map((item, index) => (
 				<MenuItem
 					key={item}
-					text={item}
+					text={
+						<div className={autocompleteElement('item')}>
+							{item} <span>({labels[item]})</span>
+						</div>
+					}
 					onClick={() => onSelect(item)}
 					active={index === focus}
 				/>

@@ -1,16 +1,26 @@
 import React, { useRef } from 'react';
-import { ITreeProps, ITreeNode } from '@blueprintjs/core';
+import { ITreeProps, ITreeNode, ContextMenuTarget } from '@blueprintjs/core';
 import { fileIcons, ROOT_FOLDER_PATH } from '../../utils';
 import { FileTreeProps } from './FileTree';
 import { NewItem } from './NewItem';
 import { fileTreeElement, NewItemData } from './common';
+import { FileTreeDispatch } from './dispatcher';
 
 export type TreeProps = OmitType<
 	ITreeProps<any>,
-	'onNodeClick' | 'onNodeCollapse' | 'onNodeExpand' | 'contents'
+	| 'onNodeClick'
+	| 'onNodeCollapse'
+	| 'onNodeExpand'
+	| 'contents'
+	| 'onNodeContextMenu'
 > & {
 	contents: TreeNode[];
 	onNodeClick: (node: Node) => void;
+	onNodeContextMenu: (
+		node: Node,
+		nodePath: number[],
+		e: React.MouseEvent<HTMLElement>
+	) => void;
 	onNodeCollapse: (node: FolderNode) => void;
 	onNodeExpand: (node: FolderNode) => void;
 };
@@ -34,7 +44,7 @@ type NodeData = FolderNodeData | FileNodeData;
 
 type FolderNode = InnerNode<FolderNodeData>;
 type FileNode = LeafNode<FileNodeData>;
-type Node = FolderNode | FileNode;
+export type Node = FolderNode | FileNode;
 
 type NodesMap = {
 	folders: Map<Path, FolderNode>;
@@ -127,10 +137,10 @@ export const useTree = (
 
 	const isSelected = (path: string) => !newItem && path === selectedPath;
 
-	folders.forEach(folder => {
+	folders.forEach((folder) => {
 		const folderNode = nodesMap.folders.get(folder.path)!;
 
-		folder.content.folders.forEach(path => {
+		folder.content.folders.forEach((path) => {
 			const childFolder = folders.get(path)!;
 
 			const childFolderNode = createFolderNode({
@@ -147,7 +157,7 @@ export const useTree = (
 
 		maybeAppendNewItem(folderNode, newItem);
 
-		folder.content.files.forEach(path => {
+		folder.content.files.forEach((path) => {
 			const file = files.get(path)!;
 
 			const fileNode = createFileNode({

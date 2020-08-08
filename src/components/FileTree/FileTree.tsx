@@ -1,6 +1,15 @@
 import React, { useState, useLayoutEffect } from 'react';
 import './file-tree.scss';
-import { Tree, ITreeProps, Button, IButtonProps } from '@blueprintjs/core';
+import {
+	Tree,
+	ITreeProps,
+	Button,
+	IButtonProps,
+	ButtonGroup,
+	ContextMenu,
+	Menu,
+	MenuItem,
+} from '@blueprintjs/core';
 import {
 	ROOT_FOLDER_PATH,
 	isFolderPath,
@@ -14,6 +23,7 @@ import {
 	TreeProps,
 	isFolderNode,
 	expandParentFolders,
+	Node,
 } from './useTree';
 import { fileTreeBlock, NewItemData } from './common';
 import { NewItemProps } from './NewItem';
@@ -59,18 +69,46 @@ export const FileTree: React.FC<FileTreeProps> = ({
 			: files.get(selected.path)!.path.dir;
 	};
 
-	const onNodeClick: TreeProps['onNodeClick'] = node => {
-		if (isFolderNode(node)) return onToggleExpanded(node);
+	const onNodeClick: TreeProps['onNodeClick'] = (node) => {
+		if (isFolderNode(node)) {
+			onToggleExpanded(node);
+		} else selectNode(node);
+	};
 
+	const selectNode = (node: Node) => {
 		if (node.id !== selected.path) {
-			dispatch.setActiveFile(node.id);
 			setSelected({ path: node.id });
+
+			if (!isFolderNode(node)) {
+				dispatch.setActiveFile(node.id);
+			}
 		}
 	};
 
-	const onToggleExpanded: TreeProps['onNodeExpand'] = node => {
+	const onNodeContextMenu: TreeProps['onNodeContextMenu'] = (node, _, e) => {
+		e.preventDefault();
+		selectNode(node);
+
+		const onDelete = () => {
+			if (!isFolderNode(node)) {
+				dispatch.deleteFile(node.id);
+			}
+		};
+
+		ContextMenu.show(
+			<Menu>
+				<MenuItem text='Rename' />
+				<MenuItem text='Delete' onClick={onDelete} />
+			</Menu>,
+			{ left: e.pageX, top: e.pageY },
+			undefined,
+			true
+		);
+	};
+
+	const onToggleExpanded: TreeProps['onNodeExpand'] = (node) => {
 		node.isExpanded = !node.isExpanded;
-		setSelected({ path: node.id });
+		selectNode(node);
 	};
 
 	const onAddItem = (
@@ -78,7 +116,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	): IButtonProps['onClick'] => () => {
 		const cwd = getCwd();
 		const onDismiss = () => setNewItemData(null);
-		const onCreate: NewItemProps['onCreate'] = name => {
+		const onCreate: NewItemProps['onCreate'] = (name) => {
 			if (type === 'folder') {
 				setSelected({ path: getFolderPath(cwd, name) });
 			}
@@ -96,7 +134,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	};
 
 	const onCollapseAll = () => {
-		nodesMap.folders.forEach(node => {
+		nodesMap.folders.forEach((node) => {
 			node.isExpanded = false;
 		});
 		forceUpdate();
@@ -110,6 +148,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	const treeProps: TreeProps = {
 		contents,
 		onNodeClick,
+		onNodeContextMenu: onNodeContextMenu,
 		onNodeExpand: onToggleExpanded,
 		onNodeCollapse: onToggleExpanded,
 		className: fileTreeBlock({ insert: newItemData }),
@@ -118,18 +157,18 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	return (
 		<div className={explorerBlock()}>
 			<div className={explorerElement('controls')}>
-				<Button
-					minimal
-					icon='document'
-					title='New File'
-					onClick={onAddItem('file')}
-				/>
-				<Button
-					minimal
-					icon='folder-new'
-					title='New Folder'
-					onClick={onAddItem('folder')}
-				/>
+				<ButtonGroup>
+					<Button
+						icon='document'
+						title='New File'
+						onClick={onAddItem('file')}
+					/>
+					<Button
+						icon='folder-new'
+						title='New Folder'
+						onClick={onAddItem('folder')}
+					/>
+				</ButtonGroup>
 				<Button
 					minimal
 					icon='collapse-all'

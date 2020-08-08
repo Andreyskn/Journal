@@ -67,7 +67,7 @@ const generateName = (
 ) => {
 	const siblingFilePaths = state.folders.get(folderPath)!.content.files;
 	const usedBaseNames = siblingFilePaths
-		.map(path => state.files.get(path)!.path.base.toLowerCase())
+		.map((path) => state.files.get(path)!.path.base.toLowerCase())
 		.toSet();
 
 	let i = 1;
@@ -111,8 +111,8 @@ const createFile: Store.Handler<{
 		},
 	};
 
-	return state.withMutations(state => {
-		state.update('files', files =>
+	return state.withMutations((state) => {
+		state.update('files', (files) =>
 			files.set(newFile.path.absolute, FileRecord(newFile))
 		);
 		state.updateIn(
@@ -124,8 +124,20 @@ const createFile: Store.Handler<{
 	});
 };
 
-const deleteFile: Store.Handler = (state, action) => {
-	return state;
+const deleteFile: Store.Handler<{
+	filePath: Store.File['path']['absolute'];
+}> = (state, action) => {
+	const { filePath } = action.payload;
+	const parentFolderPath = state.getIn(['files', filePath]).path.dir;
+	return state.withMutations((state) => {
+		state.update('files', (files) => files.delete(filePath));
+		state.updateIn(
+			['folders', parentFolderPath, 'content', 'files'],
+			(files: Store.Folder['content']['files']) =>
+				files.filter((path) => path !== filePath)
+		);
+		state.set('activeFilePath', null);
+	});
 };
 
 const renameFile: Store.Handler = (state, action) => {
@@ -147,8 +159,8 @@ const createFolder: Store.Handler<{
 
 	const path = getFolderPath(parentPath, name);
 
-	return state.withMutations(state => {
-		state.update('folders', folders =>
+	return state.withMutations((state) => {
+		state.update('folders', (folders) =>
 			folders.set(
 				path,
 				FolderRecord({
@@ -165,13 +177,13 @@ const createFolder: Store.Handler<{
 	});
 };
 
-// const deleteFolder: Store.Handler = (state, action) => {
-// 	return state;
-// };
+const deleteFolder: Store.Handler = (state, action) => {
+	return state;
+};
 
-// const renameFolder: Store.Handler = (state, action) => {
-// 	return state;
-// };
+const renameFolder: Store.Handler = (state, action) => {
+	return state;
+};
 
 export const fileSystemHandlers = {
 	'@fs/CREATE_FILE': createFile,
@@ -179,8 +191,8 @@ export const fileSystemHandlers = {
 	'@fs/RENAME_FILE': renameFile,
 	'@fs/SET_ACTIVE_FILE': setActiveFile,
 	'@fs/CREATE_FOLDER': createFolder,
-	// '@fs/DELETE_FOLDER': createFile,
-	// '@fs/RENAME_FOLDER': createFile,
+	'@fs/DELETE_FOLDER': deleteFolder,
+	'@fs/RENAME_FOLDER': renameFolder,
 };
 
 export type FileSystemHandlers = typeof fileSystemHandlers;

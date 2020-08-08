@@ -13,12 +13,22 @@ declare global {
 			FileSystemHandlers,
 			'@fs/CREATE_FOLDER'
 		>;
+		type DeleteFolder = Store.Action<
+			FileSystemHandlers,
+			'@fs/DELETE_FOLDER'
+		>;
+		type RenameFolder = Store.Action<
+			FileSystemHandlers,
+			'@fs/RENAME_FOLDER'
+		>;
 
 		type FileSystemAction =
 			| CreateFile
 			| DeleteFile
 			| RenameFile
 			| SetActiveFile
-			| CreateFolder;
+			| CreateFolder
+			| DeleteFolder
+			| RenameFolder;
 	}
 }
