@@ -1,17 +1,19 @@
-import { PATH_DELIMITER } from './constants';
 import { useReducer } from 'react';
 
-export const generateId = () => {
-	return Date.now().toString(36);
-};
-
-export const isFolderPath = (path: string) => path.endsWith(PATH_DELIMITER);
-
-export const getFolderPath = (base: Path, folderName: string) => {
-	return `${base}${folderName}${PATH_DELIMITER}`;
-};
-
 export const useForceUpdate = () => {
-	const [, forceUpdate] = useReducer(s => s + 1, 0);
+	const [, forceUpdate] = useReducer((s) => s + 1, 0);
 	return { forceUpdate };
+};
+
+export const actionHandler = <T extends string, H extends App.Handler<any>>(
+	type: T,
+	handler: H
+) => {
+	return [
+		type,
+		(
+			state: App.ImmutableAppState,
+			action: App.ActionBase<T, Parameters<H>[1]>
+		) => handler(state, (action as App.ActionBase<T, unknown>).payload),
+	] as const;
 };

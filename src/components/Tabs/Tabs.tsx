@@ -6,26 +6,19 @@ import { TabsDispatch } from './dispatcher';
 
 const [tabsBlock, tabsElement] = useBEM('tabs');
 
-export type TabsProps = Pick<
-	Store.FileSystemState,
-	'activeFilePath' | 'files'
-> & {
+export type TabsProps = {
 	dispatch: TabsDispatch;
-	tabs: Store.Tab[];
+	tabs: App.Tab[];
+	activeTabId: App.FileSystemState['activeFile']['id'];
 };
 
-export const Tabs: React.FC<TabsProps> = ({
-	tabs,
-	files,
-	activeFilePath,
-	dispatch,
-}) => {
-	const addTab = (fileType: Store.File['type']) => () => {
-		dispatch.addTab();
+export const Tabs: React.FC<TabsProps> = ({ tabs, activeTabId, dispatch }) => {
+	const createFile = (type: App.RegularFile['type']) => () => {
+		dispatch.createFile(type);
 	};
 
-	const setActiveTab = (filePath: Store.Tab['filePath']) => () => {
-		dispatch.setActiveTab(filePath);
+	const setActiveTab = (id: App.Tab['id']) => () => {
+		dispatch.setActiveTab(id);
 	};
 
 	const createTabMenu = (
@@ -33,27 +26,26 @@ export const Tabs: React.FC<TabsProps> = ({
 			<MenuItem
 				icon={fileIcons.tasks}
 				text='New Task List'
-				onClick={addTab('tasks')}
+				onClick={createFile('tasks')}
 			/>
 			<MenuItem
 				icon={fileIcons.notes}
 				text='New Notes'
-				onClick={addTab('notes')}
+				onClick={createFile('notes')}
 			/>
 		</Menu>
 	);
 
-	const renderTab = ({ filePath }: Store.Tab) => {
-		const file = files.get(filePath)!;
-		const isActive = filePath === activeFilePath;
+	const renderTab = ({ id, name, type, path }: App.Tab) => {
+		const isActive = id === activeTabId;
 
 		return (
 			<Button
-				key={filePath}
-				text={file.name}
-				icon={fileIcons[file.type]}
+				key={id}
+				text={name}
+				icon={fileIcons[type]}
 				intent={isActive ? 'success' : 'none'}
-				onClick={isActive ? undefined : setActiveTab(filePath)}
+				onClick={isActive ? undefined : setActiveTab(id)}
 			/>
 		);
 	};

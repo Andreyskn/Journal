@@ -27,6 +27,7 @@
 		"@types/vfile-message": "^2.0.0",
 		"chalk": "^4.1.0",
 		"change-case": "^4.1.1",
+		"circular-dependency-plugin": "^5.2.0",
 		"commander": "^6.0.0",
 		"css-loader": "^4.2.1",
 		"html-webpack-plugin": "^4.3.0",

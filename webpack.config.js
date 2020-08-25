@@ -1,4 +1,5 @@
 const HTMLWebpackPlugin = require('html-webpack-plugin');
+const CircularDependencyPlugin = require('circular-dependency-plugin');
 
 module.exports = {
 	mode: 'development',
@@ -34,5 +35,10 @@ module.exports = {
 		],
 	},
 
-	plugins: [new HTMLWebpackPlugin({ template: 'src/index.html' })],
+	plugins: [
+		new HTMLWebpackPlugin({ template: 'src/index.html' }),
+		new CircularDependencyPlugin({
+			exclude: /node_modules/,
+		}),
+	],
 };

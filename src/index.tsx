@@ -8,7 +8,7 @@ import '@blueprintjs/core/lib/css/blueprint.css';
 import { FocusStyleManager, Toaster, Intent } from '@blueprintjs/core';
 
 import { App } from './components/App';
-import { store } from './store';
+import { store } from './core/store';
 
 FocusStyleManager.onlyShowFocusOnTabs();
 

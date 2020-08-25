@@ -1,63 +1,37 @@
 import { Store as ReduxStore } from 'redux';
-import { generateId } from '../../utils';
 
 export type HandlerDeps = {
-	store: ReduxStore<Store.ImmutableAppState, Actions.AppAction>;
+	store: ReduxStore<App.ImmutableAppState, Actions.AppAction>;
 };
 
 const setActiveFile = ({ store: { dispatch } }: HandlerDeps) => (
-	filePath: Store.File['path']['absolute']
+	id: App.File['id']
 ) => {
-	dispatch<Actions.SetActiveFile>({
+	dispatch({
 		type: '@fs/SET_ACTIVE_FILE',
-		payload: filePath,
+		payload: { id },
 	});
 };
 
-const createFile = ({ store: { dispatch, getState } }: HandlerDeps) => (
+const createFile = ({ store: { dispatch } }: HandlerDeps) => (
 	name: string,
-	extension: Store.FileExtension,
-	folderPath: Store.Folder['path']
+	parent: App.RegularFile['parent']
 ) => {
-	const id = generateId();
-
-	dispatch<Actions.AddTaskList>({
-		type: '@tasks/ADD_TASK_LIST',
-		payload: id,
-	});
-
-	dispatch<Actions.CreateFile>({
+	dispatch({
 		type: '@fs/CREATE_FILE',
 		payload: {
-			extension,
-			contentPath: ['taskLists', id],
-			folderPath,
 			name,
+			parent,
 		},
-	});
-
-	dispatch<Actions.AddTab>({
-		type: '@tabs/ADD_TAB',
-		payload: getState().activeFilePath!,
 	});
 };
 
 const deleteFile = ({ store: { dispatch } }: HandlerDeps) => (
-	filePath: string
+	id: App.File['id']
 ) => {
-	dispatch<Actions.DeleteFile>({
+	dispatch({
 		type: '@fs/DELETE_FILE',
-		payload: { filePath },
-	});
-};
-
-const createFolder = ({ store: { dispatch } }: HandlerDeps) => (
-	name: string,
-	parentPath: Store.Folder['path']
-) => {
-	dispatch<Actions.CreateFolder>({
-		type: '@fs/CREATE_FOLDER',
-		payload: { name, parentPath },
+		payload: { id },
 	});
 };
 
@@ -65,7 +39,6 @@ export const createDispatch = (deps: HandlerDeps) => ({
 	setActiveFile: setActiveFile(deps),
 	createFile: createFile(deps),
 	deleteFile: deleteFile(deps),
-	createFolder: createFolder(deps),
 });
 
 export type FileTreeDispatch = ReturnType<typeof createDispatch>;

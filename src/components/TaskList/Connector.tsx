@@ -8,12 +8,12 @@ import { withErrorBoundary } from '../../utils';
 const WrappedTaskList = withErrorBoundary(TaskList);
 
 export type TaskConnectorProps = {
-	taskList: Store.ImmutableTaskList;
+	taskList: App.ImmutableTaskList;
 };
 
 export const TasksConnector: React.FC<TaskConnectorProps> = ({ taskList }) => {
 	const dispatch = useDispatch();
-	const taskListId = taskList.get('id');
+	const taskListId = taskList.id;
 
 	const tasksDispatch = useMemo(
 		() => createDispatch({ dispatch, taskListId }),

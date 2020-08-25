@@ -11,7 +11,7 @@ import {
 import { TasksDispatch } from './dispatcher';
 
 export type TaskListProps = {
-	taskList: Store.ImmutableTaskList;
+	taskList: App.ImmutableTaskList;
 	dispatch: TasksDispatch;
 };
 
@@ -28,7 +28,7 @@ export const TaskList: React.FC<TaskListProps> = ({ taskList, dispatch }) => {
 		event.currentTarget.reset();
 	};
 
-	const onTitleChange: IEditableTextProps['onConfirm'] = value => {
+	const onTitleChange: IEditableTextProps['onConfirm'] = (value) => {
 		dispatch.renameTaskList(value);
 	};
 

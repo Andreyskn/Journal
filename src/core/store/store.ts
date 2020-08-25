@@ -2,23 +2,23 @@ import { createStore } from 'redux';
 import { devToolsEnhancer } from 'redux-devtools-extension';
 
 import { getInitialState } from './initializer';
-import { tabsHandlers } from './tabs';
-import { tasksHandlers } from './tasks';
-import { fileSystemHandlers } from './fileSystem';
+import { tabsHandlers } from '../tabs';
+import { tasksHandlers } from '../data/tasks';
+import { fileSystemHandlers } from '../fileSystem';
 
-const handlers: Store.AnyHandlers = {
+const handlers = Object.fromEntries([
 	...tabsHandlers,
 	...tasksHandlers,
 	...fileSystemHandlers,
-};
+]);
 
 const devTools = devToolsEnhancer({ name: 'Journal' });
 
-const reducer: Store.Reducer<
-	Store.ImmutableAppState,
-	Store.ActionBase<any, any>
-> = (state, action) => {
-	const handler = handlers[action.type] as Store.Handler<any> | undefined;
+const reducer: App.Reducer<App.ImmutableAppState, App.ActionBase<any, any>> = (
+	state,
+	action
+) => {
+	const handler = handlers[action.type] as App.Handler<any> | undefined;
 	return handler ? handler(state, action) : state;
 };
 

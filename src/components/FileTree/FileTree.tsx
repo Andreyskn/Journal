@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './file-tree.scss';
 import {
 	Tree,
@@ -10,13 +10,7 @@ import {
 	Menu,
 	MenuItem,
 } from '@blueprintjs/core';
-import {
-	ROOT_FOLDER_PATH,
-	isFolderPath,
-	getFolderPath,
-	useForceUpdate,
-	useBEM,
-} from '../../utils';
+import { useForceUpdate, useBEM } from '../../utils';
 import { FileTreeDispatch } from './dispatcher';
 import {
 	useTree,
@@ -27,46 +21,48 @@ import {
 } from './useTree';
 import { fileTreeBlock, NewItemData } from './common';
 import { NewItemProps } from './NewItem';
+import { DIRECTORY_ID, getFilePath, PATHS } from '../../core/fileSystem';
 
 const [explorerBlock, explorerElement] = useBEM('file-explorer');
 
-export type FileTreeProps = Store.FileSystemState & {
+export type FileTreeProps = {
+	files: App.FileSystemState['files'];
+	activeFilePath: App.FileSystemState['activeFile']['path'];
 	dispatch: FileTreeDispatch;
 };
 
 export const FileTree: React.FC<FileTreeProps> = ({
 	dispatch,
 	files,
-	folders,
 	activeFilePath,
 }) => {
-	const [selected, setSelected] = useState<{ path: string | null }>({
+	const [selection, setSelection] = useState<{ path: string | null }>({
 		path: activeFilePath,
 	});
 	const [newItemData, setNewItemData] = useState<NewItemData>(null);
 
-	const { contents, nodesMap } = useTree(
-		folders,
-		files,
-		newItemData,
-		selected.path
-	);
+	const { contents, nodesMap } = useTree(files, newItemData, selection.path);
 	const { forceUpdate } = useForceUpdate();
 
-	useLayoutEffect(() => {
-		if (selected.path !== activeFilePath) {
-			setSelected({ path: activeFilePath });
+	useEffect(() => {
+		if (selection.path !== activeFilePath) {
+			setSelection({ path: activeFilePath });
 			const newSelectedNode =
 				activeFilePath && nodesMap.files.get(activeFilePath);
 			newSelectedNode && expandParentFolders(newSelectedNode);
 		}
 	}, [activeFilePath]);
 
-	const getCwd = () => {
-		if (!selected.path) return ROOT_FOLDER_PATH;
-		return isFolderPath(selected.path)
-			? selected.path
-			: files.get(selected.path)!.path.dir;
+	const getCurrentDirectory = () => {
+		if (!selection.path) return DIRECTORY_ID.main;
+
+		const selectedNode = (nodesMap.folders.get(selection.path) ||
+			nodesMap.files.get(selection.path)) as Node;
+		const selectedFile = files.get(selectedNode.id)!;
+
+		return selectedFile.type === 'directory'
+			? selectedFile.id
+			: (selectedFile as App.RegularFile).parent;
 	};
 
 	const onNodeClick: TreeProps['onNodeClick'] = (node) => {
@@ -76,8 +72,8 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	};
 
 	const selectNode = (node: Node) => {
-		if (node.id !== selected.path) {
-			setSelected({ path: node.id });
+		if (node.nodeData.path !== selection.path) {
+			setSelection({ path: node.nodeData.path });
 
 			if (!isFolderNode(node)) {
 				dispatch.setActiveFile(node.id);
@@ -109,27 +105,27 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	const onToggleExpanded: TreeProps['onNodeExpand'] = (node) => {
 		node.isExpanded = !node.isExpanded;
 		selectNode(node);
+		forceUpdate();
 	};
 
 	const onAddItem = (
 		type: NewItemProps['type']
 	): IButtonProps['onClick'] => () => {
-		const cwd = getCwd();
+		const cwd = getCurrentDirectory();
 		const onDismiss = () => setNewItemData(null);
 		const onCreate: NewItemProps['onCreate'] = (name) => {
 			if (type === 'folder') {
-				setSelected({ path: getFolderPath(cwd, name) });
+				setSelection({ path: getFilePath(files, name, cwd) });
 			}
 			onDismiss();
 		};
-
 		setNewItemData({
 			type,
 			dispatch,
 			cwd,
-			folders,
 			onCreate,
 			onDismiss,
+			files,
 		});
 	};
 
@@ -141,7 +137,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	};
 
 	const onRootSelect = () => {
-		setSelected({ path: ROOT_FOLDER_PATH });
+		setSelection({ path: PATHS.main });
 		// TODO: handle click outside
 	};
 
@@ -178,8 +174,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 			</div>
 			<div
 				className={explorerElement('tree-container', {
-					selected:
-						!newItemData && selected.path === ROOT_FOLDER_PATH,
+					selected: !newItemData && selection.path === PATHS.main,
 				})}
 			>
 				<Tree {...(treeProps as ITreeProps<any>)} />

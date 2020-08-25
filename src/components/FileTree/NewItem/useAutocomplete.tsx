@@ -7,12 +7,13 @@ import React, {
 
 import { Menu, MenuItem, IPopoverProps } from '@blueprintjs/core';
 import { ValidationResult } from './useValidation';
-import { fileExtensions, useBEM } from '../../../utils';
+import { useBEM } from '../../../utils';
 import { NewItemProps } from './NewItem';
+import { EXTENSIONS } from '../../../core/fileSystem';
 
 const [autocompleteBlock, autocompleteElement] = useBEM('autocomplete-popover');
 
-const labels: Record<Store.FileExtension, string> = {
+const labels: Record<App.FileExtension, string> = {
 	'.t': 'Task List',
 	'.n': 'Note',
 };
@@ -24,9 +25,9 @@ export const useAutocomplete = (
 ) => {
 	const autocompleteRef = useRef<AutocompleteRef | null>(null);
 	const [isVisible, setVisibility] = useState(false);
-	const [extensions, setExtensions] = useState([...fileExtensions]);
+	const [extensions, setExtensions] = useState([...EXTENSIONS]);
 
-	const onSelect = (ext?: Store.FileExtension) => {
+	const onSelect = (ext?: App.FileExtension) => {
 		const value = ext || autocompleteRef.current?.value;
 		if (value) {
 			onSelectProp(inputValue.endsWith('.') ? value.slice(1) : value);
@@ -46,7 +47,7 @@ export const useAutocomplete = (
 		}
 
 		const { blockedExtensions } = validationResult;
-		const extensions = fileExtensions.filter(
+		const extensions = EXTENSIONS.filter(
 			(ext) => !blockedExtensions.includes(ext)
 		);
 
@@ -82,12 +83,12 @@ export const useAutocomplete = (
 };
 
 type AutocompleteProps = {
-	items: Store.FileExtension[];
-	onSelect: (value: Store.FileExtension) => void;
+	items: App.FileExtension[];
+	onSelect: (value: App.FileExtension) => void;
 };
 
 type AutocompleteRef = {
-	value: Store.FileExtension;
+	value: App.FileExtension;
 	focusNext: () => void;
 	focusPrev: () => void;
 };

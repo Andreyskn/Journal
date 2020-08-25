@@ -2,25 +2,25 @@ import { Dispatch } from 'redux';
 
 export type HandlerDeps = {
 	dispatch: Dispatch<Actions.AppAction>;
-	taskListId: Store.TaskList['id'];
+	taskListId: App.TaskList['id'];
 };
 
 const addTask = ({ dispatch, taskListId }: HandlerDeps) => (
-	taskText: Store.Task['text']
+	text: App.Task['text']
 ) => {
-	dispatch<Actions.AddTask>({
+	dispatch({
 		type: '@tasks/ADD_TASK',
 		payload: {
 			taskListId,
-			taskText,
+			text,
 		},
 	});
 };
 
 const deleteTask = ({ dispatch, taskListId }: HandlerDeps) => (
-	taskId: Store.Task['id']
+	taskId: App.Task['id']
 ) => {
-	dispatch<Actions.DeleteTask>({
+	dispatch({
 		type: '@tasks/DELETE_TASK',
 		payload: {
 			taskListId,
@@ -30,10 +30,10 @@ const deleteTask = ({ dispatch, taskListId }: HandlerDeps) => (
 };
 
 const toggleDone = ({ dispatch, taskListId }: HandlerDeps) => (
-	taskId: Store.Task['id']
+	taskId: App.Task['id']
 ) => {
-	dispatch<Actions.ToggleDoneTaskStatus>({
-		type: '@tasks/TOGGLE_DONE',
+	dispatch({
+		type: '@tasks/TOGGLE_TASK_DONE',
 		payload: {
 			taskListId,
 			taskId,
@@ -42,10 +42,10 @@ const toggleDone = ({ dispatch, taskListId }: HandlerDeps) => (
 };
 
 const renameTaskList = ({ dispatch, taskListId }: HandlerDeps) => (
-	title: Store.TaskList['title']
+	title: App.TaskList['title']
 ) => {
-	dispatch<Actions.RenameTaskList>({
-		type: '@tasks/RENAME_TASK_LIST',
+	dispatch({
+		type: '@tasks/SET_TASK_LIST_TITLE',
 		payload: {
 			taskListId,
 			title,

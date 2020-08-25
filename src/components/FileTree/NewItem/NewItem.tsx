@@ -8,9 +8,9 @@ import { Classes, Popover, Position } from '@blueprintjs/core';
 import { useValidation } from './useValidation';
 import { useAutocomplete } from './useAutocomplete';
 
-export type NewItemProps = Pick<Store.FileSystemState, 'folders'> & {
+export type NewItemProps = Pick<App.FileSystemState, 'files'> & {
 	type: 'file' | 'folder';
-	cwd: Store.Folder['path'];
+	cwd: App.Directory['id'];
 	onCreate: (name: string) => void;
 	onDismiss: () => void;
 	dispatch: FileTreeDispatch;
@@ -45,14 +45,10 @@ export const NewItem: React.FC<NewItemProps> = (props) => {
 		if (!validationResult.isValid) return;
 
 		const { name, extension } = validationResult;
+		const fullName = name + extension;
 
-		if (type === 'file') {
-			dispatch.createFile(name, extension!, cwd);
-		} else {
-			dispatch.createFolder(name, cwd);
-		}
-
-		onCreate(name);
+		dispatch.createFile(fullName, cwd);
+		onCreate(fullName);
 	};
 
 	const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {

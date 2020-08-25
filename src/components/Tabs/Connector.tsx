@@ -8,26 +8,23 @@ import { withErrorBoundary } from '../../utils';
 const WrappedTabs = React.memo(withErrorBoundary(Tabs));
 
 export const TabsConnector: React.FC = () => {
-	const store = useStore<Store.ImmutableAppState, Actions.AppAction>();
+	const store = useStore<App.ImmutableAppState, Actions.AppAction>();
 
-	const { tabs, files, activeFilePath } = useSelector<
-		Store.ImmutableAppState,
-		Store.TabsState &
-			Pick<Store.FileSystemState, 'activeFilePath' | 'files'>
-	>(state => ({
+	const { tabs, activeTabId } = useSelector<
+		App.ImmutableAppState,
+		App.TabsState & { activeTabId: App.FileSystemState['activeFile']['id'] }
+	>((state) => ({
 		tabs: state.tabs,
-		activeFilePath: state.activeFilePath,
-		files: state.files,
+		activeTabId: state.activeFile.id,
 	}));
 
-	const tabsArray = useMemo(() => tabs.toArray(), [tabs]);
+	const tabsArray = useMemo(() => tabs.valueSeq().toArray(), [tabs]);
 	const tabsDispatch = useMemo(() => createDispatch({ store }), [store]);
 
 	return (
 		<WrappedTabs
 			tabs={tabsArray}
-			files={files}
-			activeFilePath={activeFilePath}
+			activeTabId={activeTabId}
 			dispatch={tabsDispatch}
 		/>
 	);

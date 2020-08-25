@@ -1,10 +1,15 @@
 import Immutable from 'immutable';
+import { tasksHandlers } from './handlers';
 
-type TaskListsKey = KeyOf<Store.TasksState, 'taskLists'>;
-type TaskListItemsKey = KeyOf<Store.TaskList, 'items'>;
+type DataKey = KeyOf<App.TasksState, 'data'>;
+type TaskListItemsKey = KeyOf<App.TaskList, 'items'>;
 
 declare global {
-	namespace Store {
+	namespace Actions {
+		type TasksAction = ExtractActions<typeof tasksHandlers[number]>;
+	}
+
+	namespace App {
 		type Task = {
 			id: string;
 			createdAt: Timestamp;
@@ -22,8 +27,10 @@ declare global {
 		type TaggedTaskList = TaggedRecord<TaskList, 'task-list'>;
 		type ImmutableTaskList = ImmutableRecord<TaggedTaskList>;
 
+		type TasksData = Immutable.Map<TaskList['id'], ImmutableTaskList>;
+
 		type TasksState = {
-			taskLists: Immutable.Map<TaskList['id'], ImmutableTaskList>;
+			data: Immutable.Map<TaskList['id'], ImmutableTaskList>;
 		};
 
 		interface ImmutableAppState {
@@ -42,12 +49,12 @@ declare global {
 			): ImmutableAppState;
 		}
 
-		type TasksImmutableNonRecordKey = TaskListsKey | TaskListItemsKey;
+		type TasksImmutableNonRecordKey = TaskListItemsKey;
 
 		interface PathTo {
-			taskList: [TaskListsKey, TaskList['id']];
-			tasksListItems: [TaskListsKey, TaskList['id'], TaskListItemsKey];
-			task: [TaskListsKey, TaskList['id'], TaskListItemsKey, Task['id']];
+			taskList: [DataKey, TaskList['id']];
+			tasksListItems: [DataKey, TaskList['id'], TaskListItemsKey];
+			task: [DataKey, TaskList['id'], TaskListItemsKey, Task['id']];
 		}
 	}
 }

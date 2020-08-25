@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { hot } from 'react-hot-loader/root';
 
@@ -13,19 +13,16 @@ import { Tabs } from '../Tabs';
 const [appBlock, appElement] = useBEM('app');
 
 export const App: React.FC = hot(() => {
-	const state = useSelector<Store.ImmutableAppState, Store.ImmutableAppState>(
-		state => state
+	const state = useSelector<App.ImmutableAppState, App.ImmutableAppState>(
+		(state) => state
 	);
-
-	useEffect(() => {
-		(window as any).saveState = () =>
-			localStorage.setItem('state', JSON.stringify(state));
-	}, [state]);
 
 	// TODO: add selectors with error handling
 	const activeDocument =
-		state.activeFilePath &&
-		state.getIn(state.files.get(state.activeFilePath)!.path.content);
+		state.activeFile.id &&
+		state.data.get(
+			(state.files.get(state.activeFile.id) as App.RegularFile).data
+		);
 
 	return (
 		<div className={appBlock(null, Classes.DARK)}>

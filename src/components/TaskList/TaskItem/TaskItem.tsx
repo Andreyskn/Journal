@@ -5,7 +5,7 @@ import { Switch, Button } from '@blueprintjs/core';
 import { TasksDispatch } from '../dispatcher';
 
 export type TaskItemProps = {
-	task: Store.ImmutableTask;
+	task: App.ImmutableTask;
 	dispatch: TasksDispatch;
 };
 

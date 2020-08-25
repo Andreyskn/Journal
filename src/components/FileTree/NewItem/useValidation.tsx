@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
 
-import { useBEM, fileExtensions, getFolderPath } from '../../../utils';
+import { useBEM } from '../../../utils';
 import { NewItemProps } from './NewItem';
+import { EXTENSIONS } from '../../../core/fileSystem';
 
 const [errorBlock] = useBEM('validation-popover');
 
@@ -33,20 +34,20 @@ const errors = {
 			The extension <b>{ext}</b> is invalid. Please choose one of the
 			following:{' '}
 			<b>
-				<i>{fileExtensions.join(' | ')}</i>
+				<i>{EXTENSIONS.join(' | ')}</i>
 			</b>
 		</ErrorMessage>
 	),
 };
 
-const fileNameRegex = new RegExp(
-	`^(?<name>[^\\.]+)(?<validExt>\\${fileExtensions.join(
+const FILENAME_RE = new RegExp(
+	`^(?<name>[^\\.]+)(?<validExt>\\${EXTENSIONS.join(
 		'$|\\'
 	)}$)?(?<invalidExt>\..+$)?`
 );
 
 const matchFileName = (value: string) => {
-	return fileNameRegex.exec(value) as FileNameRegexExec | null;
+	return FILENAME_RE.exec(value) as FileNameRegexExec | null;
 };
 
 type FileNameRegexExec = OmitType<RegExpExecArray, 'groups'> & {
@@ -55,76 +56,78 @@ type FileNameRegexExec = OmitType<RegExpExecArray, 'groups'> & {
 
 type FileNameData = {
 	name: string;
-	validExt?: Store.FileExtension;
+	validExt?: App.FileExtension;
 	invalidExt?: string;
 };
 
-type InvalidResult = { isValid: false };
+type ResultError = { isValid: false };
 
-type ValidResult = {
+type ResultOk = {
 	isValid: true;
 	name: string;
-	extension?: Store.FileExtension;
-	blockedExtensions: Store.FileExtension[];
+	extension: App.FileExtension | '';
+	blockedExtensions: App.FileExtension[];
 };
 
-export type ValidationResult = ValidResult | InvalidResult;
+export type ValidationResult = ResultOk | ResultError;
 
-export const useValidation = ({ type, cwd, folders }: NewItemProps) => {
+export const useValidation = ({ type, cwd, files }: NewItemProps) => {
 	const itemData = useRef<FileNameData | undefined>();
 	const [error, setError] = useState<JSX.Element | undefined>();
+
+	const result = {
+		ok: (
+			itemData: FileNameData,
+			blockedExtensions: App.FileExtension[] = []
+		): ResultOk => ({
+			isValid: true,
+			name: itemData.name,
+			extension: itemData.validExt || '',
+			blockedExtensions,
+		}),
+		error: (): ResultError => ({ isValid: false }),
+	};
 
 	const validateDistinction = (
 		inputValue: string,
 		itemData: FileNameData
 	): ValidationResult => {
-		const blockedExtensions: Store.FileExtension[] = [];
+		const blockedExtensions: App.FileExtension[] = [];
+		const lowerCaseValue = inputValue.toLowerCase();
 
-		const isAlreadyExist = folders
-			.get(cwd)!
-			.content[type === 'file' ? 'files' : 'folders'].find(
-				existingName => {
-					const targetPath = existingName.toLowerCase();
-					let foundMatch: boolean;
+		const isAlreadyExist = (files.get(cwd) as App.Directory).data
+			.keySeq()
+			.map((name) => name.toLowerCase())
+			.find((existingName) => {
+				let foundMatch: boolean;
 
-					if (type === 'file') {
-						const newPath = `${cwd}${inputValue}`.toLowerCase();
-
-						if (itemData.validExt) {
-							foundMatch = targetPath === newPath;
-						} else {
-							fileExtensions.forEach(ext => {
-								if (
-									targetPath ===
-									newPath +
-										(newPath.endsWith('.')
-											? ext.slice(1)
-											: ext)
-								) {
-									blockedExtensions.push(ext);
-								}
-							});
-
-							foundMatch =
-								blockedExtensions.length ===
-								fileExtensions.length;
+				if (type === 'folder' || itemData.validExt) {
+					foundMatch = existingName === lowerCaseValue;
+				} else {
+					EXTENSIONS.forEach((ext) => {
+						if (
+							existingName ===
+							lowerCaseValue +
+								(lowerCaseValue.endsWith('.')
+									? ext.slice(1)
+									: ext)
+						) {
+							blockedExtensions.push(ext);
 						}
-					} else {
-						foundMatch =
-							targetPath ===
-							getFolderPath(cwd, inputValue).toLowerCase();
-					}
+					});
 
-					return foundMatch;
+					foundMatch = blockedExtensions.length === EXTENSIONS.length;
 				}
-			);
+
+				return foundMatch;
+			});
 
 		if (isAlreadyExist) {
 			setError(errors.existingName(inputValue, type));
-			return fail();
+			return result.error();
 		}
 
-		return success(itemData, blockedExtensions);
+		return result.ok(itemData, blockedExtensions);
 	};
 
 	const parseInput = (value: string): FileNameData | undefined => {
@@ -153,18 +156,6 @@ export const useValidation = ({ type, cwd, folders }: NewItemProps) => {
 		}
 	};
 
-	const success = (
-		itemData: FileNameData,
-		blockedExtensions: Store.FileExtension[] = []
-	): ValidResult => ({
-		isValid: true,
-		name: itemData.name,
-		extension: itemData.validExt,
-		blockedExtensions,
-	});
-
-	const fail = (): InvalidResult => ({ isValid: false });
-
 	const onChange = (value: string) => {
 		setError(undefined);
 
@@ -175,23 +166,23 @@ export const useValidation = ({ type, cwd, folders }: NewItemProps) => {
 			return validateDistinction(value, parsedValue);
 		}
 
-		return fail();
+		return result.error();
 	};
 
 	const onCreate = (): ValidationResult => {
-		if (error) return fail();
+		if (error) return result.error();
 
 		if (!itemData.current?.name) {
 			setError(errors.noName(type));
-			return fail();
+			return result.error();
 		}
 
 		if (type === 'file' && !itemData.current.validExt) {
 			setError(errors.noExtension());
-			return fail();
+			return result.error();
 		}
 
-		return success(itemData.current);
+		return result.ok(itemData.current);
 	};
 
 	return { onChange, onCreate, error };
