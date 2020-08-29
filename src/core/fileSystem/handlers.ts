@@ -3,6 +3,30 @@ import { actionHandler } from '../../utils';
 import { DIRECTORY_ID, UNTITLED, EXTENSION_BY_TYPE } from './constants';
 import { mutations } from '../mutations';
 
+const setDirectoryData = (
+	state: App.ImmutableAppState,
+	directoryId: App.File['parent'],
+	fileToAdd: App.ImmutableFile
+) => {
+	if (!directoryId) return;
+
+	(state as any).updateIn(
+		['files', directoryId, 'data'],
+		(data: App.Directory['data']) =>
+			data.set(fileToAdd.name, fileToAdd.id).sortBy(
+				(id, name) => ({
+					name,
+					isDirectory: Number(
+						(state.files.get(id) || fileToAdd).type === 'directory'
+					),
+				}),
+				(a, b) =>
+					b.isDirectory - a.isDirectory ||
+					a.name.localeCompare(b.name)
+			)
+	);
+};
+
 export const createFile: App.Handler<{
 	name: App.File['name'];
 	parent: App.RegularFile['parent'];
@@ -27,30 +51,16 @@ export const createFile: App.Handler<{
 				parent,
 				data: state.data.last<undefined>()!.id,
 			});
+
+			state.update('activeFile', (activeFile) => ({
+				...activeFile,
+				id: newFile.id,
+				path,
+			}));
 		}
 
 		state.update('files', (files) => files.set(newFile.id, newFile));
-		state.updateIn(
-			['files', parent, 'data'],
-			(data: App.Directory['data']) =>
-				data.set(newFile.name, newFile.id).sortBy(
-					(id, name) => ({
-						name,
-						isDirectory: Number(
-							(state.files.get(id) || newFile).type ===
-								'directory'
-						),
-					}),
-					(a, b) =>
-						b.isDirectory - a.isDirectory ||
-						a.name.localeCompare(b.name)
-				)
-		);
-		state.update('activeFile', (activeFile) => ({
-			...activeFile,
-			id: newFile.id,
-			path,
-		}));
+		setDirectoryData(state, parent, newFile);
 
 		mutations.dispatch({
 			type: 'FILE_CREATED',
@@ -108,12 +118,37 @@ const deleteFile: App.Handler<{
 			}));
 		}
 
-		// mutations.onFileDelete(state, targetFile);
+		mutations.dispatch({
+			type: 'FILE_DELETED',
+			payload: { state, file: targetFile },
+		});
 	});
 };
 
-const renameFile: App.Handler = (state) => {
-	return state;
+const renameFile: App.Handler<{
+	id: App.File['id'];
+	name: App.File['name'];
+}> = (state, { id, name }) => {
+	const originalFile = state.files.get(id);
+	if (!originalFile) return state;
+
+	const renamedFile = originalFile.set('name', name);
+
+	return state.withMutations((state) => {
+		state.update('files', (files) =>
+			files.set(renamedFile.id, renamedFile)
+		);
+		(state as any).updateIn(
+			['files', originalFile.parent, 'data'],
+			(data: App.Directory['data']) => data.delete(originalFile.name)
+		);
+		setDirectoryData(state, renamedFile.parent, renamedFile);
+
+		mutations.dispatch({
+			type: 'FILE_UPDATED',
+			payload: { state, file: renamedFile },
+		});
+	});
 };
 
 const setActiveFile: App.Handler<{

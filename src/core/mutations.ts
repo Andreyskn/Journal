@@ -1,15 +1,22 @@
 import Events from 'events';
 
-type CreateData = App.ActionBase<
-	'CREATE_DATA_ENTRY',
-	{ state: App.ImmutableAppState; type: App.RegularFile['type'] }
->;
-type FileCreated = App.ActionBase<
-	'FILE_CREATED',
-	{ state: App.ImmutableAppState; file: App.ImmutableFile }
->;
-
-type Mutation = CreateData | FileCreated;
+type Mutation =
+	| App.ActionBase<
+			'CREATE_DATA_ENTRY',
+			{ state: App.ImmutableAppState; type: App.RegularFile['type'] }
+	  >
+	| App.ActionBase<
+			'FILE_CREATED',
+			{ state: App.ImmutableAppState; file: App.ImmutableFile }
+	  >
+	| App.ActionBase<
+			'FILE_DELETED',
+			{ state: App.ImmutableAppState; file: App.ImmutableFile }
+	  >
+	| App.ActionBase<
+			'FILE_UPDATED',
+			{ state: App.ImmutableAppState; file: App.ImmutableFile }
+	  >;
 
 type ExtractListener<
 	T extends App.ActionBase<any, any>

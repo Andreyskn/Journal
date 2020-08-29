@@ -2,9 +2,15 @@ import React, { useRef } from 'react';
 import { ITreeProps, ITreeNode } from '@blueprintjs/core';
 import { fileIcons } from '../../utils';
 import { FileTreeProps } from './FileTree';
-import { NewItem } from './NewItem';
-import { fileTreeElement, NewItemData } from './common';
+import { NodeEditor } from './NodeEditor';
+import {
+	fileTreeElement,
+	NodeEditorData,
+	NodeEditorDataRename,
+} from './common';
 import { DIRECTORY_ID } from '../../core/fileSystem/constants';
+
+// TODO: refactor
 
 export type TreeProps = OmitType<
 	ITreeProps<any>,
@@ -51,8 +57,8 @@ type NodesMap = {
 	files: Map<FileNode['nodeData']['path'], FileNode>;
 };
 
-const getNodeClass = (isNew: boolean) => {
-	return fileTreeElement('node', { new: isNew });
+const getNodeClass = (isEditing: boolean) => {
+	return fileTreeElement('node', { editing: isEditing });
 };
 
 const createFolderNode = ({
@@ -64,6 +70,7 @@ const createFolderNode = ({
 	parent,
 	hasCaret,
 	path,
+	editorData,
 }: Partial<
 	Pick<
 		FolderNode,
@@ -73,17 +80,29 @@ const createFolderNode = ({
 	isNew?: boolean;
 	parent: FolderNode | null;
 	path: Path;
-}): FolderNode => ({
-	id,
-	label,
-	isExpanded,
-	isSelected,
-	childNodes: [],
-	nodeData: { type: 'folder', parent, path },
-	icon: isExpanded ? 'folder-open' : 'folder-close',
-	hasCaret: hasCaret ?? !isNew,
-	className: getNodeClass(isNew),
-});
+	editorData?: NodeEditorData;
+}): FolderNode => {
+	const isRenaming = editorData?.mode === 'rename' && editorData.id === id;
+
+	return {
+		id,
+		label: isRenaming ? (
+			<NodeEditor
+				{...(editorData as NodeEditorDataRename)}
+				name={label as string}
+			/>
+		) : (
+			label
+		),
+		isExpanded,
+		isSelected,
+		childNodes: [],
+		nodeData: { type: 'folder', parent, path },
+		icon: isExpanded ? 'folder-open' : 'folder-close',
+		hasCaret: hasCaret ?? !isNew,
+		className: getNodeClass(isNew || isRenaming),
+	};
+};
 
 const createFileNode = ({
 	label = '',
@@ -93,17 +112,34 @@ const createFileNode = ({
 	parent,
 	isNew = false,
 	path,
+	editorData,
 }: Partial<
 	Pick<FileNode, 'id' | 'label' | 'isSelected' | 'className'> &
 		Pick<App.RegularFile, 'type'>
-> & { isNew?: boolean; parent: FolderNode; path: Path }): FileNode => ({
-	id,
-	label,
-	isSelected,
-	nodeData: { type: 'file', parent, path },
-	icon: type ? fileIcons[type] : 'document',
-	className: getNodeClass(isNew),
-});
+> & {
+	isNew?: boolean;
+	parent: FolderNode;
+	path: Path;
+	editorData?: NodeEditorData;
+}): FileNode => {
+	const isRenaming = editorData?.mode === 'rename' && editorData.id === id;
+
+	return {
+		id,
+		label: isRenaming ? (
+			<NodeEditor
+				{...(editorData as NodeEditorDataRename)}
+				name={label as string}
+			/>
+		) : (
+			label
+		),
+		isSelected,
+		nodeData: { type: 'file', parent, path },
+		icon: type ? fileIcons[type] : 'document',
+		className: getNodeClass(isNew || isRenaming),
+	};
+};
 
 export const expandParentFolders = ({ nodeData: { parent } }: Node) => {
 	while (parent) {
@@ -112,16 +148,26 @@ export const expandParentFolders = ({ nodeData: { parent } }: Node) => {
 	}
 };
 
-const maybeAppendNewItem = (folder: FolderNode, newItem: NewItemData) => {
-	if (!newItem || folder.id !== newItem.cwd) return;
+const TEMP_ITEM_PATH = '*';
+
+const maybeAppendNewItem = (
+	folder: FolderNode,
+	nodeEditorData: NodeEditorData
+) => {
+	if (
+		!nodeEditorData ||
+		nodeEditorData.mode !== 'create' ||
+		folder.id !== nodeEditorData.cwd
+	)
+		return;
 
 	const createNode =
-		newItem.type === 'folder' ? createFolderNode : createFileNode;
+		nodeEditorData.type === 'folder' ? createFolderNode : createFileNode;
 	const newItemNode = createNode({
-		label: <NewItem {...newItem} />,
+		label: <NodeEditor {...nodeEditorData} />,
 		isNew: true,
 		parent: folder,
-		path: '*',
+		path: TEMP_ITEM_PATH,
 	});
 
 	folder.childNodes.push(newItemNode);
@@ -132,9 +178,13 @@ export const isFolderNode = (node: Node): node is FolderNode => {
 	return node.nodeData.type === 'folder';
 };
 
+export const isEditingNode = (node: Node) => {
+	return typeof node.label !== 'string';
+};
+
 export const useTree = (
 	files: FileTreeProps['files'],
-	newItem: NewItemData,
+	editorData: NodeEditorData,
 	selectedPath: string | null
 ) => {
 	const prevNodesMap = useRef<NodesMap | undefined>();
@@ -150,7 +200,7 @@ export const useTree = (
 	};
 
 	const isSelected = (path: Node['nodeData']['path']) =>
-		!newItem && path === selectedPath;
+		!editorData && path === selectedPath;
 
 	const fillDirectory = (parent: FolderNode) => {
 		const file = files.get(parent.id) as App.Directory;
@@ -164,6 +214,7 @@ export const useTree = (
 			const { name: label, path, data } = files.get(id) as App.Directory;
 
 			const node = createFolderNode({
+				editorData,
 				parent,
 				id,
 				path,
@@ -178,7 +229,7 @@ export const useTree = (
 			parent.childNodes.push(node);
 		});
 
-		maybeAppendNewItem(parent, newItem);
+		maybeAppendNewItem(parent, editorData);
 
 		regularFiles.forEach((id) => {
 			const { type, name: label, path } = files.get(
@@ -186,6 +237,7 @@ export const useTree = (
 			) as App.RegularFile;
 
 			const node = createFileNode({
+				editorData,
 				parent,
 				label,
 				id,

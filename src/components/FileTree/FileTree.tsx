@@ -18,9 +18,10 @@ import {
 	isFolderNode,
 	expandParentFolders,
 	Node,
+	isEditingNode,
 } from './useTree';
-import { fileTreeBlock, NewItemData } from './common';
-import { NewItemProps } from './NewItem';
+import { fileTreeBlock, NodeEditorData } from './common';
+import { NodeEditorProps } from './NodeEditor';
 import { DIRECTORY_ID, getFilePath, PATHS } from '../../core/fileSystem';
 
 const [explorerBlock, explorerElement] = useBEM('file-explorer');
@@ -39,9 +40,13 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	const [selection, setSelection] = useState<{ path: string | null }>({
 		path: activeFilePath,
 	});
-	const [newItemData, setNewItemData] = useState<NewItemData>(null);
+	const [nodeEditorData, setNodeEditorData] = useState<NodeEditorData>(null);
 
-	const { contents, nodesMap } = useTree(files, newItemData, selection.path);
+	const { contents, nodesMap } = useTree(
+		files,
+		nodeEditorData,
+		selection.path
+	);
 	const { forceUpdate } = useForceUpdate();
 
 	useEffect(() => {
@@ -82,18 +87,33 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	};
 
 	const onNodeContextMenu: TreeProps['onNodeContextMenu'] = (node, _, e) => {
+		if (isEditingNode(node)) return;
 		e.preventDefault();
 		selectNode(node);
 
-		const onDelete = () => {
-			if (!isFolderNode(node)) {
-				dispatch.deleteFile(node.id);
-			}
+		const onRename = () => {
+			const cwd = getCurrentDirectory();
+			const onDismiss = () => setNodeEditorData(null);
+			const onCreate: NodeEditorProps['onConfirm'] = (name) => {
+				dispatch.renameFile(node.id, name);
+				onDismiss();
+			};
+			setNodeEditorData({
+				mode: 'rename',
+				id: node.id,
+				type: node.nodeData.type,
+				cwd,
+				onConfirm: onCreate,
+				onDismiss,
+				files,
+			});
 		};
+
+		const onDelete = () => dispatch.deleteFile(node.id);
 
 		ContextMenu.show(
 			<Menu>
-				<MenuItem text='Rename' />
+				<MenuItem text='Rename' onClick={onRename} />
 				<MenuItem text='Delete' onClick={onDelete} />
 			</Menu>,
 			{ left: e.pageX, top: e.pageY },
@@ -109,21 +129,22 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	};
 
 	const onAddItem = (
-		type: NewItemProps['type']
+		type: NodeEditorProps['type']
 	): IButtonProps['onClick'] => () => {
 		const cwd = getCurrentDirectory();
-		const onDismiss = () => setNewItemData(null);
-		const onCreate: NewItemProps['onCreate'] = (name) => {
+		const onDismiss = () => setNodeEditorData(null);
+		const onConfirm: NodeEditorProps['onConfirm'] = (name) => {
 			if (type === 'folder') {
 				setSelection({ path: getFilePath(files, name, cwd) });
 			}
+			dispatch.createFile(name, cwd);
 			onDismiss();
 		};
-		setNewItemData({
+		setNodeEditorData({
+			mode: 'create',
 			type,
-			dispatch,
 			cwd,
-			onCreate,
+			onConfirm,
 			onDismiss,
 			files,
 		});
@@ -147,7 +168,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 		onNodeContextMenu: onNodeContextMenu,
 		onNodeExpand: onToggleExpanded,
 		onNodeCollapse: onToggleExpanded,
-		className: fileTreeBlock({ insert: newItemData }),
+		className: fileTreeBlock({ insert: nodeEditorData }),
 	};
 
 	return (
@@ -174,7 +195,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 			</div>
 			<div
 				className={explorerElement('tree-container', {
-					selected: !newItemData && selection.path === PATHS.main,
+					selected: !nodeEditorData && selection.path === PATHS.main,
 				})}
 			>
 				<Tree {...(treeProps as ITreeProps<any>)} />

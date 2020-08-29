@@ -35,10 +35,21 @@ const deleteFile = ({ store: { dispatch } }: HandlerDeps) => (
 	});
 };
 
+const renameFile = ({ store: { dispatch } }: HandlerDeps) => (
+	id: App.File['id'],
+	name: App.File['name']
+) => {
+	dispatch({
+		type: '@fs/RENAME_FILE',
+		payload: { id, name },
+	});
+};
+
 export const createDispatch = (deps: HandlerDeps) => ({
 	setActiveFile: setActiveFile(deps),
 	createFile: createFile(deps),
 	deleteFile: deleteFile(deps),
+	renameFile: renameFile(deps),
 });
 
 export type FileTreeDispatch = ReturnType<typeof createDispatch>;

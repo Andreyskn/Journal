@@ -18,5 +18,8 @@
 	"editor.tabCompletion": "on",
 	"editor.renderIndentGuides": true,
 	"editor.insertSpaces": false,
-	"editor.renderWhitespace": "boundary"
+	"editor.renderWhitespace": "boundary",
+	"cSpell.words": [
+		"renamer"
+	]
 }

@@ -1,5 +1,6 @@
 {
 	"compilerOptions": {
+		// "noUnusedLocals": true,
 		"lib": ["ESNext", "DOM"],
 		"target": "ESNext",
 		"sourceMap": true,
@@ -9,6 +10,5 @@
 		"jsx": "react",
 		"allowSyntheticDefaultImports": true,
 		"outDir": "./build"
-		// "noUnusedLocals": true
 	}
 }

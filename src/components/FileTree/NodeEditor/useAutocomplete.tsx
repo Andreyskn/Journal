@@ -8,7 +8,7 @@ import React, {
 import { Menu, MenuItem, IPopoverProps } from '@blueprintjs/core';
 import { ValidationResult } from './useValidation';
 import { useBEM } from '../../../utils';
-import { NewItemProps } from './NewItem';
+import { NodeEditorProps } from './NodeEditor';
 import { EXTENSIONS } from '../../../core/fileSystem';
 
 const [autocompleteBlock, autocompleteElement] = useBEM('autocomplete-popover');
@@ -21,7 +21,7 @@ const labels: Record<App.FileExtension, string> = {
 export const useAutocomplete = (
 	onSelectProp: (value: string) => void,
 	inputValue: string,
-	type: NewItemProps['type']
+	{ type, mode }: NodeEditorProps
 ) => {
 	const autocompleteRef = useRef<AutocompleteRef | null>(null);
 	const [isVisible, setVisibility] = useState(false);
@@ -37,6 +37,7 @@ export const useAutocomplete = (
 
 	const setState = (validationResult: ValidationResult) => {
 		if (
+			mode !== 'create' ||
 			type === 'folder' ||
 			!validationResult.isValid ||
 			!validationResult.name ||

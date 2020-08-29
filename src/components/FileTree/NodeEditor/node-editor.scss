@@ -1,21 +1,30 @@
-.new-item {
-	&__form {
-		display: grid;
+.node-editor {
+	&__content {
+		display: flex;
 
 		height: 30px;
+		padding: 2px;
 
-		place-items: center;
+		align-items: center;
 	}
 
 	&__input {
-		width: calc(100% - 4px);
-		height: 26px;
+		width: 100%;
+		height: 100%;
 	}
 
 	&__popover {
 		width: 142px;
 
 		box-shadow: none !important;
+	}
+
+	&__renamer {
+		margin-left: 4px;
+
+		&.bp3-editable-text-editing {
+			margin-right: 6px;
+		}
 	}
 }
 

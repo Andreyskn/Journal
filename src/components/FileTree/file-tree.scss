@@ -5,7 +5,7 @@ $node: "#{$tree}__node";
 	user-select: none;
 
 	&--insert {
-		#{$node}:not(#{$node}--new) > .bp3-tree-node-content {
+		#{$node}:not(#{$node}--editing) > .bp3-tree-node-content {
 			opacity: 0.5;
 		}
 	}

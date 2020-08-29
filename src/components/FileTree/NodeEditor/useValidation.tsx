@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 
 import { useBEM } from '../../../utils';
-import { NewItemProps } from './NewItem';
+import { NodeEditorProps } from './NodeEditor';
 import { EXTENSIONS } from '../../../core/fileSystem';
 
 const [errorBlock] = useBEM('validation-popover');
@@ -71,7 +71,7 @@ type ResultOk = {
 
 export type ValidationResult = ResultOk | ResultError;
 
-export const useValidation = ({ type, cwd, files }: NewItemProps) => {
+export const useValidation = ({ type, cwd, files }: NodeEditorProps) => {
 	const itemData = useRef<FileNameData | undefined>();
 	const [error, setError] = useState<JSX.Element | undefined>();
 
