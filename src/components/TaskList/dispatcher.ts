@@ -1,13 +1,16 @@
-import { Dispatch } from 'redux';
-
-export type HandlerDeps = {
-	dispatch: Dispatch<Actions.AppAction>;
+type HandlerDeps = {
 	taskListId: App.TaskList['id'];
 };
 
-const addTask = ({ dispatch, taskListId }: HandlerDeps) => (
-	text: App.Task['text']
-) => {
+type TaskListDispatcher<T extends any[] = []> = Actions.Dispatcher<
+	T,
+	HandlerDeps
+>;
+
+const addTask: TaskListDispatcher<[text: App.Task['text']]> = ({
+	dispatch,
+	taskListId,
+}) => (text) => {
 	dispatch({
 		type: '@tasks/ADD_TASK',
 		payload: {
@@ -17,9 +20,10 @@ const addTask = ({ dispatch, taskListId }: HandlerDeps) => (
 	});
 };
 
-const deleteTask = ({ dispatch, taskListId }: HandlerDeps) => (
-	taskId: App.Task['id']
-) => {
+const deleteTask: TaskListDispatcher<[taskId: App.Task['id']]> = ({
+	dispatch,
+	taskListId,
+}) => (taskId: App.Task['id']) => {
 	dispatch({
 		type: '@tasks/DELETE_TASK',
 		payload: {
@@ -29,9 +33,10 @@ const deleteTask = ({ dispatch, taskListId }: HandlerDeps) => (
 	});
 };
 
-const toggleDone = ({ dispatch, taskListId }: HandlerDeps) => (
-	taskId: App.Task['id']
-) => {
+const toggleDone: TaskListDispatcher<[taskId: App.Task['id']]> = ({
+	dispatch,
+	taskListId,
+}) => (taskId: App.Task['id']) => {
 	dispatch({
 		type: '@tasks/TOGGLE_TASK_DONE',
 		payload: {
@@ -41,9 +46,10 @@ const toggleDone = ({ dispatch, taskListId }: HandlerDeps) => (
 	});
 };
 
-const renameTaskList = ({ dispatch, taskListId }: HandlerDeps) => (
-	title: App.TaskList['title']
-) => {
+const renameTaskList: TaskListDispatcher<[title: App.TaskList['title']]> = ({
+	dispatch,
+	taskListId,
+}) => (title: App.TaskList['title']) => {
 	dispatch({
 		type: '@tasks/SET_TASK_LIST_TITLE',
 		payload: {
@@ -53,11 +59,11 @@ const renameTaskList = ({ dispatch, taskListId }: HandlerDeps) => (
 	});
 };
 
-export const createDispatch = (deps: HandlerDeps) => ({
-	addTask: addTask(deps),
-	deleteTask: deleteTask(deps),
-	toggleDone: toggleDone(deps),
-	renameTaskList: renameTaskList(deps),
-});
+export const dispatchers = {
+	addTask,
+	deleteTask,
+	toggleDone,
+	renameTaskList,
+};
 
-export type TasksDispatch = ReturnType<typeof createDispatch>;
+export type TasksDispatch = Actions.DispatcherMap<typeof dispatchers>;

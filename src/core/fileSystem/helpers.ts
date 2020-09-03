@@ -49,6 +49,30 @@ export const createFile = ({
 	});
 };
 
+export const setDirectoryData = (
+	state: App.ImmutableAppState,
+	directoryId: App.File['parent'],
+	fileToAdd: App.ImmutableFile
+) => {
+	if (!directoryId) return;
+
+	(state as any).updateIn(
+		['files', directoryId, 'data'],
+		(data: App.Directory['data']) =>
+			data.set(fileToAdd.name, fileToAdd.id).sortBy(
+				(id, name) => ({
+					name,
+					isDirectory: Number(
+						(state.files.get(id) || fileToAdd).type === 'directory'
+					),
+				}),
+				(a, b) =>
+					b.isDirectory - a.isDirectory ||
+					a.name.localeCompare(b.name)
+			)
+	);
+};
+
 export const getFileType = (name: string): App.File['type'] => {
 	const extension = /(\..+)$/.exec(name)?.[1];
 

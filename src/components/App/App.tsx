@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from '../../core/store';
 import { hot } from 'react-hot-loader/root';
 
 import './app.scss';
@@ -13,9 +13,7 @@ import { Tabs } from '../Tabs';
 const [appBlock, appElement] = useBEM('app');
 
 export const App: React.FC = hot(() => {
-	const state = useSelector<App.ImmutableAppState, App.ImmutableAppState>(
-		(state) => state
-	);
+	const state = useSelector((state) => state);
 
 	// TODO: add selectors with error handling
 	const activeDocument =

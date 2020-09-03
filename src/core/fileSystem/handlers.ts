@@ -3,30 +3,6 @@ import { actionHandler } from '../../utils';
 import { DIRECTORY_ID, UNTITLED, EXTENSION_BY_TYPE } from './constants';
 import { mutations } from '../mutations';
 
-const setDirectoryData = (
-	state: App.ImmutableAppState,
-	directoryId: App.File['parent'],
-	fileToAdd: App.ImmutableFile
-) => {
-	if (!directoryId) return;
-
-	(state as any).updateIn(
-		['files', directoryId, 'data'],
-		(data: App.Directory['data']) =>
-			data.set(fileToAdd.name, fileToAdd.id).sortBy(
-				(id, name) => ({
-					name,
-					isDirectory: Number(
-						(state.files.get(id) || fileToAdd).type === 'directory'
-					),
-				}),
-				(a, b) =>
-					b.isDirectory - a.isDirectory ||
-					a.name.localeCompare(b.name)
-			)
-	);
-};
-
 export const createFile: App.Handler<{
 	name: App.File['name'];
 	parent: App.RegularFile['parent'];
@@ -60,7 +36,7 @@ export const createFile: App.Handler<{
 		}
 
 		state.update('files', (files) => files.set(newFile.id, newFile));
-		setDirectoryData(state, parent, newFile);
+		helpers.setDirectoryData(state, parent, newFile);
 
 		mutations.dispatch({
 			type: 'FILE_CREATED',
@@ -142,7 +118,7 @@ const renameFile: App.Handler<{
 			['files', originalFile.parent, 'data'],
 			(data: App.Directory['data']) => data.delete(originalFile.name)
 		);
-		setDirectoryData(state, renamedFile.parent, renamedFile);
+		helpers.setDirectoryData(state, renamedFile.parent, renamedFile);
 
 		mutations.dispatch({
 			type: 'FILE_UPDATED',

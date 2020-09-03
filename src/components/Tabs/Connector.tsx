@@ -1,25 +1,20 @@
 import React, { useMemo } from 'react';
-import { useSelector, useStore } from 'react-redux';
+import { useSelector, useDispatch } from '../../core/store';
 
 import { Tabs } from './Tabs';
-import { createDispatch } from './dispatcher';
+import { dispatchers } from './dispatcher';
 import { withErrorBoundary } from '../../utils';
 
 const WrappedTabs = React.memo(withErrorBoundary(Tabs));
 
 export const TabsConnector: React.FC = () => {
-	const store = useStore<App.ImmutableAppState, Actions.AppAction>();
-
-	const { tabs, activeTabId } = useSelector<
-		App.ImmutableAppState,
-		App.TabsState & { activeTabId: App.FileSystemState['activeFile']['id'] }
-	>((state) => ({
+	const { tabs, activeTabId } = useSelector((state) => ({
 		tabs: state.tabs,
 		activeTabId: state.activeFile.id,
 	}));
 
 	const tabsArray = useMemo(() => tabs.valueSeq().toArray(), [tabs]);
-	const tabsDispatch = useMemo(() => createDispatch({ store }), [store]);
+	const tabsDispatch = useDispatch(dispatchers);
 
 	return (
 		<WrappedTabs

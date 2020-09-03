@@ -1,8 +1,21 @@
 import Immutable from 'immutable';
+import { Dispatch as ReduxDispatch } from 'redux';
 
 declare global {
 	namespace Actions {
 		type AppAction = TasksAction | TabsAction | FileSystemAction;
+
+		type Dispatcher<T extends any[] = any[], D extends AnyObject = {}> = (
+			deps: D & {
+				dispatch: ReduxDispatch<Actions.AppAction>;
+			}
+		) => (...args: T) => void;
+
+		type DispatcherMap<
+			T extends Record<string, Actions.Dispatcher<any[], any>>
+		> = {
+			[K in keyof T]: ReturnType<T[K]>;
+		};
 
 		//@ts-expect-error
 		type ExtractActions<T> = T extends any ? Parameters<T[1]>[1] : never;

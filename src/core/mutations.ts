@@ -31,7 +31,7 @@ type ExtractListener<
 
 type EventEmitter = {
 	dispatch: (mutation: Mutation) => void;
-	on: (mutation: ExtractListener<Mutation>) => void;
+	on: (mutation: ExtractListener<Mutation>) => EventEmitter;
 };
 
 const eventEmitter = new Events.EventEmitter();
@@ -40,5 +40,8 @@ export const mutations: EventEmitter = {
 	dispatch: ({ type, payload }) => {
 		eventEmitter.emit(type, payload);
 	},
-	on: ({ type, act }) => eventEmitter.on(type, act),
+	on: ({ type, act }) => {
+		eventEmitter.on(type, act);
+		return mutations;
+	},
 };

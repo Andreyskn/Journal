@@ -2,28 +2,27 @@ import { actionHandler } from '../../utils';
 import * as helpers from './helpers';
 import { mutations } from '../mutations';
 
-mutations.on({
-	type: 'FILE_CREATED',
-	act: ({ state, file }) => {
-		createTab(state, { file });
-	},
-});
-
-mutations.on({
-	type: 'FILE_UPDATED',
-	act: ({ state, file }) => {
-		updateTab(state, { file });
-	},
-});
-
-mutations.on({
-	type: 'FILE_DELETED',
-	act: ({ state, file }) => {
-		if (file.type === 'directory') {
-			closeTabByPath(state, { path: file.path });
-		} else closeTabById(state, { id: file.id });
-	},
-});
+mutations
+	.on({
+		type: 'FILE_CREATED',
+		act: ({ state, file }) => {
+			createTab(state, { file });
+		},
+	})
+	.on({
+		type: 'FILE_UPDATED',
+		act: ({ state, file }) => {
+			updateTab(state, { file });
+		},
+	})
+	.on({
+		type: 'FILE_DELETED',
+		act: ({ state, file }) => {
+			if (file.type === 'directory') {
+				closeTabByPath(state, { path: file.path });
+			} else closeTabById(state, { id: file.id });
+		},
+	});
 
 export const createTab: App.Handler<{ file: App.ImmutableFile }> = (
 	state,

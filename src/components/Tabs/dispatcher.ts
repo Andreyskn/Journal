@@ -1,12 +1,6 @@
-import { Store as ReduxStore } from 'redux';
-
-export type HandlerDeps = {
-	store: ReduxStore<App.ImmutableAppState, Actions.AppAction>;
-};
-
-const createFile = ({ store: { dispatch, getState } }: HandlerDeps) => (
-	type: App.RegularFile['type']
-) => {
+const createFile: Actions.Dispatcher<[type: App.RegularFile['type']]> = ({
+	dispatch,
+}) => (type) => {
 	dispatch({
 		type: '@fs/CREATE_UNTITLED_FILE',
 		payload: {
@@ -15,18 +9,18 @@ const createFile = ({ store: { dispatch, getState } }: HandlerDeps) => (
 	});
 };
 
-const setActiveTab = ({ store: { dispatch } }: HandlerDeps) => (
-	id: App.Tab['id']
-) => {
+const setActiveTab: Actions.Dispatcher<[id: App.Tab['id']]> = ({
+	dispatch,
+}) => (id) => {
 	dispatch({
 		type: '@fs/SET_ACTIVE_FILE',
 		payload: { id },
 	});
 };
 
-export const createDispatch = (deps: HandlerDeps) => ({
-	createFile: createFile(deps),
-	setActiveTab: setActiveTab(deps),
-});
+export const dispatchers = {
+	createFile,
+	setActiveTab,
+};
 
-export type TabsDispatch = ReturnType<typeof createDispatch>;
+export type TabsDispatch = Actions.DispatcherMap<typeof dispatchers>;

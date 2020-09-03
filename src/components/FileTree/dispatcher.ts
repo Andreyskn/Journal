@@ -1,22 +1,16 @@
-import { Store as ReduxStore } from 'redux';
-
-export type HandlerDeps = {
-	store: ReduxStore<App.ImmutableAppState, Actions.AppAction>;
-};
-
-const setActiveFile = ({ store: { dispatch } }: HandlerDeps) => (
-	id: App.File['id']
-) => {
+const setActiveFile: Actions.Dispatcher<[id: App.File['id']]> = ({
+	dispatch,
+}) => (id) => {
 	dispatch({
 		type: '@fs/SET_ACTIVE_FILE',
 		payload: { id },
 	});
 };
 
-const createFile = ({ store: { dispatch } }: HandlerDeps) => (
+const createFile: Actions.Dispatcher<[
 	name: string,
 	parent: App.RegularFile['parent']
-) => {
+]> = ({ dispatch }) => (name, parent) => {
 	dispatch({
 		type: '@fs/CREATE_FILE',
 		payload: {
@@ -26,8 +20,8 @@ const createFile = ({ store: { dispatch } }: HandlerDeps) => (
 	});
 };
 
-const deleteFile = ({ store: { dispatch } }: HandlerDeps) => (
-	id: App.File['id']
+const deleteFile: Actions.Dispatcher<[id: App.File['id']]> = ({ dispatch }) => (
+	id
 ) => {
 	dispatch({
 		type: '@fs/DELETE_FILE',
@@ -35,21 +29,21 @@ const deleteFile = ({ store: { dispatch } }: HandlerDeps) => (
 	});
 };
 
-const renameFile = ({ store: { dispatch } }: HandlerDeps) => (
+const renameFile: Actions.Dispatcher<[
 	id: App.File['id'],
 	name: App.File['name']
-) => {
+]> = ({ dispatch }) => (id, name) => {
 	dispatch({
 		type: '@fs/RENAME_FILE',
 		payload: { id, name },
 	});
 };
 
-export const createDispatch = (deps: HandlerDeps) => ({
-	setActiveFile: setActiveFile(deps),
-	createFile: createFile(deps),
-	deleteFile: deleteFile(deps),
-	renameFile: renameFile(deps),
-});
+export const dispatchers = {
+	setActiveFile,
+	createFile,
+	deleteFile,
+	renameFile,
+};
 
-export type FileTreeDispatch = ReturnType<typeof createDispatch>;
+export type FileTreeDispatch = Actions.DispatcherMap<typeof dispatchers>;

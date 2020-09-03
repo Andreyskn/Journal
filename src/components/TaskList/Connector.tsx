@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import React from 'react';
+import { useDispatch } from '../../core/store';
 
-import { createDispatch } from './dispatcher';
+import { dispatchers } from './dispatcher';
 import { TaskList } from './TaskList';
 import { withErrorBoundary } from '../../utils';
 
@@ -12,13 +12,8 @@ export type TaskConnectorProps = {
 };
 
 export const TasksConnector: React.FC<TaskConnectorProps> = ({ taskList }) => {
-	const dispatch = useDispatch();
 	const taskListId = taskList.id;
-
-	const tasksDispatch = useMemo(
-		() => createDispatch({ dispatch, taskListId }),
-		[dispatch, taskListId]
-	);
+	const tasksDispatch = useDispatch(dispatchers, { taskListId });
 
 	return (
 		<WrappedTaskList
