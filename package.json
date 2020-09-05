@@ -11,6 +11,7 @@
 	"dependencies": {
 		"@blueprintjs/core": "^3.31.0",
 		"@hot-loader/react-dom": "^16.13.0",
+		"idb-keyval": "^3.2.0",
 		"immutable": "^4.0.0-rc.12",
 		"normalize.css": "^8.0.1",
 		"react": "^16.13.1",

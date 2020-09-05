@@ -45,6 +45,11 @@ declare global {
 
 		type FileExtension = typeof EXTENSIONS[number];
 
+		type FileSystemStateImmutableNonRecordKey =
+			| 'files'
+			| 'data'
+			| 'activeFile';
+
 		// interface ImmutableAppState {
 		// 	updateIn(
 		// 		path: PathTo['foldersInFolder'],

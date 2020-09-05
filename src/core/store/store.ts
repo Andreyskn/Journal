@@ -1,13 +1,15 @@
-import { createStore, Store } from 'redux';
+import { createStore } from 'redux';
 import { devToolsEnhancer } from 'redux-devtools-extension';
 import { useEffect, useMemo, useState } from 'react';
 
-import { getInitialState } from './initializer';
 import { tabsHandlers } from '../tabs';
 import { tasksHandlers } from '../data/tasks';
 import { fileSystemHandlers } from '../fileSystem';
+import { initPersistance, persistanceHandlers } from './persistance';
+import { createAppState } from './initializer';
 
 const handlers = Object.fromEntries([
+	...persistanceHandlers,
 	...tabsHandlers,
 	...tasksHandlers,
 	...fileSystemHandlers,
@@ -23,10 +25,13 @@ const reducer: App.Reducer<App.ImmutableAppState, App.ActionBase<any, any>> = (
 	return handler ? handler(state, action) : state;
 };
 
-const store = createStore(reducer as any, getInitialState(), devTools) as Store<
-	App.ImmutableAppState,
-	Actions.AppAction
->;
+const store = createStore(
+	reducer as any,
+	createAppState(),
+	devTools
+) as App.Store;
+
+initPersistance(store);
 
 export const useSelector = <T extends any>(
 	select: (state: App.ImmutableAppState) => T
@@ -64,7 +69,7 @@ export const useDispatch = <
 					result[name] = fn({
 						dispatch: store.dispatch,
 						...deps,
-					}) as any;
+					}) as R[keyof T];
 					return result;
 				},
 				{} as R

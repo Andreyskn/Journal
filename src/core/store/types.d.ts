@@ -1,13 +1,17 @@
 import Immutable from 'immutable';
-import { Dispatch as ReduxDispatch } from 'redux';
+import { Dispatch, Store as ReduxStore } from 'redux';
 
 declare global {
 	namespace Actions {
-		type AppAction = TasksAction | TabsAction | FileSystemAction;
+		type AppAction =
+			| PersistanceAction
+			| TasksAction
+			| TabsAction
+			| FileSystemAction;
 
 		type Dispatcher<T extends any[] = any[], D extends AnyObject = {}> = (
 			deps: D & {
-				dispatch: ReduxDispatch<Actions.AppAction>;
+				dispatch: Dispatch<Actions.AppAction>;
 			}
 		) => (...args: T) => void;
 
@@ -22,6 +26,8 @@ declare global {
 	}
 
 	namespace App {
+		type Store = ReduxStore<ImmutableAppState, Actions.AppAction>;
+
 		type AppState = TasksState & TabsState & FileSystemState;
 
 		interface ImmutableAppState
@@ -35,15 +41,10 @@ declare global {
 		type ImmutableNonRecordKey =
 			| AppImmutableNonRecordKey
 			| TasksImmutableNonRecordKey
-			| TabsImmutableNonRecordKey;
+			| TabsImmutableNonRecordKey
+			| FileSystemStateImmutableNonRecordKey;
 
-		type RecordTag =
-			| 'task'
-			| 'task-list'
-			| 'tab'
-			| 'folder'
-			| 'file'
-			| 'inode';
+		type RecordTag = 'task' | 'task-list' | 'tab' | 'file';
 
 		type TaggedRecord<O extends AnyObject, T extends RecordTag> = O & {
 			_tag: T;

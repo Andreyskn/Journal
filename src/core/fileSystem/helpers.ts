@@ -2,7 +2,7 @@ import Immutable from 'immutable';
 import { identifier } from '../../utils';
 import { SEP } from './constants';
 
-const FileRecord = Immutable.Record<App.TaggedFile>({
+export const createFileRecord = Immutable.Record<App.TaggedFile>({
 	_tag: 'file',
 	id: identifier.generateId('file'),
 	lastModifiedAt: 0,
@@ -21,7 +21,7 @@ export const createDirectory = ({
 	id = identifier.generateId('file'),
 }: Pick<App.Directory, 'name' | 'path'> &
 	Partial<Pick<App.Directory, 'parent' | 'data' | 'id'>>) => {
-	return FileRecord({
+	return createFileRecord({
 		id,
 		name,
 		path,
@@ -38,7 +38,7 @@ export const createFile = ({
 	parent,
 	data,
 }: Pick<App.RegularFile, 'type' | 'name' | 'path' | 'data' | 'parent'>) => {
-	return FileRecord({
+	return createFileRecord({
 		type,
 		name,
 		path,
