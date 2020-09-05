@@ -8,18 +8,20 @@ import { createTab } from '../tabs';
 import { createTask, createTaskList } from '../data/tasks';
 
 export const initPersistance = (store: App.Store) => {
-	store.subscribe(() => {
-		(<any>window).requestIdleCallback(() => {
-			set('state', store.getState().toJS());
+	get<App.AppState>('state')
+		.then((savedState) => {
+			store.dispatch({
+				type: '@persistance/HYDRATE_STORE',
+				payload: { savedState },
+			});
+		})
+		.finally(() => {
+			store.subscribe(() => {
+				(<any>window).requestIdleCallback(() => {
+					set('state', store.getState().toJS());
+				});
+			});
 		});
-	});
-
-	get<App.AppState>('state').then((savedState) => {
-		store.dispatch({
-			type: '@persistance/HYDRATE_STORE',
-			payload: { savedState },
-		});
-	});
 };
 
 const hydrateStore: App.Handler<{ savedState?: App.AppState }> = (
