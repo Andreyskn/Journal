@@ -10,16 +10,18 @@
 	},
 	"dependencies": {
 		"@blueprintjs/core": "^3.31.0",
-		"@hot-loader/react-dom": "^16.13.0",
 		"idb-keyval": "^3.2.0",
 		"immutable": "^4.0.0-rc.12",
 		"normalize.css": "^8.0.1",
 		"react": "^16.13.1",
 		"react-dom": "^16.13.1",
+		"react-markdown": "^4.3.1",
 		"redux": "^4.0.5",
-		"redux-devtools-extension": "^2.13.8"
+		"redux-devtools-extension": "^2.13.8",
+		"webpack-bundle-analyzer": "^3.8.0"
 	},
 	"devDependencies": {
+		"@hot-loader/react-dom": "^16.13.0",
 		"@types/circular-dependency-plugin": "^5.0.1",
 		"@types/mini-css-extract-plugin": "^0.9.1",
 		"@types/node": "^14.6.0",
@@ -27,6 +29,7 @@
 		"@types/react": "^16.9.47",
 		"@types/react-dom": "^16.9.8",
 		"@types/vfile-message": "^2.0.0",
+		"@types/webpack-bundle-analyzer": "^3.8.0",
 		"@types/webpack-dev-server": "^3.11.0",
 		"chalk": "^4.1.0",
 		"change-case": "^4.1.1",

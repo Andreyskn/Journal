@@ -1,6 +1,6 @@
 import React from 'react';
 import './task-list.scss';
-import { useBEM } from '../../utils';
+import { useBEM } from '../../../utils';
 import { TaskItem } from './TaskItem';
 import {
 	Classes,
@@ -8,16 +8,19 @@ import {
 	H1,
 	IEditableTextProps,
 } from '@blueprintjs/core';
-import { TasksDispatch } from './dispatcher';
+import { TasksDispatch } from '../dispatcher';
 
 export type TaskListProps = {
-	taskList: App.ImmutableTaskList;
+	data: App.ImmutableTaskList;
 	dispatch: TasksDispatch;
 };
 
 const [taskListBlock, taskListElement] = useBEM('task-list');
 
-export const TaskList: React.FC<TaskListProps> = ({ taskList, dispatch }) => {
+export const TaskList: React.FC<TaskListProps> = ({
+	data: taskList,
+	dispatch,
+}) => {
 	const addTask = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const input = event.currentTarget.elements[0] as HTMLTextAreaElement;

@@ -1,5 +1,5 @@
 import Immutable from 'immutable';
-import { identifier } from '../../../utils';
+import { identifier } from '../../utils';
 
 export const createTaskList = Immutable.Record<App.TaggedTaskList>({
 	_tag: 'task-list',

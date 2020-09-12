@@ -1,10 +1,10 @@
+import { Configuration, ConfigurationFactory } from 'webpack';
 import HTMLWebpackPlugin from 'html-webpack-plugin';
 import CircularDependencyPlugin from 'circular-dependency-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import OptimizeCssAssetsPlugin from 'optimize-css-assets-webpack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
-
-import { Configuration, ConfigurationFactory } from 'webpack';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 type Mode = 'development' | 'production';
 
@@ -60,6 +60,7 @@ const configure: ConfigurationFactory = (env) => {
 
 	if (!isDev) {
 		config.plugins!.push(
+			new BundleAnalyzerPlugin(),
 			new CleanWebpackPlugin(),
 			new MiniCssExtractPlugin(),
 			new OptimizeCssAssetsPlugin()

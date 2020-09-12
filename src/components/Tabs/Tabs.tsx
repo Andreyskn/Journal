@@ -1,8 +1,9 @@
 import React from 'react';
 import './tabs.scss';
-import { useBEM, fileIcons } from '../../utils';
+import { useBEM } from '../../utils';
 import { Button, Menu, MenuItem, Popover } from '@blueprintjs/core';
 import { TabsDispatch } from './dispatcher';
+import { plugins } from '../../core/pluginManager';
 
 const [tabsBlock, tabsElement] = useBEM('tabs');
 
@@ -23,16 +24,14 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTabId, dispatch }) => {
 
 	const createTabMenu = (
 		<Menu>
-			<MenuItem
-				icon={fileIcons.tasks}
-				text='New Task List'
-				onClick={createFile('tasks')}
-			/>
-			<MenuItem
-				icon={fileIcons.notes}
-				text='New Notes'
-				onClick={createFile('notes')}
-			/>
+			{plugins.map((plugin) => (
+				<MenuItem
+					key={plugin.type}
+					icon={plugin.icon}
+					text={`New ${plugin.label}`}
+					onClick={createFile(plugin.type)}
+				/>
+			))}
 		</Menu>
 	);
 
@@ -43,7 +42,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTabId, dispatch }) => {
 			<Button
 				key={id}
 				text={name}
-				icon={fileIcons[type]}
+				icon={plugins.get(type)!.icon}
 				intent={isActive ? 'success' : 'none'}
 				onClick={isActive ? undefined : setActiveTab(id)}
 			/>

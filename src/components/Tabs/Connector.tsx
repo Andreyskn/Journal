@@ -14,13 +14,13 @@ export const TabsConnector: React.FC = () => {
 	}));
 
 	const tabsArray = useMemo(() => tabs.valueSeq().toArray(), [tabs]);
-	const tabsDispatch = useDispatch(dispatchers);
+	const dispatch = useDispatch(dispatchers);
 
 	return (
 		<WrappedTabs
 			tabs={tabsArray}
 			activeTabId={activeTabId}
-			dispatch={tabsDispatch}
+			dispatch={dispatch}
 		/>
 	);
 };

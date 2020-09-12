@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector } from '../../core/store';
+import { dispatch, useSelector } from '../../core/store';
 import { hot } from 'react-hot-loader/root';
 
 import './app.scss';
@@ -7,20 +7,25 @@ import './app.scss';
 import { Classes } from '@blueprintjs/core';
 import { useBEM } from '../../utils';
 import { FileTree } from '../FileTree';
-import { TaskList } from '../TaskList';
 import { Tabs } from '../Tabs';
+import { plugins } from '../../core/pluginManager';
 
 const [appBlock, appElement] = useBEM('app');
+
+const Fallback: React.FC = () => null;
 
 export const App: React.FC = hot(() => {
 	const state = useSelector((state) => state);
 
 	// TODO: add selectors with error handling
-	const activeDocument =
+	const activeFile =
 		state.activeFile.id &&
-		state.data.get(
-			(state.files.get(state.activeFile.id) as App.RegularFile).data
-		);
+		(state.files.get(state.activeFile.id) as App.RegularFile);
+	const activeDocument = activeFile && state.data.get(activeFile.data);
+
+	const Workspace = activeDocument
+		? plugins.get((activeFile as App.RegularFile).type)!.component
+		: Fallback;
 
 	return (
 		<div className={appBlock(null, Classes.DARK)}>
@@ -31,7 +36,7 @@ export const App: React.FC = hot(() => {
 				<Tabs />
 			</div>
 			<div className={appElement('workspace')}>
-				{activeDocument && <TaskList taskList={activeDocument} />}
+				<Workspace data={activeDocument as any} dispatch={dispatch} />
 			</div>
 		</div>
 	);

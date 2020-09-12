@@ -1,19 +1,31 @@
 import Immutable from 'immutable';
-import { Dispatch, Store as ReduxStore } from 'redux';
+import { Dispatch as ReduxDispatch, Store as ReduxStore } from 'redux';
 
 declare global {
 	namespace Actions {
+		type AnyAction = App.ActionBase<string | number | symbol, any>;
+
 		type AppAction =
 			| PersistanceAction
-			| TasksAction
 			| TabsAction
-			| FileSystemAction;
+			| FileSystemAction
+			| App.Plugins[keyof App.Plugins]['actions'];
+
+		type Dispatch = ReduxDispatch<Actions.AppAction>;
 
 		type Dispatcher<T extends any[] = any[], D extends AnyObject = {}> = (
 			deps: D & {
-				dispatch: Dispatch<Actions.AppAction>;
+				dispatch: Dispatch;
 			}
 		) => (...args: T) => void;
+
+		type DispatcherDeps<
+			T extends Record<string, Actions.Dispatcher<any[], any>>,
+			R extends AnyObject = OmitType<
+				Parameters<T[keyof T]>[0],
+				'dispatch'
+			>
+		> = keyof R extends never ? never : R;
 
 		type DispatcherMap<
 			T extends Record<string, Actions.Dispatcher<any[], any>>
@@ -28,7 +40,7 @@ declare global {
 	namespace App {
 		type Store = ReduxStore<ImmutableAppState, Actions.AppAction>;
 
-		type AppState = TasksState & TabsState & FileSystemState;
+		type AppState = TabsState & FileSystemState;
 
 		interface ImmutableAppState
 			extends OmitType<
@@ -40,11 +52,11 @@ declare global {
 
 		type ImmutableNonRecordKey =
 			| AppImmutableNonRecordKey
-			| TasksImmutableNonRecordKey
+			// | TasksImmutableNonRecordKey
 			| TabsImmutableNonRecordKey
 			| FileSystemStateImmutableNonRecordKey;
 
-		type RecordTag = 'task' | 'task-list' | 'tab' | 'file';
+		type RecordTag = 'task' | 'task-list' | 'tab' | 'file' | keyof Plugins;
 
 		type TaggedRecord<O extends AnyObject, T extends RecordTag> = O & {
 			_tag: T;
@@ -71,19 +83,13 @@ declare global {
 			  };
 
 		type Handler<
-			P extends AnyObject | undefined = undefined
-		> = P extends undefined
-			? (state: ImmutableAppState) => ImmutableAppState
-			: (state: ImmutableAppState, payload: P) => ImmutableAppState;
+			P extends AnyObject | undefined = undefined,
+			S extends AnyObject = ImmutableAppState
+		> = P extends undefined ? (state: S) => S : (state: S, payload: P) => S;
 
-		// type AnyHandlers = Record<string, Handler<any>>;
-		type AnyActionHandlers = [string, Handler<any>][];
-
-		// type Action<H extends AnyHandlers, T extends keyof H> = ActionBase<
-		// 	T,
-		// 	Parameters<H[T]>[1] extends { payload: any }
-		// 		? Parameters<H[T]>[1]['payload']
-		// 		: undefined
-		// >;
+		type ActionHandlers<S extends AnyObject = ImmutableAppState> = [
+			string,
+			Handler<any, S>
+		][];
 	}
 }

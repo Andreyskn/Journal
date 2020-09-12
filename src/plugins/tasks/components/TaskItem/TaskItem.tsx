@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import './task-item.scss';
-import { useBEM } from '../../../utils';
+import { useBEM } from '../../../../utils';
 import { Switch, Button } from '@blueprintjs/core';
-import { TasksDispatch } from '../dispatcher';
+import { TasksDispatch } from '../../dispatcher';
 
 export type TaskItemProps = {
 	task: App.ImmutableTask;

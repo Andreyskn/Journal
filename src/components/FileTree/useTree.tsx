@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import { ITreeProps, ITreeNode } from '@blueprintjs/core';
-import { fileIcons } from '../../utils';
 import { FileTreeProps } from './FileTree';
 import { NodeEditor } from './NodeEditor';
 import {
@@ -9,6 +8,7 @@ import {
 	NodeEditorDataRename,
 } from './common';
 import { DIRECTORY_ID } from '../../core/fileSystem/constants';
+import { plugins } from '../../core/pluginManager';
 
 // TODO: refactor
 
@@ -64,7 +64,7 @@ const getNodeClass = (isEditing: boolean) => {
 const createFolderNode = ({
 	label = '',
 	id = '',
-	isExpanded = true,
+	isExpanded = false,
 	isSelected = false,
 	isNew = false,
 	parent,
@@ -136,7 +136,7 @@ const createFileNode = ({
 		),
 		isSelected,
 		nodeData: { type: 'file', parent, path },
-		icon: type ? fileIcons[type] : 'document',
+		icon: type ? plugins.get(type)!.icon : 'document',
 		className: getNodeClass(isNew || isRenaming),
 	};
 };

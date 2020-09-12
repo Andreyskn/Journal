@@ -24,8 +24,8 @@ declare global {
 		};
 
 		type RegularFile = BaseFileData & {
-			type: 'tasks' | 'notes';
-			data: string; // content id
+			type: keyof Plugins;
+			data: FileData['id'];
 			parent: App.Directory['id'];
 		};
 
@@ -34,7 +34,15 @@ declare global {
 		type TaggedFile = App.TaggedRecord<File, 'file'>;
 		type ImmutableFile = App.ImmutableRecord<TaggedFile>;
 
+		type FileData = {
+			id: string;
+		} & App.Plugins[keyof App.Plugins]['data'];
+
+		type TaggedFileData = App.TaggedRecord<FileData, keyof Plugins>;
+		type ImmutableFileData = App.ImmutableRecord<TaggedFileData>;
+
 		type FileSystemState = {
+			data: Immutable.Map<FileData['id'], FileData>;
 			files: Immutable.Map<File['id'], ImmutableFile>;
 			activeFile: {
 				id: File['id'] | null;

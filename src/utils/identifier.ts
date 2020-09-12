@@ -13,7 +13,7 @@ const getCreationTime = (id: string): Timestamp => {
 };
 
 enum EntityType {
-	'file',
+	'file' = 370, // 'AA' in base 36
 	'task-list',
 	'task',
 }

@@ -17,18 +17,3 @@ export const PATHS = {
 	trash: [ROOT_NAME, DIRECTORY_ID.trash].join(SEP),
 	favorites: [ROOT_NAME, DIRECTORY_ID.favorites].join(SEP),
 };
-
-export const EXTENSIONS = ['.t', '.n'] as const;
-
-export const EXTENSION_BY_TYPE: Record<
-	ExcludeType<App.File['type'], 'directory'>,
-	App.FileExtension
-> = {
-	tasks: '.t',
-	notes: '.n',
-};
-
-export const TYPE_BY_EXTENSION: Record<App.FileExtension, App.File['type']> = {
-	'.t': 'tasks',
-	'.n': 'notes',
-};

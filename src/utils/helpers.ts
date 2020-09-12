@@ -5,15 +5,39 @@ export const useForceUpdate = () => {
 	return { forceUpdate };
 };
 
-export const actionHandler = <T extends string, H extends App.Handler<any>>(
+export const actionHandler = <
+	T extends string,
+	H extends App.Handler<any, any>
+>(
 	type: T,
 	handler: H
 ) => {
 	return [
 		type,
 		(
-			state: App.ImmutableAppState,
+			state: Parameters<H>[0],
 			action: App.ActionBase<T, Parameters<H>[1]>
 		) => handler(state, (action as App.ActionBase<T, unknown>).payload),
 	] as const;
+};
+
+export const initDispatchers = <
+	T extends Record<string, Actions.Dispatcher<any[], any>>,
+	D extends Actions.DispatcherDeps<T>,
+	R extends Actions.DispatcherMap<T>
+>(
+	dispatch: Actions.Dispatch,
+	dispatchers: T,
+	deps: D = {} as D
+): R => {
+	return (Object.entries(dispatchers) as [keyof T, T[keyof T]][]).reduce(
+		(result, [name, fn]) => {
+			result[name] = fn({
+				dispatch,
+				...deps,
+			}) as R[keyof T];
+			return result;
+		},
+		{} as R
+	);
 };

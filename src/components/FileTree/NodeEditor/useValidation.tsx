@@ -1,8 +1,8 @@
 import React, { useRef, useState } from 'react';
+import { plugins } from '../../../core/pluginManager';
 
 import { useBEM } from '../../../utils';
 import { NodeEditorProps } from './NodeEditor';
-import { EXTENSIONS } from '../../../core/fileSystem';
 
 const [errorBlock] = useBEM('validation-popover');
 
@@ -34,14 +34,14 @@ const errors = {
 			The extension <b>{ext}</b> is invalid. Please choose one of the
 			following:{' '}
 			<b>
-				<i>{EXTENSIONS.join(' | ')}</i>
+				<i>{plugins.extensions.join(' | ')}</i>
 			</b>
 		</ErrorMessage>
 	),
 };
 
 const FILENAME_RE = new RegExp(
-	`^(?<name>[^\\.]+)(?<validExt>\\${EXTENSIONS.join(
+	`^(?<name>[^\\.]+)(?<validExt>\\${plugins.extensions.join(
 		'$|\\'
 	)}$)?(?<invalidExt>\..+$)?`
 );
@@ -104,7 +104,7 @@ export const useValidation = ({ type, cwd, files }: NodeEditorProps) => {
 				if (type === 'folder' || itemData.validExt) {
 					foundMatch = existingName === lowerCaseValue;
 				} else {
-					EXTENSIONS.forEach((ext) => {
+					plugins.extensions.forEach((ext) => {
 						if (
 							existingName ===
 							lowerCaseValue +
@@ -116,7 +116,8 @@ export const useValidation = ({ type, cwd, files }: NodeEditorProps) => {
 						}
 					});
 
-					foundMatch = blockedExtensions.length === EXTENSIONS.length;
+					foundMatch =
+						blockedExtensions.length === plugins.extensions.length;
 				}
 
 				return foundMatch;

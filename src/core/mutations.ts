@@ -2,10 +2,6 @@ import Events from 'events';
 
 type Mutation =
 	| App.ActionBase<
-			'CREATE_DATA_ENTRY',
-			{ state: App.ImmutableAppState; type: App.RegularFile['type'] }
-	  >
-	| App.ActionBase<
 			'FILE_CREATED',
 			{ state: App.ImmutableAppState; file: App.ImmutableFile }
 	  >

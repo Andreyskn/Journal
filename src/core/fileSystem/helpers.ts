@@ -1,5 +1,6 @@
 import Immutable from 'immutable';
 import { identifier } from '../../utils';
+import { plugins } from '../pluginManager';
 import { SEP } from './constants';
 
 export const createFileRecord = Immutable.Record<App.TaggedFile>({
@@ -75,23 +76,8 @@ export const setDirectoryData = (
 
 export const getFileType = (name: string): App.File['type'] => {
 	const extension = /(\..+)$/.exec(name)?.[1];
-
-	if (!extension) return 'directory';
-
-	switch (extension as Maybe<App.FileExtension>) {
-		case '.t':
-			return 'tasks';
-		case '.n':
-			return 'notes';
-		default:
-			throw Error(`Unknown extension: ${extension}`);
-	}
+	return extension ? plugins.getTypeByExt(extension)! : 'directory';
 };
-
-// export const getActiveFile = (state: App.ImmutableAppState) => {
-// 	const { id } = state.activeFile;
-// 	return (id && (state.files.get(id) as App.RegularFile)) || null;
-// };
 
 export const getFilePath = (
 	files: App.FileSystemState['files'],

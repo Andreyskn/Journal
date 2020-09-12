@@ -1,7 +1,8 @@
 import * as helpers from './helpers';
-import { actionHandler } from '../../utils';
-import { DIRECTORY_ID, UNTITLED, EXTENSION_BY_TYPE } from './constants';
+import { actionHandler, identifier } from '../../utils';
+import { DIRECTORY_ID, UNTITLED } from './constants';
 import { mutations } from '../mutations';
+import { plugins } from '../pluginManager';
 
 export const createFile: App.Handler<{
 	name: App.File['name'];
@@ -15,19 +16,19 @@ export const createFile: App.Handler<{
 		if (type === 'directory') {
 			newFile = helpers.createDirectory({ name, parent, path });
 		} else {
-			mutations.dispatch({
-				type: 'CREATE_DATA_ENTRY',
-				payload: { state, type },
-			});
+			const newData = plugins
+				.get(type)!
+				.init({ id: identifier.generateId(type) });
 
 			newFile = helpers.createFile({
 				name,
 				path,
 				type,
 				parent,
-				data: state.data.last<undefined>()!.id,
+				data: newData.id,
 			});
 
+			state.update('data', (data) => data.set(newData.id, newData));
 			state.update('activeFile', (activeFile) => ({
 				...activeFile,
 				id: newFile.id,
@@ -49,7 +50,7 @@ const createUntitledFile: App.Handler<{ type: App.RegularFile['type'] }> = (
 	state,
 	{ type }
 ) => {
-	const extension = EXTENSION_BY_TYPE[type];
+	const extension = plugins.get(type)!.extension;
 	let name = `${UNTITLED}${extension}`;
 
 	const siblingFileNames = (state.files.get(

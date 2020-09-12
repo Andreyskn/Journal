@@ -13,13 +13,13 @@ export const FileTreeConnector: React.FC = () => {
 		files: state.files,
 	}));
 
-	const fileTreeDispatch = useDispatch(dispatchers);
+	const dispatch = useDispatch(dispatchers);
 
 	return (
 		<WrappedFileTree
 			files={files}
 			activeFilePath={activeFilePath}
-			dispatch={fileTreeDispatch}
+			dispatch={dispatch}
 		/>
 	);
 };

@@ -5,23 +5,23 @@ import { actionHandler } from '../../utils';
 import { createAppState } from './initializer';
 import { createFileRecord } from '../fileSystem';
 import { createTab } from '../tabs';
-import { createTask, createTaskList } from '../data/tasks';
+// import { createTask, createTaskList } from '../data/tasks';
 
 export const initPersistance = (store: App.Store) => {
-	get<App.AppState>('state')
-		.then((savedState) => {
-			store.dispatch({
-				type: '@persistance/HYDRATE_STORE',
-				payload: { savedState },
-			});
-		})
-		.finally(() => {
-			store.subscribe(() => {
-				(<any>window).requestIdleCallback(() => {
-					set('state', store.getState().toJS());
-				});
-			});
-		});
+	// get<App.AppState>('state')
+	// 	.then((savedState) => {
+	// 		store.dispatch({
+	// 			type: '@persistance/HYDRATE_STORE',
+	// 			payload: { savedState },
+	// 		});
+	// 	})
+	// 	.finally(() => {
+	// 		store.subscribe(() => {
+	// 			(<any>window).requestIdleCallback(() => {
+	// 				set('state', store.getState().toJS());
+	// 			});
+	// 		});
+	// 	});
 };
 
 const hydrateStore: App.Handler<{ savedState?: App.AppState }> = (
@@ -38,10 +38,10 @@ const hydrateStore: App.Handler<{ savedState?: App.AppState }> = (
 		switch (objectTag) {
 			case 'file':
 				return createFileRecord(value);
-			case 'task':
-				return createTask(value);
-			case 'task-list':
-				return createTaskList(value);
+			// case 'task':
+			// 	return createTask(value);
+			// case 'task-list':
+			// 	return createTaskList(value);
 			case 'tab':
 				return createTab(value);
 		}
@@ -51,7 +51,7 @@ const hydrateStore: App.Handler<{ savedState?: App.AppState }> = (
 				return createAppState(value);
 			case 'files':
 				return value.toMap();
-			case 'items':
+			// case 'items':
 			case 'tabs':
 			case 'data':
 				return value.toOrderedMap();
