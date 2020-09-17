@@ -1,11 +1,11 @@
 import Immutable from 'immutable';
-import { tabsHandlers } from './handlers';
+import { handlers } from './handlers';
 
 type TabsKey = KeyOf<App.TabsState, 'tabs'>;
 
 declare global {
 	namespace Actions {
-		type TabsAction = ExtractActions<typeof tabsHandlers[number]>;
+		type TabsAction = ExtractActions<typeof handlers[number]>;
 	}
 
 	namespace App {

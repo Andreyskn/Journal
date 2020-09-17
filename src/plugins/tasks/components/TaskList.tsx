@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
+import Immutable from 'immutable';
 import './task-list.scss';
 import { useBEM } from '../../../utils';
 import { TaskItem } from './TaskItem';
@@ -10,17 +11,26 @@ import {
 } from '@blueprintjs/core';
 import { TasksDispatch } from '../dispatcher';
 
-export type TaskListProps = {
-	data: App.ImmutableTaskList;
-	dispatch: TasksDispatch;
-};
+export type TaskListProps = App.PluginComponentProps<
+	App.ImmutableTaskList,
+	TasksDispatch
+>;
 
 const [taskListBlock, taskListElement] = useBEM('task-list');
 
-export const TaskList: React.FC<TaskListProps> = ({
-	data: taskList,
-	dispatch,
-}) => {
+export const TaskList: React.FC<TaskListProps> = ({ data, dispatch }) => {
+	const isValidState = Immutable.isRecord(data);
+
+	useLayoutEffect(() => {
+		if (!isValidState) {
+			dispatch.init(data as any);
+		}
+	}, []);
+
+	if (!isValidState) return null;
+
+	const taskList = data as App.ImmutableTaskList;
+
 	const addTask = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const input = event.currentTarget.elements[0] as HTMLTextAreaElement;

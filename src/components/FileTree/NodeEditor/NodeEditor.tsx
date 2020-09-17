@@ -107,7 +107,7 @@ export const NodeEditor: React.FC<NodeEditorProps> = (props) => {
 					>
 						<input
 							value={inputValue}
-							onChange={(e) => onChange(e.target.value.trim())}
+							onChange={(e) => onChange(e.target.value)}
 							onKeyDown={onKeyDown}
 							className={nodeEditorElement(
 								'input',
@@ -139,7 +139,7 @@ export const NodeEditor: React.FC<NodeEditorProps> = (props) => {
 							selectAllOnFocus
 							minWidth={0}
 							placeholder=''
-							onChange={(v) => onChange(v.trim() + extension)}
+							onChange={(v) => onChange(v + extension)}
 							onCancel={onDismiss}
 							onConfirm={() => {
 								tryConfirm();

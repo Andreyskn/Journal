@@ -1,4 +1,4 @@
-export {};
+import { IconName, MaybeElement } from '@blueprintjs/core';
 
 declare global {
 	type Maybe<T> = T | undefined | null;
@@ -16,4 +16,6 @@ declare global {
 	type Timestamp = number;
 
 	type Path = string;
+
+	type Icon = IconName | MaybeElement;
 }

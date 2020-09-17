@@ -1,15 +1,17 @@
 import Immutable from 'immutable';
-import { tasksHandlers } from './handlers';
+import { handlers } from './handlers';
 
 // type DataKey = KeyOf<App.TasksState, 'data'>;
 // type TaskListItemsKey = KeyOf<App.TaskList, 'items'>;
 
 declare global {
 	namespace App {
-		interface Plugins {
-			'task-list': PluginType<
-				ImmutableTaskList,
-				Actions.ExtractActions<typeof tasksHandlers[number]>
+		interface PluginRegistry {
+			'task-list': Plugin<
+				'task-list',
+				'.t',
+				Actions.ExtractActions<typeof handlers[number]>,
+				TaskList | ImmutableTaskList
 			>;
 		}
 
@@ -19,16 +21,14 @@ declare global {
 			text: string;
 			done: boolean;
 		};
-		type TaggedTask = TaggedRecord<Task, 'task'>;
-		type ImmutableTask = ImmutableRecord<TaggedTask>;
+		type ImmutableTask = ImmutableRecord<Task>;
 
 		type TaskList = {
 			id: string;
 			title: string;
 			items: Immutable.OrderedMap<Task['id'], ImmutableTask>;
 		};
-		type TaggedTaskList = TaggedRecord<TaskList, 'task-list'>;
-		type ImmutableTaskList = ImmutableRecord<TaggedTaskList>;
+		type ImmutableTaskList = ImmutableRecord<TaskList>;
 
 		// interface ImmutableAppState {
 		// 	getIn(path: PathTo['taskList']): ImmutableTaskList;

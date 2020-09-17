@@ -1,3 +1,4 @@
+import Immutable from 'immutable';
 import * as helpers from './helpers';
 import { actionHandler, identifier } from '../../utils';
 
@@ -37,7 +38,26 @@ const toggleTaskDone: TasksHandler<{
 	);
 };
 
-export const tasksHandlers = [
+const initState: TasksHandler<{
+	data: App.AnyFileData;
+}> = (_, { data }) => {
+	const items =
+		data.items &&
+		Immutable.OrderedMap(
+			Object.entries<App.Task>(data.items).map(([key, value]) => [
+				key,
+				helpers.createTask(value),
+			])
+		);
+
+	return helpers.createTaskList({
+		...data,
+		items,
+	});
+};
+
+export const handlers = [
+	actionHandler('@tasks/INIT', initState),
 	actionHandler('@tasks/ADD_TASK', addTask),
 	actionHandler('@tasks/DELETE_TASK', deleteTask),
 	actionHandler('@tasks/TOGGLE_TASK_DONE', toggleTaskDone),

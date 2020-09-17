@@ -24,7 +24,7 @@ mutations
 		},
 	});
 
-export const createTab: App.Handler<{ file: App.ImmutableFile }> = (
+const createTab: App.Handler<{ file: App.ImmutableFile }> = (
 	state,
 	{ file }
 ) => {
@@ -105,4 +105,4 @@ const closeTabByPath: App.Handler<{ path: App.File['path'] }> = (
 	});
 };
 
-export const tabsHandlers = [actionHandler('@tabs/CREATE_TAB', createTab)];
+export const handlers = [actionHandler('@tabs/CREATE_TAB', createTab)];

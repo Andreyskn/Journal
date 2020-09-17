@@ -1,14 +1,14 @@
 import React from 'react';
-import { dispatch, useSelector } from '../../core/store';
 import { hot } from 'react-hot-loader/root';
 
 import './app.scss';
 
+import { useSelector } from '../../core';
 import { Classes } from '@blueprintjs/core';
 import { useBEM } from '../../utils';
 import { FileTree } from '../FileTree';
 import { Tabs } from '../Tabs';
-import { plugins } from '../../core/pluginManager';
+import { PluginContainer } from '../../plugins/PluginContainer';
 
 const [appBlock, appElement] = useBEM('app');
 
@@ -23,9 +23,7 @@ export const App: React.FC = hot(() => {
 		(state.files.get(state.activeFile.id) as App.RegularFile);
 	const activeDocument = activeFile && state.data.get(activeFile.data);
 
-	const Workspace = activeDocument
-		? plugins.get((activeFile as App.RegularFile).type)!.component
-		: Fallback;
+	const Workspace = activeDocument ? PluginContainer : Fallback;
 
 	return (
 		<div className={appBlock(null, Classes.DARK)}>
@@ -36,7 +34,10 @@ export const App: React.FC = hot(() => {
 				<Tabs />
 			</div>
 			<div className={appElement('workspace')}>
-				<Workspace data={activeDocument as any} dispatch={dispatch} />
+				<Workspace
+					data={activeDocument as any}
+					type={activeFile ? activeFile.type : 'note'}
+				/>
 			</div>
 		</div>
 	);

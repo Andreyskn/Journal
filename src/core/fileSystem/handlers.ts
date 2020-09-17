@@ -2,9 +2,9 @@ import * as helpers from './helpers';
 import { actionHandler, identifier } from '../../utils';
 import { DIRECTORY_ID, UNTITLED } from './constants';
 import { mutations } from '../mutations';
-import { plugins } from '../pluginManager';
+import { PLUGINS_MAP } from '../../plugins/constants';
 
-export const createFile: App.Handler<{
+const createFile: App.Handler<{
 	name: App.File['name'];
 	parent: App.RegularFile['parent'];
 }> = (state, { name, parent }) => {
@@ -16,19 +16,20 @@ export const createFile: App.Handler<{
 		if (type === 'directory') {
 			newFile = helpers.createDirectory({ name, parent, path });
 		} else {
-			const newData = plugins
-				.get(type)!
-				.init({ id: identifier.generateId(type) });
+			const fileData: App.FileData = {
+				id: identifier.generateId(type),
+				_tag: 'file-data',
+			};
 
 			newFile = helpers.createFile({
 				name,
 				path,
 				type,
 				parent,
-				data: newData.id,
+				data: fileData.id,
 			});
 
-			state.update('data', (data) => data.set(newData.id, newData));
+			state.update('data', (data) => data.set(fileData.id, fileData));
 			state.update('activeFile', (activeFile) => ({
 				...activeFile,
 				id: newFile.id,
@@ -50,7 +51,7 @@ const createUntitledFile: App.Handler<{ type: App.RegularFile['type'] }> = (
 	state,
 	{ type }
 ) => {
-	const extension = plugins.get(type)!.extension;
+	const extension = PLUGINS_MAP[type].extension;
 	let name = `${UNTITLED}${extension}`;
 
 	const siblingFileNames = (state.files.get(
@@ -86,6 +87,12 @@ const deleteFile: App.Handler<{
 			(data: App.Directory['data']) => data.delete(targetFile.name)
 		);
 		state.update('files', (files) => files.delete(id));
+
+		if (targetFile.type !== 'directory') {
+			state.update('data', (data) =>
+				data.delete((targetFile as App.RegularFile).data)
+			);
+		}
 
 		if (state.activeFile.id === id) {
 			state.update('activeFile', (activeFile) => ({
@@ -138,7 +145,7 @@ const setActiveFile: App.Handler<{
 	}));
 };
 
-export const fileSystemHandlers = [
+export const handlers = [
 	actionHandler('@fs/CREATE_FILE', createFile),
 	actionHandler('@fs/CREATE_UNTITLED_FILE', createUntitledFile),
 	actionHandler('@fs/DELETE_FILE', deleteFile),

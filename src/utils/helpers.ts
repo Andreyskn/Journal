@@ -28,16 +28,19 @@ export const initDispatchers = <
 >(
 	dispatch: Actions.Dispatch,
 	dispatchers: T,
-	deps: D = {} as D
-): R => {
-	return (Object.entries(dispatchers) as [keyof T, T[keyof T]][]).reduce(
+	deps: D = {} as D,
+	meta?: Actions.Meta
+): R =>
+	(Object.entries(dispatchers) as [keyof T, T[keyof T]][]).reduce(
 		(result, [name, fn]) => {
 			result[name] = fn({
-				dispatch,
+				dispatch: meta
+					? (action: Actions.AppAction) =>
+							dispatch({ ...action, ...meta })
+					: dispatch,
 				...deps,
 			}) as R[keyof T];
 			return result;
 		},
 		{} as R
 	);
-};

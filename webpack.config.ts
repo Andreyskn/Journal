@@ -1,4 +1,5 @@
 import { Configuration, ConfigurationFactory } from 'webpack';
+import TerserPlugin from 'terser-webpack-plugin';
 import HTMLWebpackPlugin from 'html-webpack-plugin';
 import CircularDependencyPlugin from 'circular-dependency-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -6,10 +7,8 @@ import OptimizeCssAssetsPlugin from 'optimize-css-assets-webpack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
-type Mode = 'development' | 'production';
-
 const configure: ConfigurationFactory = (env) => {
-	const mode = env as Mode;
+	const mode = env as Configuration['mode'];
 	const isDev = mode === 'development';
 	const finalCssLoader = isDev ? 'style-loader' : MiniCssExtractPlugin.loader;
 
@@ -23,7 +22,6 @@ const configure: ConfigurationFactory = (env) => {
 
 		resolve: {
 			extensions: ['.ts', '.tsx', '.js', 'jsx'],
-			mainFields: ['esnext', 'browser', 'module', 'main'],
 			alias: {
 				'react-dom': '@hot-loader/react-dom',
 			},
@@ -47,6 +45,11 @@ const configure: ConfigurationFactory = (env) => {
 			],
 		},
 
+		optimization: {
+			minimize: !isDev,
+			minimizer: [new TerserPlugin(), new OptimizeCssAssetsPlugin()],
+		},
+
 		plugins: [
 			new HTMLWebpackPlugin({
 				template: 'src/index.html',
@@ -60,10 +63,9 @@ const configure: ConfigurationFactory = (env) => {
 
 	if (!isDev) {
 		config.plugins!.push(
-			new BundleAnalyzerPlugin(),
+			// new BundleAnalyzerPlugin(),
 			new CleanWebpackPlugin(),
-			new MiniCssExtractPlugin(),
-			new OptimizeCssAssetsPlugin()
+			new MiniCssExtractPlugin()
 		);
 	}
 

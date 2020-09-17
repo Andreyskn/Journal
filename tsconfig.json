@@ -2,13 +2,12 @@
 	"compilerOptions": {
 		// "noUnusedLocals": true,
 		"lib": ["ESNext", "DOM"],
-		"target": "ESNext",
+		"target": "ES6",
 		"sourceMap": true,
 		"strict": true,
 		"moduleResolution": "Node",
 		"module": "ESNext",
 		"jsx": "react",
-		"allowSyntheticDefaultImports": true,
-		"outDir": "./build"
+		"allowSyntheticDefaultImports": true
 	}
 }

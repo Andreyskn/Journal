@@ -1,38 +1,41 @@
-import '../../plugins/tasks';
-
 import { createStore } from 'redux';
 import { devToolsEnhancer } from 'redux-devtools-extension';
 import { useEffect, useMemo, useState } from 'react';
 
-import { tabsHandlers } from '../tabs';
-import { fileSystemHandlers } from '../fileSystem';
-import { initPersistance, persistanceHandlers } from './persistance';
-import { createAppState } from './initializer';
+import {
+	getInitialState,
+	initPersistance,
+	persistanceHandlers,
+} from './persistance';
+import { initDispatchers } from '../utils';
+import { fileSystem } from './fileSystem';
+import { tabs } from './tabs';
 
-import { plugins } from '../pluginManager';
-import { initDispatchers } from '../../utils';
+export let store: App.Store;
 
-const handlers = Object.fromEntries([
+let handlers = Object.fromEntries([
 	...persistanceHandlers,
-	...tabsHandlers,
-	...fileSystemHandlers,
-	...plugins.handlers,
+	...fileSystem.handlers,
+	...tabs.handlers,
 ]);
-
-const devTools = devToolsEnhancer({ name: 'Journal' });
 
 const reducer: App.Reducer<App.ImmutableAppState, any> = (state, action) => {
 	const handler = handlers[action.type] as App.Handler<any> | undefined;
 	return handler ? handler(state, action) : state;
 };
 
-const store = createStore(
-	reducer as any,
-	createAppState(),
-	devTools
-) as App.Store;
+export const initStore = () => {
+	store = createStore(
+		reducer as any,
+		getInitialState(),
+		devToolsEnhancer({ name: 'Journal' })
+	);
+	initPersistance(store);
+};
 
-initPersistance(store);
+export const addHandlers = (newHandlers: App.ActionHandlers) => {
+	handlers = Object.fromEntries(Object.entries(handlers).concat(newHandlers));
+};
 
 export const useSelector = <T extends any>(
 	select: (state: App.ImmutableAppState) => T
@@ -50,18 +53,17 @@ export const useSelector = <T extends any>(
 	return data;
 };
 
-export const dispatch = store.dispatch;
-
 export const useDispatch = <
 	T extends Record<string, Actions.Dispatcher<any[], any>>,
 	D extends Actions.DispatcherDeps<T>,
 	R extends Actions.DispatcherMap<T>
 >(
 	dispatchers: T,
-	deps: D = {} as D
+	deps: D = {} as D,
+	meta?: Actions.Meta
 ): R => {
 	return useMemo(
-		() => initDispatchers(dispatch, dispatchers, deps),
-		Object.values(deps)
+		() => initDispatchers(store.dispatch, dispatchers, deps, meta),
+		Object.values({ ...deps, meta })
 	);
 };

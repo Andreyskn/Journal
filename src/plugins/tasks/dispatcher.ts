@@ -1,3 +1,14 @@
+const init: Actions.Dispatcher<[data: App.AnyFileData]> = ({ dispatch }) => (
+	data
+) => {
+	dispatch({
+		type: '@tasks/INIT',
+		payload: {
+			data,
+		},
+	});
+};
+
 const addTask: Actions.Dispatcher<[text: App.Task['text']]> = ({
 	dispatch,
 }) => (text) => {
@@ -43,6 +54,7 @@ const renameTaskList: Actions.Dispatcher<[title: App.TaskList['title']]> = ({
 };
 
 export const dispatchers = {
+	init,
 	addTask,
 	deleteTask,
 	toggleDone,

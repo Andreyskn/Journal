@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
-import { useSelector, useDispatch } from '../../core/store';
 
+import { useSelector, useDispatch } from '../../core';
 import { Tabs } from './Tabs';
 import { dispatchers } from './dispatcher';
-import { withErrorBoundary } from '../../utils';
+import { ErrorBoundary } from '../../utils';
 
-const WrappedTabs = React.memo(withErrorBoundary(Tabs));
+const WrappedTabs = React.memo(Tabs);
 
 export const TabsConnector: React.FC = () => {
 	const { tabs, activeTabId } = useSelector((state) => ({
@@ -17,10 +17,12 @@ export const TabsConnector: React.FC = () => {
 	const dispatch = useDispatch(dispatchers);
 
 	return (
-		<WrappedTabs
-			tabs={tabsArray}
-			activeTabId={activeTabId}
-			dispatch={dispatch}
-		/>
+		<ErrorBoundary name='Tabs'>
+			<WrappedTabs
+				tabs={tabsArray}
+				activeTabId={activeTabId}
+				dispatch={dispatch}
+			/>
+		</ErrorBoundary>
 	);
 };

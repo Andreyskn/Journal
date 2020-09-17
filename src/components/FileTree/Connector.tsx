@@ -1,11 +1,11 @@
 import React from 'react';
-import { useSelector, useDispatch } from '../../core/store';
 
-import { withErrorBoundary } from '../../utils';
+import { useSelector, useDispatch } from '../../core';
+import { ErrorBoundary } from '../../utils';
 import { FileTree } from './FileTree';
 import { dispatchers } from './dispatcher';
 
-const WrappedFileTree = React.memo(withErrorBoundary(FileTree));
+const WrappedFileTree = React.memo(FileTree);
 
 export const FileTreeConnector: React.FC = () => {
 	const { files, activeFilePath } = useSelector((state) => ({
@@ -16,10 +16,12 @@ export const FileTreeConnector: React.FC = () => {
 	const dispatch = useDispatch(dispatchers);
 
 	return (
-		<WrappedFileTree
-			files={files}
-			activeFilePath={activeFilePath}
-			dispatch={dispatch}
-		/>
+		<ErrorBoundary name='FileTree'>
+			<WrappedFileTree
+				files={files}
+				activeFilePath={activeFilePath}
+				dispatch={dispatch}
+			/>
+		</ErrorBoundary>
 	);
 };

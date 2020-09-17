@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { plugins } from '../../../core/pluginManager';
+import { EXTENSIONS } from '../../../plugins/constants';
 
 import { useBEM } from '../../../utils';
 import { NodeEditorProps } from './NodeEditor';
@@ -16,14 +16,14 @@ const errors = {
 	),
 	existingName: (name: string, type: 'file' | 'folder') => (
 		<ErrorMessage>
-			A {type} <b>{name}</b> already exists in this location. Please
+			A {type} <b>"{name}"</b> already exists in this location. Please
 			choose a different name.
 		</ErrorMessage>
 	),
 	invalidName: (name: string, type: 'file' | 'folder') => (
 		<ErrorMessage>
-			The name <b>{name}</b> is not valid as a {type} name. Please choose
-			a different name.
+			The name <b>"{name}"</b> is not valid as a {type} name. Please
+			choose a different name.
 		</ErrorMessage>
 	),
 	noExtension: () => (
@@ -31,17 +31,17 @@ const errors = {
 	),
 	invalidExtension: (ext: string) => (
 		<ErrorMessage>
-			The extension <b>{ext}</b> is invalid. Please choose one of the
+			The extension <b>"{ext}"</b> is invalid. Please choose one of the
 			following:{' '}
 			<b>
-				<i>{plugins.extensions.join(' | ')}</i>
+				<i>{EXTENSIONS.join(' | ')}</i>
 			</b>
 		</ErrorMessage>
 	),
 };
 
 const FILENAME_RE = new RegExp(
-	`^(?<name>[^\\.]+)(?<validExt>\\${plugins.extensions.join(
+	`^(?<name>[^\\.]+)(?<validExt>\\${EXTENSIONS.join(
 		'$|\\'
 	)}$)?(?<invalidExt>\..+$)?`
 );
@@ -104,7 +104,7 @@ export const useValidation = ({ type, cwd, files }: NodeEditorProps) => {
 				if (type === 'folder' || itemData.validExt) {
 					foundMatch = existingName === lowerCaseValue;
 				} else {
-					plugins.extensions.forEach((ext) => {
+					EXTENSIONS.forEach((ext) => {
 						if (
 							existingName ===
 							lowerCaseValue +
@@ -116,8 +116,7 @@ export const useValidation = ({ type, cwd, files }: NodeEditorProps) => {
 						}
 					});
 
-					foundMatch =
-						blockedExtensions.length === plugins.extensions.length;
+					foundMatch = blockedExtensions.length === EXTENSIONS.length;
 				}
 
 				return foundMatch;

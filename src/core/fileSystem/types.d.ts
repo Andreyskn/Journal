@@ -1,8 +1,7 @@
 import Immutable from 'immutable';
-import { EXTENSIONS } from './constants';
-import { fileSystemHandlers } from './handlers';
+import { handlers } from './handlers';
 
-type BaseFileData = {
+type BaseFile = {
 	id: string;
 	name: string;
 	lastModifiedAt: Timestamp;
@@ -11,20 +10,18 @@ type BaseFileData = {
 
 declare global {
 	namespace Actions {
-		type FileSystemAction = ExtractActions<
-			typeof fileSystemHandlers[number]
-		>;
+		type FileSystemAction = ExtractActions<typeof handlers[number]>;
 	}
 
 	namespace App {
-		type Directory = BaseFileData & {
+		type Directory = BaseFile & {
 			type: 'directory';
 			data: Immutable.OrderedMap<File['name'], File['id']>;
 			parent: App.Directory['id'] | null;
 		};
 
-		type RegularFile = BaseFileData & {
-			type: keyof Plugins;
+		type RegularFile = BaseFile & {
+			type: FileType;
 			data: FileData['id'];
 			parent: App.Directory['id'];
 		};
@@ -33,13 +30,6 @@ declare global {
 
 		type TaggedFile = App.TaggedRecord<File, 'file'>;
 		type ImmutableFile = App.ImmutableRecord<TaggedFile>;
-
-		type FileData = {
-			id: string;
-		} & App.Plugins[keyof App.Plugins]['data'];
-
-		type TaggedFileData = App.TaggedRecord<FileData, keyof Plugins>;
-		type ImmutableFileData = App.ImmutableRecord<TaggedFileData>;
 
 		type FileSystemState = {
 			data: Immutable.Map<FileData['id'], FileData>;
@@ -50,8 +40,6 @@ declare global {
 				isPreview: boolean;
 			};
 		};
-
-		type FileExtension = typeof EXTENSIONS[number];
 
 		type FileSystemStateImmutableNonRecordKey =
 			| 'files'

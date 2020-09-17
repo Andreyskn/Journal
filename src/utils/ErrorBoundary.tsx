@@ -4,33 +4,40 @@ import { useBEM } from './useBEM';
 
 const [boundaryBlock] = useBEM('error-boundary');
 
+type BoundaryProps = {
+	name: string;
+};
+
 type BoundaryState = {
 	error: Error | null;
 };
 
-export const withErrorBoundary = <T extends React.ComponentType<any>>(
-	Component: T
-) => {
-	return (class ErrorBoundary extends React.Component {
-		state: BoundaryState = { error: null };
+export class ErrorBoundary extends React.Component<
+	BoundaryProps,
+	BoundaryState
+> {
+	state: BoundaryState = { error: null };
 
-		static getDerivedStateFromError(error: Error) {
-			return { error };
+	static getDerivedStateFromError(error: Error) {
+		return { error };
+	}
+
+	render() {
+		const {
+			props: { name, children },
+			state: { error },
+		} = this;
+
+		if (error) {
+			return (
+				<Callout
+					title={`${name} failed to render`}
+					intent='danger'
+					className={boundaryBlock()}
+				/>
+			);
 		}
 
-		render() {
-			if (this.state.error) {
-				return (
-					<Callout
-						title={`${(Component as any).name ||
-							'Component'} failed to render`}
-						intent='danger'
-						className={boundaryBlock()}
-					/>
-				);
-			}
-
-			return <Component {...(this.props as any)} />;
-		}
-	} as unknown) as T;
-};
+		return children;
+	}
+}

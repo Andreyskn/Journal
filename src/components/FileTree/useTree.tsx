@@ -8,7 +8,7 @@ import {
 	NodeEditorDataRename,
 } from './common';
 import { DIRECTORY_ID } from '../../core/fileSystem/constants';
-import { plugins } from '../../core/pluginManager';
+import { PLUGINS_MAP } from '../../plugins/constants';
 
 // TODO: refactor
 
@@ -123,7 +123,6 @@ const createFileNode = ({
 	editorData?: NodeEditorData;
 }): FileNode => {
 	const isRenaming = editorData?.mode === 'rename' && editorData.id === id;
-
 	return {
 		id,
 		label: isRenaming ? (
@@ -136,7 +135,7 @@ const createFileNode = ({
 		),
 		isSelected,
 		nodeData: { type: 'file', parent, path },
-		icon: type ? plugins.get(type)!.icon : 'document',
+		icon: type ? PLUGINS_MAP[type].icon : 'document',
 		className: getNodeClass(isNew || isRenaming),
 	};
 };

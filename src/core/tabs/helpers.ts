@@ -5,5 +5,5 @@ export const createTab = Immutable.Record<App.TaggedTab>({
 	id: '',
 	name: '',
 	path: '',
-	type: 'task-list',
+	type: '' as any,
 });

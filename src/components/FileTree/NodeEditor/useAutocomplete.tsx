@@ -9,7 +9,7 @@ import { Menu, MenuItem, IPopoverProps } from '@blueprintjs/core';
 import { ValidationResult } from './useValidation';
 import { useBEM } from '../../../utils';
 import { NodeEditorProps } from './NodeEditor';
-import { plugins } from '../../../core/pluginManager';
+import { EXTENSIONS } from '../../../plugins/constants';
 
 const [autocompleteBlock, autocompleteElement] = useBEM('autocomplete-popover');
 
@@ -25,7 +25,7 @@ export const useAutocomplete = (
 ) => {
 	const autocompleteRef = useRef<AutocompleteRef | null>(null);
 	const [isVisible, setVisibility] = useState(false);
-	const [extensions, setExtensions] = useState([...plugins.extensions]);
+	const [extensions, setExtensions] = useState([...EXTENSIONS]);
 
 	const onSelect = (ext?: App.FileExtension) => {
 		const value = ext || autocompleteRef.current?.value;
@@ -48,7 +48,7 @@ export const useAutocomplete = (
 		}
 
 		const { blockedExtensions } = validationResult;
-		const extensions = plugins.extensions.filter(
+		const extensions = EXTENSIONS.filter(
 			(ext) => !blockedExtensions.includes(ext)
 		);
 

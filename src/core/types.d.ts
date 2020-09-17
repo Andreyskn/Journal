@@ -5,13 +5,19 @@ declare global {
 	namespace Actions {
 		type AnyAction = App.ActionBase<string | number | symbol, any>;
 
-		type AppAction =
-			| PersistanceAction
+		type AppAction = (
 			| TabsAction
 			| FileSystemAction
-			| App.Plugins[keyof App.Plugins]['actions'];
+			| PluginAction
+			| PersistanceAction
+		) &
+			Meta;
 
-		type Dispatch = ReduxDispatch<Actions.AppAction>;
+		type Meta = Partial<{
+			scope: string[];
+		}>;
+
+		type Dispatch = ReduxDispatch<AppAction>;
 
 		type Dispatcher<T extends any[] = any[], D extends AnyObject = {}> = (
 			deps: D & {
@@ -43,20 +49,16 @@ declare global {
 		type AppState = TabsState & FileSystemState;
 
 		interface ImmutableAppState
-			extends OmitType<
-				App.ImmutableRecord<AppState>,
-				'updateIn' | 'getIn'
-			> {}
+			extends OmitType<App.ImmutableRecord<AppState>, 'updateIn'> {}
 
 		type AppImmutableNonRecordKey = '';
 
 		type ImmutableNonRecordKey =
 			| AppImmutableNonRecordKey
-			// | TasksImmutableNonRecordKey
 			| TabsImmutableNonRecordKey
 			| FileSystemStateImmutableNonRecordKey;
 
-		type RecordTag = 'task' | 'task-list' | 'tab' | 'file' | keyof Plugins;
+		type RecordTag = 'tab' | 'file';
 
 		type TaggedRecord<O extends AnyObject, T extends RecordTag> = O & {
 			_tag: T;
@@ -64,6 +66,12 @@ declare global {
 
 		type ImmutableRecord<T extends AnyObject> = Immutable.Record<T> &
 			Omit<T, '_tag'>;
+
+		type StateReviver = (
+			tag: Maybe<RecordTag>,
+			key: Maybe<ImmutableNonRecordKey>,
+			value: Immutable.Collection.Keyed<string, any>
+		) => AnyObject | undefined;
 
 		type Reducer<S, A extends Actions.AppAction> = (
 			state: S,
@@ -87,9 +95,9 @@ declare global {
 			S extends AnyObject = ImmutableAppState
 		> = P extends undefined ? (state: S) => S : (state: S, payload: P) => S;
 
-		type ActionHandlers<S extends AnyObject = ImmutableAppState> = [
-			string,
-			Handler<any, S>
-		][];
+		type ActionHandlers<
+			S extends AnyObject = ImmutableAppState,
+			P extends AnyObject | undefined = any
+		> = [string, Handler<P, S>][];
 	}
 }
