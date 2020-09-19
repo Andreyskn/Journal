@@ -12,7 +12,7 @@ import {
 import { TasksDispatch } from '../dispatcher';
 
 export type TaskListProps = App.PluginComponentProps<
-	App.ImmutableTaskList,
+	App.ImmutableTaskList | App.TaskList,
 	TasksDispatch
 >;
 

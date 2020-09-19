@@ -45,15 +45,14 @@ type PluginProps = {
 //TODO: fix types
 const PluginComponents: Record<any, React.LazyExoticComponent<any>> = {
 	'task-list': React.lazy(() => import('./tasks').then(connectPlugin as any)),
-	// note: React.lazy(() => import('./notes').then(connectPlugin as any)),
+	note: React.lazy(() => import('./notes').then(connectPlugin as any)),
 };
 
 export const PluginContainer: React.FC<PluginProps> = ({ data, type }) => {
-	const Component = PluginComponents[type] || (() => null);
-
+	const Component = PluginComponents[type];
 	return (
 		<ErrorBoundary name={`${PLUGINS_MAP[type].label}`}>
-			<React.Suspense fallback={<div>Loading...</div>}>
+			<React.Suspense fallback={null}>
 				<Component data={data} />
 			</React.Suspense>
 		</ErrorBoundary>

@@ -16,10 +16,7 @@ const createFile: App.Handler<{
 		if (type === 'directory') {
 			newFile = helpers.createDirectory({ name, parent, path });
 		} else {
-			const fileData: App.FileData = {
-				id: identifier.generateId(type),
-				_tag: 'file-data',
-			};
+			const fileData: App.FileData = { id: identifier.generateId(type) };
 
 			newFile = helpers.createFile({
 				name,

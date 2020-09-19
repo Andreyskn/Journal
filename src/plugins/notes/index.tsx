@@ -1,33 +1,7 @@
-import React from 'react';
-// import { registerPlugin } from '../pluginManager';
+import { NoteEditor } from './components/NoteEditor';
+import { dispatchers } from './dispatcher';
+import { handlers } from './handlers';
 
-const Note: React.FC = () => {
-	return <div>123</div>;
-};
+const Component = NoteEditor;
 
-// registerPlugin({
-// 	extension: '.n',
-// 	icon: 'manual',
-// 	type: 'note',
-// 	component: Note,
-// 	dispatchers: {},
-// 	handlers: [],
-// 	init: () => ({ id: '1', text: 'test' }),
-// 	label: 'Note',
-// 	sample: { id: '0', text: 'test' },
-// });
-
-declare global {
-	namespace App {
-		interface PluginRegistry {
-			note: Plugin<'note', '.n', never, Note>;
-		}
-
-		type Note = {
-			id: string;
-			text: string;
-		};
-	}
-}
-
-export { Note as default };
+export { Component, dispatchers, handlers };

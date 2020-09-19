@@ -1,0 +1,22 @@
+.note-editor {
+	display: flex;
+	overflow: auto;
+
+	height: 100%;
+
+	&__text-area {
+		width: 50%;
+		height: 100%;
+
+		resize: none;
+
+		box-shadow: none !important;
+	}
+
+	&__viewer {
+		width: 50%;
+		padding: 0 15px;
+
+		font-size: 16px;
+	}
+}

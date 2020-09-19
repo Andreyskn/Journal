@@ -22,7 +22,7 @@ const addTask: Actions.Dispatcher<[text: App.Task['text']]> = ({
 
 const deleteTask: Actions.Dispatcher<[taskId: App.Task['id']]> = ({
 	dispatch,
-}) => (taskId: App.Task['id']) => {
+}) => (taskId) => {
 	dispatch({
 		type: '@tasks/DELETE_TASK',
 		payload: {
@@ -33,7 +33,7 @@ const deleteTask: Actions.Dispatcher<[taskId: App.Task['id']]> = ({
 
 const toggleDone: Actions.Dispatcher<[taskId: App.Task['id']]> = ({
 	dispatch,
-}) => (taskId: App.Task['id']) => {
+}) => (taskId) => {
 	dispatch({
 		type: '@tasks/TOGGLE_TASK_DONE',
 		payload: {
@@ -44,7 +44,7 @@ const toggleDone: Actions.Dispatcher<[taskId: App.Task['id']]> = ({
 
 const renameTaskList: Actions.Dispatcher<[title: App.TaskList['title']]> = ({
 	dispatch,
-}) => (title: App.TaskList['title']) => {
+}) => (title) => {
 	dispatch({
 		type: '@tasks/SET_TASK_LIST_TITLE',
 		payload: {

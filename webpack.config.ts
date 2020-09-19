@@ -1,5 +1,4 @@
 import { Configuration, ConfigurationFactory } from 'webpack';
-import TerserPlugin from 'terser-webpack-plugin';
 import HTMLWebpackPlugin from 'html-webpack-plugin';
 import CircularDependencyPlugin from 'circular-dependency-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -14,7 +13,7 @@ const configure: ConfigurationFactory = (env) => {
 
 	const config: Configuration = {
 		mode,
-		devtool: isDev ? 'inline-source-map' : 'eval',
+		devtool: isDev ? 'inline-source-map' : false,
 
 		devServer: {
 			hot: true,
@@ -45,11 +44,6 @@ const configure: ConfigurationFactory = (env) => {
 			],
 		},
 
-		optimization: {
-			minimize: !isDev,
-			minimizer: [new TerserPlugin(), new OptimizeCssAssetsPlugin()],
-		},
-
 		plugins: [
 			new HTMLWebpackPlugin({
 				template: 'src/index.html',
@@ -65,6 +59,7 @@ const configure: ConfigurationFactory = (env) => {
 		config.plugins!.push(
 			// new BundleAnalyzerPlugin(),
 			new CleanWebpackPlugin(),
+			new OptimizeCssAssetsPlugin(),
 			new MiniCssExtractPlugin()
 		);
 	}

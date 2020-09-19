@@ -44,3 +44,27 @@ export const initDispatchers = <
 		},
 		{} as R
 	);
+
+// TODO: introduce some kind of a race for unload handling
+export const debounce = <T extends (...args: any[]) => void>(
+	fn: T,
+	delay: number
+) => {
+	let timeout: ReturnType<typeof setTimeout>;
+	let callback: () => void;
+
+	return ((...args: Parameters<T>) => {
+		clearTimeout(timeout);
+		window.removeEventListener('beforeunload', callback);
+
+		callback = () => fn(...args);
+		window.addEventListener('beforeunload', callback);
+
+		timeout = setTimeout(() => {
+			callback();
+			window.removeEventListener('beforeunload', callback);
+		}, delay);
+	}) as T;
+};
+
+// export const debounceRace

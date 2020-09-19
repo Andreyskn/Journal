@@ -30,7 +30,7 @@ declare global {
 			T extends AnyObject,
 			D extends Actions.DispatcherMap<any>
 		> = {
-			data: T | AnyFileData;
+			data: T;
 			dispatch: D;
 		};
 
