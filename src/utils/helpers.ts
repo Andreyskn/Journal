@@ -1,8 +1,26 @@
-import { useReducer } from 'react';
+import { useReducer, useRef } from 'react';
 
 export const useForceUpdate = () => {
 	const [, forceUpdate] = useReducer((s) => s + 1, 0);
 	return { forceUpdate };
+};
+
+export const useStateRef = <S>(initialState: S) => {
+	const { forceUpdate } = useForceUpdate();
+	const state = useRef(initialState);
+	const changeRef = useRef(false);
+
+	const getState = () => state.current;
+
+	const setState = (nextState: S) => {
+		state.current = nextState;
+		changeRef.current = true;
+		forceUpdate();
+	};
+
+	const hasChanged = () => changeRef.current;
+
+	return [state.current, setState, { getState, hasChanged }] as const;
 };
 
 export const actionHandler = <
@@ -45,26 +63,14 @@ export const initDispatchers = <
 		{} as R
 	);
 
-// TODO: introduce some kind of a race for unload handling
 export const debounce = <T extends (...args: any[]) => void>(
 	fn: T,
 	delay: number
 ) => {
 	let timeout: ReturnType<typeof setTimeout>;
-	let callback: () => void;
 
 	return ((...args: Parameters<T>) => {
 		clearTimeout(timeout);
-		window.removeEventListener('beforeunload', callback);
-
-		callback = () => fn(...args);
-		window.addEventListener('beforeunload', callback);
-
-		timeout = setTimeout(() => {
-			callback();
-			window.removeEventListener('beforeunload', callback);
-		}, delay);
+		timeout = setTimeout(() => fn(...args), delay);
 	}) as T;
 };
-
-// export const debounceRace

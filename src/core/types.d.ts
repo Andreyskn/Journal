@@ -19,7 +19,10 @@ declare global {
 
 		type Dispatch = ReduxDispatch<AppAction>;
 
-		type Dispatcher<T extends any[] = any[], D extends AnyObject = {}> = (
+		type Dispatcher<
+			T extends any[] = undefined[],
+			D extends AnyObject = {}
+		> = (
 			deps: D & {
 				dispatch: Dispatch;
 			}
