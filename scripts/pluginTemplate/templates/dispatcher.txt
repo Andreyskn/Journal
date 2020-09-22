@@ -1,0 +1,16 @@
+const example: Actions.Dispatcher<[example: string]> = ({
+	dispatch,
+}) => (example) => {
+	dispatch({
+		type: '@/* type *//EXAMPLE',
+		payload: {
+			example,
+		},
+	});
+};
+
+export const dispatchers = {
+	example,
+};
+
+export type /* interfaceName */Dispatch = Actions.DispatcherMap<typeof dispatchers>;

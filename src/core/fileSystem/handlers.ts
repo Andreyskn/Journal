@@ -2,7 +2,7 @@ import * as helpers from './helpers';
 import { actionHandler, identifier } from '../../utils';
 import { DIRECTORY_ID, UNTITLED } from './constants';
 import { mutations } from '../mutations';
-import { PLUGINS_MAP } from '../../plugins/constants';
+import { PLUGINS_MAP } from '../../plugins/registry';
 
 const createFile: App.Handler<{
 	name: App.File['name'];

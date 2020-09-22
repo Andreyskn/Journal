@@ -18,6 +18,13 @@ export const PLUGINS: PluginInfo[] = [
 		icon: 'manual',
 		label: 'Note',
 	},
+	{
+		type: 'questions',
+		extension: '.qa',
+		icon: 'help',
+		label: 'Q & A',
+	},
+	/* pluginInfo */
 ];
 
 export const PLUGINS_MAP = Object.fromEntries(

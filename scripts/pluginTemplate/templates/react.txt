@@ -1,0 +1,24 @@
+import React from 'react';
+
+import './/* stylesFileName */';
+
+import { useBEM } from '../../../utils';
+import { /* interfaceName */Dispatch } from '../dispatcher';
+
+type /* componentName */Props = App.PluginComponentProps<
+	App./* interfaceName */,
+	/* interfaceName */Dispatch
+>;
+
+const [/* varName */Block, /* varName */Element] = useBEM('/* cssClassName */');
+
+export const /* componentName */: React.FC</* componentName */Props> = ({
+	data: /* varName */,
+	dispatch,
+}) => {
+	return (
+		<div className={/* varName */Block()}>
+			/* label */
+		</div>
+	)
+}

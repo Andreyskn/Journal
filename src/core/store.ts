@@ -20,8 +20,7 @@ let handlers = Object.fromEntries([
 ]);
 
 const reducer: App.Reducer<App.ImmutableAppState, any> = (state, action) => {
-	const handler = handlers[action.type] as App.Handler<any> | undefined;
-	return handler ? handler(state, action) : state;
+	return (handlers[action.type] || (<T>(s: T) => s))(state, action);
 };
 
 export const initStore = () => {

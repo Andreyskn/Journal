@@ -1,6 +1,6 @@
 import Immutable from 'immutable';
 import { identifier } from '../../utils';
-import { TYPE_BY_EXTENSION } from '../../plugins/constants';
+import { TYPE_BY_EXTENSION } from '../../plugins/registry';
 import { SEP } from './constants';
 
 export const createFileRecord = Immutable.Record<App.TaggedFile>({

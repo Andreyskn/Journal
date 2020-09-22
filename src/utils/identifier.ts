@@ -1,11 +1,9 @@
-const TYPE_CODE_LENGTH = 2;
+const TYPE_CODE_LENGTH = 1;
 const RANDOM_PART_LENGTH = 4;
 const TIMESTAMP_OFFSET = TYPE_CODE_LENGTH + RANDOM_PART_LENGTH;
 
 const generateId = (type: keyof typeof EntityType) => {
-	const typeCode = EntityType[type]
-		.toString(36)
-		.padStart(TYPE_CODE_LENGTH, '0');
+	const typeCode = String.fromCodePoint(EntityType[type]);
 	const randomPart = Math.random()
 		.toString(36)
 		.slice(2, 2 + RANDOM_PART_LENGTH);
@@ -15,9 +13,7 @@ const generateId = (type: keyof typeof EntityType) => {
 };
 
 const getType = (id: string) => {
-	return EntityType[
-		parseInt(id.slice(0, TYPE_CODE_LENGTH), 36)
-	] as keyof typeof EntityType;
+	return EntityType[id.codePointAt(0)!] as keyof typeof EntityType;
 };
 
 const getCreationTime = (id: string): Timestamp => {
@@ -25,10 +21,12 @@ const getCreationTime = (id: string): Timestamp => {
 };
 
 enum EntityType {
-	'file' = 370, // 'AA' in base 36
+	'file' = 11039,
 	'task-list',
 	'task',
 	'note',
+	'questions',
+	/* entityType */
 }
 
 export const identifier = {

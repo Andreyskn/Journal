@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "cross-env TS_NODE_PROJECT=\"webpack.tsconfig.json\" webpack-dev-server --env development",
 		"build": "cross-env TS_NODE_PROJECT=\"webpack.tsconfig.json\" webpack --env production",
-		"cmp": "ts-node -T -P scripts/tsconfig.json scripts/addComponent"
+		"template": "ts-node -T -P scripts/tsconfig.json scripts/createTemplate"
 	},
 	"dependencies": {
 		"@blueprintjs/core": "^3.31.0",
@@ -34,9 +34,9 @@
 		"change-case": "^4.1.1",
 		"circular-dependency-plugin": "^5.2.0",
 		"clean-webpack-plugin": "^3.0.0",
-		"commander": "^6.0.0",
 		"cross-env": "^7.0.2",
 		"css-loader": "^4.2.2",
+		"enquirer": "^2.3.6",
 		"html-webpack-plugin": "^4.3.0",
 		"log-symbols": "^4.0.0",
 		"mini-css-extract-plugin": "^0.11.0",

@@ -1,0 +1,21 @@
+import React from 'react';
+
+import './/* stylesFileName */';
+
+import { useBEM } from '../../utils';
+
+export type /* name */Props = {
+
+}
+
+const [/* varName */Block, /* varName */Element] = useBEM('/* cssClassName */');
+
+export const /* name */: React.FC</* name */Props> = (props) => {
+	const {  } = props;
+
+	return (
+		<div className={/* varName */Block()}>
+
+		</div>
+	)
+}

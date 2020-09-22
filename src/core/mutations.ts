@@ -14,16 +14,12 @@ type Mutation =
 			{ state: App.ImmutableAppState; file: App.ImmutableFile }
 	  >;
 
-type ExtractListener<
-	T extends App.ActionBase<any, any>
-> = T extends App.ActionBase<any, any>
-	? {
-			type: T['type'];
-			act: (
-				payload: T extends { payload: any } ? T['payload'] : undefined
-			) => void;
-	  }
-	: never;
+type ExtractListener<T extends App.ActionBase<any, any>> = {
+	type: T['type'];
+	act: (
+		payload: T extends { payload: any } ? T['payload'] : undefined
+	) => void;
+};
 
 type EventEmitter = {
 	dispatch: (mutation: Mutation) => void;

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { EXTENSIONS } from '../../../plugins/constants';
+import { EXTENSIONS } from '../../../plugins/registry';
 
 import { useBEM } from '../../../utils';
 import { NodeEditorProps } from './NodeEditor';
