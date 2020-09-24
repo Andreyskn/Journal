@@ -1,5 +1,4 @@
 import React, { useLayoutEffect } from 'react';
-import Immutable from 'immutable';
 import './task-list.scss';
 import { useBEM } from '../../../utils';
 import { TaskItem } from './TaskItem';
@@ -11,25 +10,25 @@ import {
 } from '@blueprintjs/core';
 import { TasksDispatch } from '../dispatcher';
 
+const [taskListBlock, taskListElement] = useBEM('task-list');
+
 export type TaskListProps = App.PluginComponentProps<
-	App.ImmutableTaskList | App.TaskList,
+	App.TaskList,
 	TasksDispatch
 >;
 
-const [taskListBlock, taskListElement] = useBEM('task-list');
-
-export const TaskList: React.FC<TaskListProps> = ({ data, dispatch }) => {
-	const isValidState = Immutable.isRecord(data);
+export const TaskList: React.FC<TaskListProps> = (props) => {
+	const { dispatch } = props;
 
 	useLayoutEffect(() => {
-		if (!isValidState) {
-			dispatch.init(data as any);
+		if (props.isStubData) {
+			dispatch.init(props.data);
 		}
 	}, []);
 
-	if (!isValidState) return null;
+	if (props.isStubData) return null;
 
-	const taskList = data as App.ImmutableTaskList;
+	const taskList = props.data;
 
 	const addTask = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -68,8 +67,8 @@ export const TaskList: React.FC<TaskListProps> = ({ data, dispatch }) => {
 				/>
 			</form>
 			<div>
-				{taskList.items.toArray().map(([key, task]) => (
-					<TaskItem key={key} task={task} dispatch={dispatch} />
+				{taskList.tasks.map((task) => (
+					<TaskItem key={task.id} task={task} dispatch={dispatch} />
 				))}
 			</div>
 		</div>

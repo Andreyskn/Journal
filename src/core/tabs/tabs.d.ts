@@ -5,7 +5,7 @@ type TabsKey = KeyOf<App.TabsState, 'tabs'>;
 
 declare global {
 	namespace Actions {
-		type TabsAction = ExtractActions<typeof handlers[number]>;
+		type TabsAction = ExtractActions<typeof handlers>;
 	}
 
 	namespace App {

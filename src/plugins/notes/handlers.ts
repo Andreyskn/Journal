@@ -1,5 +1,3 @@
-import { actionHandler } from '../../utils';
-
 type NoteHandler<P extends AnyObject | undefined = undefined> = App.Handler<
 	P,
 	App.Note
@@ -11,4 +9,4 @@ const saveNote: NoteHandler<{
 	return { ...state, text };
 };
 
-export const handlers = [actionHandler('@notes/SAVE', saveNote)];
+export const handlers = { '@notes/SAVE': saveNote };

@@ -6,7 +6,7 @@ declare global {
 			note: Plugin<
 				'note',
 				'.n',
-				Actions.ExtractActions<typeof handlers[number]>,
+				Actions.ExtractActions<typeof handlers>,
 				Note
 			>;
 		}

@@ -1,5 +1,5 @@
 import * as helpers from './helpers';
-import { actionHandler, identifier } from '../../utils';
+import { identifier } from '../../utils';
 import { DIRECTORY_ID, UNTITLED } from './constants';
 import { mutations } from '../mutations';
 import { PLUGINS_MAP } from '../../plugins/registry';
@@ -16,7 +16,7 @@ const createFile: App.Handler<{
 		if (type === 'directory') {
 			newFile = helpers.createDirectory({ name, parent, path });
 		} else {
-			const fileData: App.FileData = { id: identifier.generateId(type) };
+			const fileData: App.StubFileData = { id: identifier.generateId(type) };
 
 			newFile = helpers.createFile({
 				name,
@@ -142,10 +142,10 @@ const setActiveFile: App.Handler<{
 	}));
 };
 
-export const handlers = [
-	actionHandler('@fs/CREATE_FILE', createFile),
-	actionHandler('@fs/CREATE_UNTITLED_FILE', createUntitledFile),
-	actionHandler('@fs/DELETE_FILE', deleteFile),
-	actionHandler('@fs/RENAME_FILE', renameFile),
-	actionHandler('@fs/SET_ACTIVE_FILE', setActiveFile),
-];
+export const handlers = {
+	'@fs/CREATE_FILE': createFile,
+	'@fs/CREATE_UNTITLED_FILE': createUntitledFile,
+	'@fs/DELETE_FILE': deleteFile,
+	'@fs/RENAME_FILE': renameFile,
+	'@fs/SET_ACTIVE_FILE': setActiveFile,
+};

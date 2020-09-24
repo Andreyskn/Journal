@@ -1,4 +1,3 @@
-import { actionHandler } from '../../utils';
 import * as helpers from './helpers';
 import { mutations } from '../mutations';
 
@@ -105,4 +104,4 @@ const closeTabByPath: App.Handler<{ path: App.File['path'] }> = (
 	});
 };
 
-export const handlers = [actionHandler('@tabs/CREATE_TAB', createTab)];
+export const handlers = { '@tabs/CREATE_TAB': createTab };

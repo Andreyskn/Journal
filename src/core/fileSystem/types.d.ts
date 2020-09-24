@@ -10,7 +10,7 @@ type BaseFile = {
 
 declare global {
 	namespace Actions {
-		type FileSystemAction = ExtractActions<typeof handlers[number]>;
+		type FileSystemAction = ExtractActions<typeof handlers>;
 	}
 
 	namespace App {

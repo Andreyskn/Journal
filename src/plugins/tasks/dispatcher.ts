@@ -1,4 +1,4 @@
-const init: Actions.Dispatcher<[data: App.AnyFileData]> = ({ dispatch }) => (
+const init: Actions.Dispatcher<[data: App.StubFileData]> = ({ dispatch }) => (
 	data
 ) => {
 	dispatch({

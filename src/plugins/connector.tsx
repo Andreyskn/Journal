@@ -1,44 +1,52 @@
 import React from 'react';
 import { addHandlers, useDispatch } from '../core';
 
-const connectPlugin = <
-	T extends {
-		Component: App.PluginComponent;
-		dispatchers: any;
-		handlers: any[];
-	}
->({
-	Component,
-	dispatchers,
-	handlers,
-}: T) => {
+type PluginModule = {
+	Component: React.FC<App.PluginComponentProps<any, any>>;
+	dispatchers: Record<string, Actions.Dispatcher<any[], any>>;
+	handlers: Record<any, App.Handler<any, any>>;
+};
+
+const connectPlugin = ({ Component, dispatchers, handlers }: PluginModule) => {
 	addHandlers(
-		handlers.map(([type, handler]) => [
-			type,
-			(state, action) => {
-				const pluginState = state.getIn(action.scope);
+		Object.entries(handlers).reduce((acc, [type, handler]) => {
+			acc[type] = (
+				state: App.ImmutableAppState,
+				action: Actions.AppAction
+			) => {
+				const pluginState = state.getIn(action.scope!);
 				return pluginState
-					? state.setIn(action.scope, handler(pluginState, action))
+					? state.setIn(
+							action.scope!,
+							handler(pluginState, action.payload as any)
+					  )
 					: state;
-			},
-		])
+			};
+			return acc;
+		}, {} as AnyObject)
 	);
 
-	const ConnectedPlugin: App.ConnectedPluginComponent = ({ data }) => {
+	const ConnectedPlugin: React.FC<{ data: App.FileData }> = ({ data }) => {
 		const dispatch = useDispatch(dispatchers, undefined, {
 			scope: ['data', data.id],
 		});
 
-		return <Component data={data} dispatch={dispatch} key={data.id} />;
+		return (
+			<Component
+				isStubData={Object.keys(data).length === 1}
+				data={data}
+				dispatch={dispatch}
+				key={data.id}
+			/>
+		);
 	};
 
 	return { default: ConnectedPlugin };
 };
 
-//TODO: fix types
-export const connectedPlugins: Record<any, React.LazyExoticComponent<any>> = {
-	'task-list': React.lazy(() => import('./tasks').then(connectPlugin as any)),
-	note: React.lazy(() => import('./notes').then(connectPlugin as any)),
-	questions: React.lazy(() => import('./questions').then(connectPlugin as any)),
+export const connectedPlugins = {
+	'task-list': React.lazy(() => import('./tasks').then(connectPlugin)),
+	note: React.lazy(() => import('./notes').then(connectPlugin)),
+	questions: React.lazy(() => import('./questions').then(connectPlugin)),
 	/* connectedPlugin */
 };

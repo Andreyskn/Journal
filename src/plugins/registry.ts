@@ -5,7 +5,7 @@ type PluginInfo = {
 	label: string;
 };
 
-export const PLUGINS: PluginInfo[] = [
+export const PLUGINS: readonly PluginInfo[] = [
 	{
 		type: 'task-list',
 		extension: '.t',
@@ -31,7 +31,9 @@ export const PLUGINS_MAP = Object.fromEntries(
 	PLUGINS.map((p) => [p.type, p])
 ) as Record<PluginInfo['type'], PluginInfo>;
 
-export const EXTENSIONS = PLUGINS.map((p) => p.extension);
+export const EXTENSIONS = PLUGINS.map((p) => p.extension) as ReadonlyArray<
+	typeof PLUGINS[number]['extension']
+>;
 
 export const TYPE_BY_EXTENSION = Object.fromEntries(
 	PLUGINS.map((p) => [p.extension, p.type])

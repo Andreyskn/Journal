@@ -3,7 +3,6 @@ import { get, set } from 'idb-keyval';
 
 import { fileSystem } from './fileSystem';
 import { tabs } from './tabs';
-import { actionHandler } from '../utils';
 
 const createAppState = Immutable.Record<App.AppState>({
 	...fileSystem.state,
@@ -32,17 +31,22 @@ export const getInitialState = () => {
 };
 
 export const initPersistance = (store: App.Store) => {
-	get<App.AppState>('state')
+	get<Maybe<App.AppState>>('state')
 		.then((savedState) => {
+			if (!savedState) return;
 			store.dispatch({
 				type: '@persistance/HYDRATE_STORE',
 				payload: { savedState },
 			});
 		})
 		.finally(() => {
+			let hasScheduledSave = false;
 			store.subscribe(() => {
+				if (hasScheduledSave) return;
+				hasScheduledSave = true;
 				(<any>window).requestIdleCallback(() => {
 					set('state', store.getState().toJS());
+					hasScheduledSave = false;
 				});
 			});
 		});
@@ -53,14 +57,12 @@ const hydrateStore: App.Handler<{ savedState?: App.AppState }> = (
 	{ savedState }
 ) => (savedState ? reviveState(savedState) : state);
 
-export const persistanceHandlers = [
-	actionHandler('@persistance/HYDRATE_STORE', hydrateStore),
-];
+export const persistanceHandlers = {
+	'@persistance/HYDRATE_STORE': hydrateStore,
+};
 
 declare global {
 	namespace Actions {
-		type PersistanceAction = ExtractActions<
-			typeof persistanceHandlers[number]
-		>;
+		type PersistanceAction = ExtractActions<typeof persistanceHandlers>;
 	}
 }

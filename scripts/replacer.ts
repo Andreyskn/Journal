@@ -8,8 +8,8 @@ export const createPatternReplacer = (object: Record<string, any>) => {
 		'gm'
 	);
 
-	const getTemplate = (path: string) => {
-		return fs.readFileSync(path, 'utf8').replace(regexp, (...args) => {
+	const getTemplateFromString = (string: string) => {
+		return string.replace(regexp, (...args) => {
 			const [groups] = args.slice(-1);
 
 			for (let [key, value] of Object.entries(groups)) {
@@ -21,5 +21,9 @@ export const createPatternReplacer = (object: Record<string, any>) => {
 		});
 	};
 
-	return { getTemplate };
+	const getTemplateFromFile = (path: string) => {
+		return getTemplateFromString(fs.readFileSync(path, 'utf8'));
+	};
+
+	return { getTemplateFromFile, getTemplateFromString };
 };

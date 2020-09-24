@@ -1,9 +1,6 @@
-import { actionHandler } from '../../utils';
-
-type QuestionsHandler<P extends AnyObject | undefined = undefined> = App.Handler<
-	P,
-	App.Questions
->;
+type QuestionsHandler<
+	P extends AnyObject | undefined = undefined
+> = App.Handler<P, App.Questions>;
 
 const example: QuestionsHandler<{
 	example: string;
@@ -11,4 +8,4 @@ const example: QuestionsHandler<{
 	return { ...state, example };
 };
 
-export const handlers = [actionHandler('@questions/EXAMPLE', example)];
+export const handlers = { '@questions/EXAMPLE': example };

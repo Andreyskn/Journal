@@ -1,65 +1,66 @@
-import Immutable from 'immutable';
-import * as helpers from './helpers';
-import { actionHandler, identifier } from '../../utils';
+import { identifier } from '../../utils';
 
 type TasksHandler<P extends AnyObject | undefined = undefined> = App.Handler<
 	P,
-	App.ImmutableTaskList
+	App.TaskList
 >;
 
 const setTaskListTitle: TasksHandler<{
 	title: App.TaskList['title'];
 }> = (state, { title }) => {
-	return state.set('title', title);
+	return { ...state, title };
 };
 
 const addTask: TasksHandler<{
 	text: App.Task['text'];
 }> = (state, { text }) => {
-	const newTask = helpers.createTask({
-		text,
+	const task: App.Task = {
+		createdAt: Date.now(),
+		done: false,
 		id: identifier.generateId('task'),
-	});
+		text,
+	};
 
-	return state.update('items', (tasks) => tasks.set(newTask.id, newTask));
+	return {
+		...state,
+		tasks: [task, ...state.tasks],
+	};
 };
 
 const deleteTask: TasksHandler<{
 	taskId: App.Task['id'];
 }> = (state, { taskId }) => {
-	return state.update('items', (tasks) => tasks.delete(taskId));
+	return {
+		...state,
+		tasks: state.tasks.filter((t) => t.id !== taskId),
+	};
 };
 
 const toggleTaskDone: TasksHandler<{
 	taskId: App.Task['id'];
 }> = (state, { taskId }) => {
-	return state.updateIn(['items', taskId], (task) =>
-		task.set('done', !task.done)
-	);
+	return {
+		...state,
+		tasks: state.tasks.map((t) =>
+			t.id === taskId ? { ...t, done: !t.done } : t
+		),
+	};
 };
 
 const initState: TasksHandler<{
-	data: App.AnyFileData;
+	data: App.StubFileData;
 }> = (_, { data }) => {
-	const items =
-		data.items &&
-		Immutable.OrderedMap(
-			Object.entries<App.Task>(data.items).map(([key, value]) => [
-				key,
-				helpers.createTask(value),
-			])
-		);
-
-	return helpers.createTaskList({
+	return {
 		...data,
-		items,
-	});
+		tasks: [],
+		title: 'Task List',
+	};
 };
 
-export const handlers = [
-	actionHandler('@tasks/INIT', initState),
-	actionHandler('@tasks/ADD_TASK', addTask),
-	actionHandler('@tasks/DELETE_TASK', deleteTask),
-	actionHandler('@tasks/TOGGLE_TASK_DONE', toggleTaskDone),
-	actionHandler('@tasks/SET_TASK_LIST_TITLE', setTaskListTitle),
-];
+export const handlers = {
+	'@tasks/INIT': initState,
+	'@tasks/ADD_TASK': addTask,
+	'@tasks/DELETE_TASK': deleteTask,
+	'@tasks/TOGGLE_TASK_DONE': toggleTaskDone,
+	'@tasks/SET_TASK_LIST_TITLE': setTaskListTitle,
+};

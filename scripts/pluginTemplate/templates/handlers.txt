@@ -1,5 +1,3 @@
-import { actionHandler } from '../../utils';
-
 type /* interfaceName */Handler<P extends AnyObject | undefined = undefined> = App.Handler<
 	P,
 	App./* interfaceName */
@@ -11,4 +9,4 @@ const example: /* interfaceName */Handler<{
 	return { ...state, example };
 };
 
-export const handlers = [actionHandler('@/* type *//EXAMPLE', example)];
+export const handlers = { '@/* type *//EXAMPLE': example };

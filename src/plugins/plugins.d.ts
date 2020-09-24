@@ -1,4 +1,4 @@
-import React from 'react';
+export {};
 
 declare global {
 	namespace App {
@@ -8,7 +8,7 @@ declare global {
 			T extends string,
 			E extends string,
 			A extends Actions.AnyAction,
-			D extends AnyFileData
+			D extends StubFileData
 		> = {
 			type: T;
 			extension: E;
@@ -20,33 +20,20 @@ declare global {
 		type FileExtension = PluginRegistry[keyof PluginRegistry]['extension'];
 		type FileData =
 			| PluginRegistry[keyof PluginRegistry]['data']
-			| AnyFileData;
+			| StubFileData;
 
-		type AnyFileData = { id: string } & AnyObject;
-
-		type InitFileData = (initialState: AnyFileData) => AnyFileData;
+		type StubFileData = { id: string };
 
 		type PluginComponentProps<
-			T extends AnyObject,
+			T extends FileData,
 			D extends Actions.DispatcherMap<any>
-		> = {
-			data: T;
-			dispatch: D;
-		};
-
-		type PluginComponent = React.ComponentType<{
-			data: AnyFileData;
-			dispatch: Actions.DispatcherMap<any>;
-		}>;
-
-		type ConnectedPluginComponent = React.FC<{
-			data: FileData;
-		}>;
-
-		type PluginHandlers = App.ActionHandlers<
-			App.FileData,
-			Actions.PluginAction
-		>;
+		> = { dispatch: D } & (
+			| {
+					isStubData: true;
+					data: StubFileData;
+			  }
+			| { isStubData: false; data: T }
+		);
 	}
 
 	namespace Actions {

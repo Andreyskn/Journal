@@ -3,7 +3,7 @@ import { Dispatch as ReduxDispatch, Store as ReduxStore } from 'redux';
 
 declare global {
 	namespace Actions {
-		type AnyAction = App.ActionBase<string | number | symbol, any>;
+		type AnyAction = App.ActionBase<any, any>;
 
 		type AppAction = (
 			| TabsAction
@@ -28,22 +28,13 @@ declare global {
 			}
 		) => (...args: T) => void;
 
-		type DispatcherDeps<
-			T extends Record<string, Actions.Dispatcher<any[], any>>,
-			R extends AnyObject = OmitType<
-				Parameters<T[keyof T]>[0],
-				'dispatch'
-			>
-		> = keyof R extends never ? never : R;
-
-		type DispatcherMap<
-			T extends Record<string, Actions.Dispatcher<any[], any>>
-		> = {
+		type DispatcherMap<T extends Record<string, Dispatcher<any[], any>>> = {
 			[K in keyof T]: ReturnType<T[K]>;
 		};
 
-		//@ts-expect-error
-		type ExtractActions<T> = T extends any ? Parameters<T[1]>[1] : never;
+		type ExtractActions<T extends AnyObject> = {
+			[K in keyof T]: App.ActionBase<K, Parameters<T[K]>[1]>;
+		}[keyof T];
 	}
 
 	namespace App {
@@ -76,11 +67,6 @@ declare global {
 			value: Immutable.Collection.Keyed<string, any>
 		) => AnyObject | undefined;
 
-		type Reducer<S, A extends Actions.AppAction> = (
-			state: S,
-			action: A
-		) => S;
-
 		type Updater<T> = (data: T) => T;
 
 		type ActionBase<
@@ -98,9 +84,12 @@ declare global {
 			S extends AnyObject = ImmutableAppState
 		> = P extends undefined ? (state: S) => S : (state: S, payload: P) => S;
 
-		type ActionHandlers<
-			S extends AnyObject = ImmutableAppState,
-			P extends AnyObject | undefined = any
-		> = [string, Handler<P, S>][];
+		type ActionHandlers = Record<
+			string,
+			(
+				state: ImmutableAppState,
+				action: ActionBase<any, AnyObject>
+			) => ImmutableAppState
+		>;
 	}
 }

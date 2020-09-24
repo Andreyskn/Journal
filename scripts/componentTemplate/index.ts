@@ -27,23 +27,23 @@ export const createComponentTemplate = async () => {
 		return { error: `Component with name "${name}" already exists` };
 	}
 
-	const { getTemplate } = createPatternReplacer(component);
+	const { getTemplateFromFile } = createPatternReplacer(component);
 
 	fs.mkdirSync(component.dir);
 
 	fs.writeFileSync(
 		path.join(component.dir, 'index.ts'),
-		getTemplate(path.join(__dirname, 'templates/index.txt'))
+		getTemplateFromFile(path.join(__dirname, 'templates/index.txt'))
 	);
 
 	fs.writeFileSync(
 		path.join(component.dir, component.stylesFileName),
-		getTemplate(path.join(__dirname, 'templates/styles.txt'))
+		getTemplateFromFile(path.join(__dirname, 'templates/styles.txt'))
 	);
 
 	fs.writeFileSync(
 		path.join(component.dir, `${component.name}.tsx`),
-		getTemplate(path.join(__dirname, 'templates/react.txt'))
+		getTemplateFromFile(path.join(__dirname, 'templates/react.txt'))
 	);
 
 	return { ok: true };

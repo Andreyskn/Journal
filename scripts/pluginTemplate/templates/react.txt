@@ -18,7 +18,7 @@ export const /* componentName */: React.FC</* componentName */Props> = ({
 }) => {
 	return (
 		<div className={/* varName */Block()}>
-			/* label */
+			/* label */ {/* varName */.id}
 		</div>
 	)
 }

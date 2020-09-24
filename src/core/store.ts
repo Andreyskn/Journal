@@ -1,4 +1,4 @@
-import { createStore } from 'redux';
+import { createStore, Reducer } from 'redux';
 import { devToolsEnhancer } from 'redux-devtools-extension';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -7,33 +7,34 @@ import {
 	initPersistance,
 	persistanceHandlers,
 } from './persistance';
-import { initDispatchers } from '../utils';
 import { fileSystem } from './fileSystem';
 import { tabs } from './tabs';
 
 export let store: App.Store;
 
-let handlers = Object.fromEntries([
+let handlers = Object.entries({
 	...persistanceHandlers,
 	...fileSystem.handlers,
 	...tabs.handlers,
-]);
+}).reduce((acc, [type, handler]) => {
+	acc[type] = (state, action) => handler(state, action.payload as any);
+	return acc;
+}, {} as App.ActionHandlers);
 
-const reducer: App.Reducer<App.ImmutableAppState, any> = (state, action) => {
+const reducer: Reducer<App.ImmutableAppState, Actions.AppAction> = (
+	state = getInitialState(),
+	action
+) => {
 	return (handlers[action.type] || (<T>(s: T) => s))(state, action);
 };
 
 export const initStore = () => {
-	store = createStore(
-		reducer as any,
-		getInitialState(),
-		devToolsEnhancer({ name: 'Journal' })
-	);
+	store = createStore(reducer, devToolsEnhancer({ name: 'Journal' }));
 	initPersistance(store);
 };
 
 export const addHandlers = (newHandlers: App.ActionHandlers) => {
-	handlers = Object.fromEntries(Object.entries(handlers).concat(newHandlers));
+	handlers = { ...handlers, ...newHandlers };
 };
 
 export const useSelector = <T extends any>(
@@ -52,9 +53,14 @@ export const useSelector = <T extends any>(
 	return data;
 };
 
+type DispatcherDeps<
+	T extends Record<string, Actions.Dispatcher<any[], any>>,
+	R extends AnyObject = OmitType<Parameters<T[keyof T]>[0], 'dispatch'>
+> = keyof R extends never ? never : R;
+
 export const useDispatch = <
 	T extends Record<string, Actions.Dispatcher<any[], any>>,
-	D extends Actions.DispatcherDeps<T>,
+	D extends DispatcherDeps<T>,
 	R extends Actions.DispatcherMap<T>
 >(
 	dispatchers: T,
@@ -62,7 +68,20 @@ export const useDispatch = <
 	meta?: Actions.Meta
 ): R => {
 	return useMemo(
-		() => initDispatchers(store.dispatch, dispatchers, deps, meta),
+		() =>
+			(Object.entries(dispatchers) as [keyof T, T[keyof T]][]).reduce(
+				(result, [name, fn]) => {
+					result[name] = fn({
+						dispatch: meta
+							? (action: Actions.AppAction) =>
+									store.dispatch({ ...action, ...meta })
+							: store.dispatch,
+						...deps,
+					}) as R[keyof T];
+					return result;
+				},
+				{} as R
+			),
 		Object.values({ ...deps, meta })
 	);
 };

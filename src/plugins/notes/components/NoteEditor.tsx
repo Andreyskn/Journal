@@ -15,12 +15,12 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
 	data: note,
 	dispatch,
 }) => {
-	const [text, setText, textRef] = useStateRef(note.text || '');
+	const [text, setText, textRef] = useStateRef((note as any).text || '');
 
 	const saveState = useCallback(() => {
 		if (!textRef.hasChanged()) return;
 		const text = textRef.getState();
-		if (text !== note.text) dispatch.saveNote(text);
+		if (text !== (note as any).text) dispatch.saveNote(text);
 	}, []);
 
 	useEffect(() => {
