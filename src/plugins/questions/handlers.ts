@@ -1,11 +1,12 @@
 type QuestionsHandler<
 	P extends AnyObject | undefined = undefined
-> = App.Handler<P, App.Questions>;
+> = App.Handler<P, Plugin.Questions>;
 
-const example: QuestionsHandler<{
-	example: string;
-}> = (state, { example }) => {
-	return { ...state, example };
+const initState: Plugin.InitStateHandler<Plugin.Questions> = (_, { data }) => {
+	return {
+		...data,
+		example: '',
+	};
 };
 
-export const handlers = { '@questions/EXAMPLE': example };
+export const handlers = { '@notes/INIT': initState };

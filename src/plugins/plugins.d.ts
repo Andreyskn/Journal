@@ -2,41 +2,43 @@ export {};
 
 declare global {
 	namespace App {
-		interface PluginRegistry {}
+		type FileType = Plugin.Type;
+		type FileExtension = Plugin.Extension;
+		type FileData = Plugin.Data | StubFileData;
 
-		type Plugin<
+		type StubFileData = { id: string };
+	}
+
+	namespace Plugin {
+		interface Registry {}
+
+		type SetPlugin<
 			T extends string,
 			E extends string,
 			A extends Actions.AnyAction,
-			D extends StubFileData
+			D extends App.StubFileData
 		> = {
 			type: T;
 			extension: E;
-			actions: A;
+			action: A;
 			data: D;
 		};
 
-		type FileType = PluginRegistry[keyof PluginRegistry]['type'];
-		type FileExtension = PluginRegistry[keyof PluginRegistry]['extension'];
-		type FileData =
-			| PluginRegistry[keyof PluginRegistry]['data']
-			| StubFileData;
+		type Type = Registry[keyof Registry]['type'];
+		type Extension = Registry[keyof Registry]['extension'];
+		type Action = Registry[keyof Registry]['action'];
+		type Data = Registry[keyof Registry]['data'];
 
-		type StubFileData = { id: string };
+		type InitStateDispatcher = Actions.Dispatcher<[data: App.StubFileData]>;
 
-		type PluginComponentProps<
-			T extends FileData,
+		type InitStateHandler<T extends Data> = App.Handler<
+			{ data: App.StubFileData },
+			T
+		>;
+
+		type ComponentProps<
+			T extends Data,
 			D extends Actions.DispatcherMap<any>
-		> = { dispatch: D } & (
-			| {
-					isStubData: true;
-					data: StubFileData;
-			  }
-			| { isStubData: false; data: T }
-		);
-	}
-
-	namespace Actions {
-		type PluginAction = App.PluginRegistry[keyof App.PluginRegistry]['actions'];
+		> = { data: T; dispatch: D };
 	}
 }

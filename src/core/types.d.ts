@@ -8,7 +8,7 @@ declare global {
 		type AppAction = (
 			| TabsAction
 			| FileSystemAction
-			| PluginAction
+			| Plugin.Action
 			| PersistanceAction
 		) &
 			Meta;

@@ -86,7 +86,6 @@ export const createPluginTemplate = async () => {
 		extension,
 		label,
 		interfaceName,
-		componentName: `${interfaceName}Plugin`,
 		cssClassName,
 		varName,
 		dir: path.join(PATHS.pluginsFolder, varName),
@@ -132,7 +131,7 @@ export const createPluginTemplate = async () => {
 	);
 
 	fs.writeFileSync(
-		path.join(plugin.componentsDir, `${plugin.componentName}.tsx`),
+		path.join(plugin.componentsDir, `${plugin.interfaceName}.tsx`),
 		getTemplateFromFile(path.join(__dirname, 'templates/react.txt'))
 	);
 	fs.writeFileSync(

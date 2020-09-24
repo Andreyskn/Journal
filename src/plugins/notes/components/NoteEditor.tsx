@@ -7,7 +7,7 @@ import './note-editor.scss';
 import { useBEM, useStateRef } from '../../../utils';
 import { NotesDispatch } from '../dispatcher';
 
-type NoteEditorProps = App.PluginComponentProps<App.Note, NotesDispatch>;
+type NoteEditorProps = Plugin.ComponentProps<Plugin.Note, NotesDispatch>;
 
 const [noteEditorBlock, noteEditorElement] = useBEM('note-editor');
 
@@ -15,12 +15,12 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
 	data: note,
 	dispatch,
 }) => {
-	const [text, setText, textRef] = useStateRef((note as any).text || '');
+	const [text, setText, textRef] = useStateRef(note.text || '');
 
 	const saveState = useCallback(() => {
 		if (!textRef.hasChanged()) return;
 		const text = textRef.getState();
-		if (text !== (note as any).text) dispatch.saveNote(text);
+		if (text !== note.text) dispatch.saveNote(text);
 	}, []);
 
 	useEffect(() => {

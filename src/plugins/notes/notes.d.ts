@@ -1,9 +1,9 @@
 import { handlers } from './handlers';
 
 declare global {
-	namespace App {
-		interface PluginRegistry {
-			note: Plugin<
+	namespace Plugin {
+		interface Registry {
+			note: SetPlugin<
 				'note',
 				'.n',
 				Actions.ExtractActions<typeof handlers>,

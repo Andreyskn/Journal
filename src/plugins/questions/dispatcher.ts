@@ -1,16 +1,14 @@
-const example: Actions.Dispatcher<[example: string]> = ({
-	dispatch,
-}) => (example) => {
+const init: Plugin.InitStateDispatcher = ({ dispatch }) => (data) => {
 	dispatch({
-		type: '@questions/EXAMPLE',
+		type: '@notes/INIT',
 		payload: {
-			example,
+			data,
 		},
 	});
 };
 
 export const dispatchers = {
-	example,
+	init,
 };
 
 export type QuestionsDispatch = Actions.DispatcherMap<typeof dispatchers>;

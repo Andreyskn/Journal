@@ -1,7 +1,14 @@
 type /* interfaceName */Handler<P extends AnyObject | undefined = undefined> = App.Handler<
 	P,
-	App./* interfaceName */
+	Plugin./* interfaceName */
 >;
+
+const initState: Plugin.InitStateHandler<Plugin./* interfaceName */> = (_, { data }) => {
+	return {
+		...data,
+		example: '',
+	};
+};
 
 const example: /* interfaceName */Handler<{
 	example: string;
@@ -9,4 +16,7 @@ const example: /* interfaceName */Handler<{
 	return { ...state, example };
 };
 
-export const handlers = { '@/* type *//EXAMPLE': example };
+export const handlers = {
+	'@/* type *//INIT': initState,
+	'@/* type *//EXAMPLE': example
+};

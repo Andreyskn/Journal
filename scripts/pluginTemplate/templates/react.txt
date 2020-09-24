@@ -5,14 +5,14 @@ import './/* stylesFileName */';
 import { useBEM } from '../../../utils';
 import { /* interfaceName */Dispatch } from '../dispatcher';
 
-type /* componentName */Props = App.PluginComponentProps<
-	App./* interfaceName */,
+type /* interfaceName */Props = Plugin.ComponentProps<
+	Plugin./* interfaceName */,
 	/* interfaceName */Dispatch
 >;
 
 const [/* varName */Block, /* varName */Element] = useBEM('/* cssClassName */');
 
-export const /* componentName */: React.FC</* componentName */Props> = ({
+export const /* interfaceName */: React.FC</* interfaceName */Props> = ({
 	data: /* varName */,
 	dispatch,
 }) => {

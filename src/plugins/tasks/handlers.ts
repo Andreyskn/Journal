@@ -2,19 +2,27 @@ import { identifier } from '../../utils';
 
 type TasksHandler<P extends AnyObject | undefined = undefined> = App.Handler<
 	P,
-	App.TaskList
+	Plugin.TaskList
 >;
 
+const initState: Plugin.InitStateHandler<Plugin.TaskList> = (_, { data }) => {
+	return {
+		...data,
+		tasks: [],
+		title: 'Task List',
+	};
+};
+
 const setTaskListTitle: TasksHandler<{
-	title: App.TaskList['title'];
+	title: Plugin.TaskList['title'];
 }> = (state, { title }) => {
 	return { ...state, title };
 };
 
 const addTask: TasksHandler<{
-	text: App.Task['text'];
+	text: Plugin.Task['text'];
 }> = (state, { text }) => {
-	const task: App.Task = {
+	const task: Plugin.Task = {
 		createdAt: Date.now(),
 		done: false,
 		id: identifier.generateId('task'),
@@ -28,7 +36,7 @@ const addTask: TasksHandler<{
 };
 
 const deleteTask: TasksHandler<{
-	taskId: App.Task['id'];
+	taskId: Plugin.Task['id'];
 }> = (state, { taskId }) => {
 	return {
 		...state,
@@ -37,23 +45,13 @@ const deleteTask: TasksHandler<{
 };
 
 const toggleTaskDone: TasksHandler<{
-	taskId: App.Task['id'];
+	taskId: Plugin.Task['id'];
 }> = (state, { taskId }) => {
 	return {
 		...state,
 		tasks: state.tasks.map((t) =>
 			t.id === taskId ? { ...t, done: !t.done } : t
 		),
-	};
-};
-
-const initState: TasksHandler<{
-	data: App.StubFileData;
-}> = (_, { data }) => {
-	return {
-		...data,
-		tasks: [],
-		title: 'Task List',
 	};
 };
 

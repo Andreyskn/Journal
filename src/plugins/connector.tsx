@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { addHandlers, useDispatch } from '../core';
 
 type PluginModule = {
-	Component: React.FC<App.PluginComponentProps<any, any>>;
-	dispatchers: Record<string, Actions.Dispatcher<any[], any>>;
-	handlers: Record<any, App.Handler<any, any>>;
+	Component: React.FC<Plugin.ComponentProps<any, any>>;
+	dispatchers: { init: Plugin.InitStateDispatcher };
+	handlers: Record<string, App.Handler<any, any>>;
 };
 
 const connectPlugin = ({ Component, dispatchers, handlers }: PluginModule) => {
@@ -31,14 +31,15 @@ const connectPlugin = ({ Component, dispatchers, handlers }: PluginModule) => {
 			scope: ['data', data.id],
 		});
 
-		return (
-			<Component
-				isStubData={Object.keys(data).length === 1}
-				data={data}
-				dispatch={dispatch}
-				key={data.id}
-			/>
-		);
+		const isStubData = Object.keys(data).length === 1;
+
+		useLayoutEffect(() => {
+			if (isStubData) dispatch.init(data);
+		}, []);
+
+		if (isStubData) return null;
+
+		return <Component data={data} dispatch={dispatch} key={data.id} />;
 	};
 
 	return { default: ConnectedPlugin };

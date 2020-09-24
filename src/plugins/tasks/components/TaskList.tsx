@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react';
+import React from 'react';
 import './task-list.scss';
 import { useBEM } from '../../../utils';
 import { TaskItem } from './TaskItem';
@@ -12,24 +12,15 @@ import { TasksDispatch } from '../dispatcher';
 
 const [taskListBlock, taskListElement] = useBEM('task-list');
 
-export type TaskListProps = App.PluginComponentProps<
-	App.TaskList,
+export type TaskListProps = Plugin.ComponentProps<
+	Plugin.TaskList,
 	TasksDispatch
 >;
 
-export const TaskList: React.FC<TaskListProps> = (props) => {
-	const { dispatch } = props;
-
-	useLayoutEffect(() => {
-		if (props.isStubData) {
-			dispatch.init(props.data);
-		}
-	}, []);
-
-	if (props.isStubData) return null;
-
-	const taskList = props.data;
-
+export const TaskList: React.FC<TaskListProps> = ({
+	data: taskList,
+	dispatch,
+}) => {
 	const addTask = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const input = event.currentTarget.elements[0] as HTMLTextAreaElement;

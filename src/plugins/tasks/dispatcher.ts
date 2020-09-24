@@ -1,6 +1,4 @@
-const init: Actions.Dispatcher<[data: App.StubFileData]> = ({ dispatch }) => (
-	data
-) => {
+const init: Plugin.InitStateDispatcher = ({ dispatch }) => (data) => {
 	dispatch({
 		type: '@tasks/INIT',
 		payload: {
@@ -9,7 +7,7 @@ const init: Actions.Dispatcher<[data: App.StubFileData]> = ({ dispatch }) => (
 	});
 };
 
-const addTask: Actions.Dispatcher<[text: App.Task['text']]> = ({
+const addTask: Actions.Dispatcher<[text: Plugin.Task['text']]> = ({
 	dispatch,
 }) => (text) => {
 	dispatch({
@@ -20,7 +18,7 @@ const addTask: Actions.Dispatcher<[text: App.Task['text']]> = ({
 	});
 };
 
-const deleteTask: Actions.Dispatcher<[taskId: App.Task['id']]> = ({
+const deleteTask: Actions.Dispatcher<[taskId: Plugin.Task['id']]> = ({
 	dispatch,
 }) => (taskId) => {
 	dispatch({
@@ -31,7 +29,7 @@ const deleteTask: Actions.Dispatcher<[taskId: App.Task['id']]> = ({
 	});
 };
 
-const toggleDone: Actions.Dispatcher<[taskId: App.Task['id']]> = ({
+const toggleDone: Actions.Dispatcher<[taskId: Plugin.Task['id']]> = ({
 	dispatch,
 }) => (taskId) => {
 	dispatch({
@@ -42,7 +40,7 @@ const toggleDone: Actions.Dispatcher<[taskId: App.Task['id']]> = ({
 	});
 };
 
-const renameTaskList: Actions.Dispatcher<[title: App.TaskList['title']]> = ({
+const renameTaskList: Actions.Dispatcher<[title: Plugin.TaskList['title']]> = ({
 	dispatch,
 }) => (title) => {
 	dispatch({

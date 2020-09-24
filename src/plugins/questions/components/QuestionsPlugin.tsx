@@ -5,8 +5,8 @@ import './questions.scss';
 import { useBEM } from '../../../utils';
 import { QuestionsDispatch } from '../dispatcher';
 
-type QuestionsPluginProps = App.PluginComponentProps<
-	App.Questions,
+type QuestionsPluginProps = Plugin.ComponentProps<
+	Plugin.Questions,
 	QuestionsDispatch
 >;
 

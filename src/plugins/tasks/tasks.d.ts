@@ -1,9 +1,9 @@
 import { handlers } from './handlers';
 
 declare global {
-	namespace App {
-		interface PluginRegistry {
-			'task-list': Plugin<
+	namespace Plugin {
+		interface Registry {
+			'task-list': SetPlugin<
 				'task-list',
 				'.t',
 				Actions.ExtractActions<typeof handlers>,

@@ -1,3 +1,3 @@
-export { /* componentName */ as Component } from './components//* componentName */';
+export { /* interfaceName */ as Component } from './components//* interfaceName */';
 export { dispatchers } from './dispatcher';
 export { handlers } from './handlers';
