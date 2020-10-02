@@ -1,11 +1,11 @@
 import Immutable from 'immutable';
-import { identifier } from '../../utils';
+import { generateId } from '../../utils';
 import { TYPE_BY_EXTENSION } from '../../plugins/registry';
 import { SEP } from './constants';
 
 export const createFileRecord = Immutable.Record<App.TaggedFile>({
 	_tag: 'file',
-	id: identifier.generateId('file'),
+	id: generateId(),
 	lastModifiedAt: 0,
 	name: '',
 	path: '',
@@ -19,7 +19,7 @@ export const createDirectory = ({
 	path,
 	parent = null,
 	data = Immutable.OrderedMap(),
-	id = identifier.generateId('file'),
+	id = generateId(),
 }: Pick<App.Directory, 'name' | 'path'> &
 	Partial<Pick<App.Directory, 'parent' | 'data' | 'id'>>) => {
 	return createFileRecord({
@@ -45,7 +45,7 @@ export const createFile = ({
 		path,
 		parent,
 		data,
-		id: identifier.generateId('file'),
+		id: generateId(),
 		lastModifiedAt: Date.now(),
 	});
 };

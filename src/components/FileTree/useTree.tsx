@@ -10,7 +10,7 @@ import {
 import { DIRECTORY_ID } from '../../core/fileSystem/constants';
 import { PLUGINS_MAP } from '../../plugins/registry';
 
-// TODO: refactor
+// TODO: refactor. try composite pattern
 
 export type TreeProps = OmitType<
 	ITreeProps<any>,

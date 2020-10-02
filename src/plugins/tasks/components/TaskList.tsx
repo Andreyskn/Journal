@@ -8,17 +8,13 @@ import {
 	H1,
 	IEditableTextProps,
 } from '@blueprintjs/core';
-import { TasksDispatch } from '../dispatcher';
 
 const [taskListBlock, taskListElement] = useBEM('task-list');
 
-export type TaskListProps = Plugin.ComponentProps<
-	Plugin.TaskList,
-	TasksDispatch
->;
+type TaskListProps = Plugin.ComponentProps<TaskList.State, TaskList.Dispatch>;
 
 export const TaskList: React.FC<TaskListProps> = ({
-	data: taskList,
+	state: taskList,
 	dispatch,
 }) => {
 	const addTask = (event: React.FormEvent<HTMLFormElement>) => {

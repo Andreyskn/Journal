@@ -1,0 +1,7 @@
+.qa-item {
+	&__textarea {
+		min-height: 40px !important;
+
+		resize: none;
+	}
+}

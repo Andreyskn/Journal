@@ -1,5 +1,5 @@
 import * as helpers from './helpers';
-import { identifier } from '../../utils';
+import { generateId } from '../../utils';
 import { DIRECTORY_ID, UNTITLED } from './constants';
 import { mutations } from '../mutations';
 import { PLUGINS_MAP } from '../../plugins/registry';
@@ -16,7 +16,10 @@ const createFile: App.Handler<{
 		if (type === 'directory') {
 			newFile = helpers.createDirectory({ name, parent, path });
 		} else {
-			const fileData: App.StubFileData = { id: identifier.generateId(type) };
+			const fileData: App.FileData = {
+				id: generateId(),
+				state: null,
+			};
 
 			newFile = helpers.createFile({
 				name,
@@ -133,12 +136,22 @@ const renameFile: App.Handler<{
 };
 
 const setActiveFile: App.Handler<{
-	id: App.File['id'];
+	id: App.FileData['id'];
 }> = (state, { id }) => {
 	return state.update('activeFile', (activeFile) => ({
 		...activeFile,
 		id,
 		path: state.files.get(id)!.path,
+	}));
+};
+
+const setFileDataState: App.Handler<{
+	id: App.File['id'];
+	dataState: App.FileData['state'];
+}> = (state, { id, dataState }) => {
+	return (state as any).updateIn(['data', id], (data: App.FileData) => ({
+		...data,
+		state: dataState,
 	}));
 };
 
@@ -148,4 +161,5 @@ export const handlers = {
 	'@fs/DELETE_FILE': deleteFile,
 	'@fs/RENAME_FILE': renameFile,
 	'@fs/SET_ACTIVE_FILE': setActiveFile,
+	'@fs/SET_FILE_DATA_STATE': setFileDataState,
 };

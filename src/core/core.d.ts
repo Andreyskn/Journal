@@ -1,32 +1,39 @@
 import Immutable from 'immutable';
 import { Dispatch as ReduxDispatch, Store as ReduxStore } from 'redux';
+import { Dispatch as ReactDispatch } from 'react';
 
 declare global {
 	namespace Actions {
 		type AnyAction = App.ActionBase<any, any>;
 
-		type AppAction = (
-			| TabsAction
-			| FileSystemAction
-			| Plugin.Action
-			| PersistanceAction
-		) &
+		type AppAction = (TabsAction | FileSystemAction | PersistanceAction) &
 			Meta;
 
 		type Meta = Partial<{
 			scope: string[];
 		}>;
 
-		type Dispatch = ReduxDispatch<AppAction>;
+		type Dispatch<A extends AnyAction = AppAction> =
+			| ReduxDispatch<A>
+			| ReactDispatch<A>;
 
 		type Dispatcher<
 			T extends any[] = undefined[],
-			D extends AnyObject = {}
+			D extends AnyObject = {},
+			A extends AnyAction = AppAction
 		> = (
 			deps: D & {
-				dispatch: Dispatch;
+				dispatch: Dispatch<A>;
 			}
 		) => (...args: T) => void;
+
+		type DispatcherDeps<
+			T extends Record<string, Actions.Dispatcher<any[], any>>,
+			R extends AnyObject = OmitType<
+				Parameters<T[keyof T]>[0],
+				'dispatch'
+			>
+		> = keyof R extends never ? never : R;
 
 		type DispatcherMap<T extends Record<string, Dispatcher<any[], any>>> = {
 			[K in keyof T]: ReturnType<T[K]>;

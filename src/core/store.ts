@@ -9,32 +9,22 @@ import {
 } from './persistance';
 import { fileSystem } from './fileSystem';
 import { tabs } from './tabs';
+import { createReducer, initDispatchers } from '../utils';
 
 export let store: App.Store;
 
-let handlers = Object.entries({
-	...persistanceHandlers,
-	...fileSystem.handlers,
-	...tabs.handlers,
-}).reduce((acc, [type, handler]) => {
-	acc[type] = (state, action) => handler(state, action.payload as any);
-	return acc;
-}, {} as App.ActionHandlers);
-
-const reducer: Reducer<App.ImmutableAppState, Actions.AppAction> = (
-	state = getInitialState(),
-	action
-) => {
-	return (handlers[action.type] || (<T>(s: T) => s))(state, action);
-};
+const reducer = createReducer(
+	{
+		...persistanceHandlers,
+		...fileSystem.handlers,
+		...tabs.handlers,
+	},
+	getInitialState()
+);
 
 export const initStore = () => {
 	store = createStore(reducer, devToolsEnhancer({ name: 'Journal' }));
 	initPersistance(store);
-};
-
-export const addHandlers = (newHandlers: App.ActionHandlers) => {
-	handlers = { ...handlers, ...newHandlers };
 };
 
 export const useSelector = <T extends any>(
@@ -53,35 +43,17 @@ export const useSelector = <T extends any>(
 	return data;
 };
 
-type DispatcherDeps<
-	T extends Record<string, Actions.Dispatcher<any[], any>>,
-	R extends AnyObject = OmitType<Parameters<T[keyof T]>[0], 'dispatch'>
-> = keyof R extends never ? never : R;
-
+// TODO: combine useDispatch with initDispatchers, add option to replace store.dispatch
 export const useDispatch = <
 	T extends Record<string, Actions.Dispatcher<any[], any>>,
-	D extends DispatcherDeps<T>,
+	D extends Actions.DispatcherDeps<T>,
 	R extends Actions.DispatcherMap<T>
 >(
 	dispatchers: T,
-	deps: D = {} as D,
-	meta?: Actions.Meta
+	deps: D = {} as D
 ): R => {
 	return useMemo(
-		() =>
-			(Object.entries(dispatchers) as [keyof T, T[keyof T]][]).reduce(
-				(result, [name, fn]) => {
-					result[name] = fn({
-						dispatch: meta
-							? (action: Actions.AppAction) =>
-									store.dispatch({ ...action, ...meta })
-							: store.dispatch,
-						...deps,
-					}) as R[keyof T];
-					return result;
-				},
-				{} as R
-			),
-		Object.values({ ...deps, meta })
+		() => initDispatchers(store.dispatch, dispatchers, deps),
+		Object.values(deps)
 	);
 };

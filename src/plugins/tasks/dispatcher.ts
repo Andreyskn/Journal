@@ -1,50 +1,41 @@
-const init: Plugin.InitStateDispatcher = ({ dispatch }) => (data) => {
-	dispatch({
-		type: '@tasks/INIT',
-		payload: {
-			data,
-		},
-	});
-};
-
-const addTask: Actions.Dispatcher<[text: Plugin.Task['text']]> = ({
+const addTask: TaskList.Dispatcher<[text: TaskList.Task['text']]> = ({
 	dispatch,
 }) => (text) => {
 	dispatch({
-		type: '@tasks/ADD_TASK',
+		type: 'ADD_TASK',
 		payload: {
 			text,
 		},
 	});
 };
 
-const deleteTask: Actions.Dispatcher<[taskId: Plugin.Task['id']]> = ({
+const deleteTask: TaskList.Dispatcher<[taskId: TaskList.Task['id']]> = ({
 	dispatch,
 }) => (taskId) => {
 	dispatch({
-		type: '@tasks/DELETE_TASK',
+		type: 'DELETE_TASK',
 		payload: {
 			taskId,
 		},
 	});
 };
 
-const toggleDone: Actions.Dispatcher<[taskId: Plugin.Task['id']]> = ({
+const toggleDone: TaskList.Dispatcher<[taskId: TaskList.Task['id']]> = ({
 	dispatch,
 }) => (taskId) => {
 	dispatch({
-		type: '@tasks/TOGGLE_TASK_DONE',
+		type: 'TOGGLE_TASK_DONE',
 		payload: {
 			taskId,
 		},
 	});
 };
 
-const renameTaskList: Actions.Dispatcher<[title: Plugin.TaskList['title']]> = ({
+const renameTaskList: TaskList.Dispatcher<[title: TaskList.State['title']]> = ({
 	dispatch,
 }) => (title) => {
 	dispatch({
-		type: '@tasks/SET_TASK_LIST_TITLE',
+		type: 'SET_TASK_LIST_TITLE',
 		payload: {
 			title,
 		},
@@ -52,11 +43,8 @@ const renameTaskList: Actions.Dispatcher<[title: Plugin.TaskList['title']]> = ({
 };
 
 export const dispatchers = {
-	init,
 	addTask,
 	deleteTask,
 	toggleDone,
 	renameTaskList,
 };
-
-export type TasksDispatch = Actions.DispatcherMap<typeof dispatchers>;

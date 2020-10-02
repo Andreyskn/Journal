@@ -4,7 +4,6 @@ import fs from 'fs';
 import { paramCase, camelCase, pascalCase } from 'change-case';
 import { createPatternReplacer } from '../replacer';
 import * as iconNames from '@blueprintjs/icons/lib/cjs/generated/iconNames';
-import { PLUGINS } from '../../src/plugins/registry';
 
 const PATHS = {
 	pluginsFolder: path.join(__dirname, '../../src/plugins'),
@@ -22,9 +21,6 @@ export const createPluginTemplate = async () => {
 			if (!/^[A-Z]/.test(value)) {
 				return 'Label should start with a capital letter';
 			}
-			if (PLUGINS.find((p) => p.label === value)) {
-				return 'Plugin with this label already exists';
-			}
 			return true;
 		},
 	});
@@ -37,9 +33,6 @@ export const createPluginTemplate = async () => {
 			if (!/^[a-z]+(?:-[a-z]+)?$/.test(value)) {
 				return 'Lower case letters with optional dash separator';
 			}
-			if (PLUGINS.find((p) => p.type === value)) {
-				return 'Plugin with this type already exists';
-			}
 			return true;
 		},
 	});
@@ -51,9 +44,6 @@ export const createPluginTemplate = async () => {
 		validate: (value) => {
 			if (!/^\.[a-z]+$/.test(value)) {
 				return 'Starts with a dot, contains only lower case letters';
-			}
-			if (PLUGINS.find((p) => p.extension === value)) {
-				return 'Plugin with this extension already exists';
 			}
 			return true;
 		},

@@ -11,7 +11,7 @@
 	height: 100vh;
 
 	grid-template: "file-tree tabs" auto
-	"file-tree workspace" minmax(0, 1fr) /
+	"file-tree viewer" minmax(0, 1fr) /
 	200px minmax(0, 1fr);
 
 	&__file-tree {
@@ -26,10 +26,10 @@
 		grid-area: tabs;
 	}
 
-	&__workspace {
+	&__viewer {
 		background-color: var(--primary-background);
 
-		grid-area: workspace;
+		grid-area: viewer;
 	}
 }
 

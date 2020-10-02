@@ -1,19 +1,29 @@
 import { handlers } from './handlers';
+import { dispatchers } from './dispatcher';
 
 declare global {
-	namespace Plugin {
-		interface Registry {
-			questions: SetPlugin<
-				'questions',
-				'.qa',
-				Actions.ExtractActions<typeof handlers>,
-				Questions
-			>;
-		}
+	namespace Questions {
+		type Dispatch = Actions.DispatcherMap<typeof dispatchers>;
 
-		type Questions = {
+		type Dispatcher<T extends any[] = undefined[]> = Actions.Dispatcher<
+			T,
+			{},
+			Actions.ExtractActions<typeof handlers>
+		>;
+
+		type Handler<P extends AnyObject | undefined = undefined> = App.Handler<
+			P,
+			State
+		>;
+
+		type State = {
+			items: QABlock[];
+		};
+
+		type QABlock = {
 			id: string;
-			example: string;
+			question: string;
+			answer: string;
 		};
 	}
 }

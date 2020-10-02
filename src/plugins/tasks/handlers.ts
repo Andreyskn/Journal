@@ -1,31 +1,18 @@
-import { identifier } from '../../utils';
+import { generateId } from '../../utils';
 
-type TasksHandler<P extends AnyObject | undefined = undefined> = App.Handler<
-	P,
-	Plugin.TaskList
->;
-
-const initState: Plugin.InitStateHandler<Plugin.TaskList> = (_, { data }) => {
-	return {
-		...data,
-		tasks: [],
-		title: 'Task List',
-	};
-};
-
-const setTaskListTitle: TasksHandler<{
-	title: Plugin.TaskList['title'];
+const setTaskListTitle: TaskList.Handler<{
+	title: TaskList.State['title'];
 }> = (state, { title }) => {
 	return { ...state, title };
 };
 
-const addTask: TasksHandler<{
-	text: Plugin.Task['text'];
+const addTask: TaskList.Handler<{
+	text: TaskList.Task['text'];
 }> = (state, { text }) => {
-	const task: Plugin.Task = {
+	const task: TaskList.Task = {
 		createdAt: Date.now(),
 		done: false,
-		id: identifier.generateId('task'),
+		id: generateId(),
 		text,
 	};
 
@@ -35,8 +22,8 @@ const addTask: TasksHandler<{
 	};
 };
 
-const deleteTask: TasksHandler<{
-	taskId: Plugin.Task['id'];
+const deleteTask: TaskList.Handler<{
+	taskId: TaskList.Task['id'];
 }> = (state, { taskId }) => {
 	return {
 		...state,
@@ -44,8 +31,8 @@ const deleteTask: TasksHandler<{
 	};
 };
 
-const toggleTaskDone: TasksHandler<{
-	taskId: Plugin.Task['id'];
+const toggleTaskDone: TaskList.Handler<{
+	taskId: TaskList.Task['id'];
 }> = (state, { taskId }) => {
 	return {
 		...state,
@@ -56,9 +43,8 @@ const toggleTaskDone: TasksHandler<{
 };
 
 export const handlers = {
-	'@tasks/INIT': initState,
-	'@tasks/ADD_TASK': addTask,
-	'@tasks/DELETE_TASK': deleteTask,
-	'@tasks/TOGGLE_TASK_DONE': toggleTaskDone,
-	'@tasks/SET_TASK_LIST_TITLE': setTaskListTitle,
+	ADD_TASK: addTask,
+	DELETE_TASK: deleteTask,
+	TOGGLE_TASK_DONE: toggleTaskDone,
+	SET_TASK_LIST_TITLE: setTaskListTitle,
 };

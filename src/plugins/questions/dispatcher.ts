@@ -1,14 +1,12 @@
-const init: Plugin.InitStateDispatcher = ({ dispatch }) => (data) => {
+const addQuestion: Questions.Dispatcher<[
+	question: Questions.QABlock['question']
+]> = ({ dispatch }) => (question) => {
 	dispatch({
-		type: '@notes/INIT',
-		payload: {
-			data,
-		},
+		type: 'ADD_QUESTION',
+		payload: { question },
 	});
 };
 
 export const dispatchers = {
-	init,
+	addQuestion,
 };
-
-export type QuestionsDispatch = Actions.DispatcherMap<typeof dispatchers>;

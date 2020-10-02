@@ -21,7 +21,7 @@ declare global {
 		};
 
 		type RegularFile = BaseFile & {
-			type: FileType;
+			type: string;
 			data: FileData['id'];
 			parent: App.Directory['id'];
 		};
@@ -30,6 +30,10 @@ declare global {
 
 		type TaggedFile = App.TaggedRecord<File, 'file'>;
 		type ImmutableFile = App.ImmutableRecord<TaggedFile>;
+
+		type FileType = string;
+		type FileExtension = string;
+		type FileData = { id: string; state: unknown };
 
 		type FileSystemState = {
 			data: Immutable.Map<FileData['id'], FileData>;

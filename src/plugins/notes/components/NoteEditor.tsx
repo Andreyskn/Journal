@@ -4,49 +4,31 @@ import ReactMarkdown from 'react-markdown';
 
 import './note-editor.scss';
 
-import { useBEM, useStateRef } from '../../../utils';
-import { NotesDispatch } from '../dispatcher';
+import { useBEM } from '../../../utils';
 
-type NoteEditorProps = Plugin.ComponentProps<Plugin.Note, NotesDispatch>;
+type NoteEditorProps = Plugin.ComponentProps<Notes.State, Notes.Dispatch>;
 
 const [noteEditorBlock, noteEditorElement] = useBEM('note-editor');
 
 export const NoteEditor: React.FC<NoteEditorProps> = ({
-	data: note,
+	state: note,
 	dispatch,
 }) => {
-	const [text, setText, textRef] = useStateRef(note.text || '');
-
-	const saveState = useCallback(() => {
-		if (!textRef.hasChanged()) return;
-		const text = textRef.getState();
-		if (text !== note.text) dispatch.saveNote(text);
-	}, []);
-
-	useEffect(() => {
-		window.addEventListener('beforeunload', saveState);
-
-		return () => {
-			saveState();
-			window.removeEventListener('beforeunload', saveState);
-		};
-	}, []);
-
 	const onChange: ITextAreaProps['onChange'] = ({ target: { value } }) => {
-		setText(value);
+		dispatch.setText(value);
 	};
 
 	return (
 		<div className={noteEditorBlock()}>
 			<TextArea
 				large
-				value={text}
+				value={note.text}
 				growVertically
 				className={noteEditorElement('text-area')}
 				onChange={onChange}
 			/>
 			<ReactMarkdown
-				source={text}
+				source={note.text}
 				className={noteEditorElement(
 					'viewer',
 					null,

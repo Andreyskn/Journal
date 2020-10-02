@@ -1,12 +1,20 @@
-type QuestionsHandler<
-	P extends AnyObject | undefined = undefined
-> = App.Handler<P, Plugin.Questions>;
+import { generateId } from '../../utils';
 
-const initState: Plugin.InitStateHandler<Plugin.Questions> = (_, { data }) => {
+const addQuestion: Questions.Handler<{
+	question: Questions.QABlock['question'];
+}> = (state, { question }) => {
+	const qaBlock: Questions.QABlock = {
+		id: generateId(),
+		question,
+		answer: '',
+	};
+
 	return {
-		...data,
-		example: '',
+		...state,
+		items: [qaBlock, ...state.items],
 	};
 };
 
-export const handlers = { '@notes/INIT': initState };
+export const handlers = {
+	ADD_QUESTION: addQuestion,
+};
