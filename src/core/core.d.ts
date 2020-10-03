@@ -6,12 +6,7 @@ declare global {
 	namespace Actions {
 		type AnyAction = App.ActionBase<any, any>;
 
-		type AppAction = (TabsAction | FileSystemAction | PersistanceAction) &
-			Meta;
-
-		type Meta = Partial<{
-			scope: string[];
-		}>;
+		type AppAction = TabsAction | FileSystemAction | PersistanceAction;
 
 		type Dispatch<A extends AnyAction = AppAction> =
 			| ReduxDispatch<A>
@@ -26,14 +21,6 @@ declare global {
 				dispatch: Dispatch<A>;
 			}
 		) => (...args: T) => void;
-
-		type DispatcherDeps<
-			T extends Record<string, Actions.Dispatcher<any[], any>>,
-			R extends AnyObject = OmitType<
-				Parameters<T[keyof T]>[0],
-				'dispatch'
-			>
-		> = keyof R extends never ? never : R;
 
 		type DispatcherMap<T extends Record<string, Dispatcher<any[], any>>> = {
 			[K in keyof T]: ReturnType<T[K]>;

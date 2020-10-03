@@ -2,12 +2,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 
 import './viewer.scss';
 
-import {
-	ErrorBoundary,
-	createReducer,
-	initDispatchers,
-	useStateRef,
-} from '../../utils';
+import { ErrorBoundary, createReducer, useStateRef } from '../../utils';
 import { PLUGINS, PLUGINS_MAP } from '../../plugins/registry';
 import { useDispatch, useSelector } from '../../core';
 
@@ -42,11 +37,13 @@ const connectPlugin = ({
 			setState(reducer(stateRef.getState(), action));
 		}, []);
 
-		const dispatch = useMemo(
-			() => initDispatchers(localDispatch, dispatchers),
-			[]
+		const pluginDispatch = useDispatch(
+			dispatchers,
+			undefined,
+			localDispatch
 		);
 
+		// TODO: add debounced save
 		const saveState = useCallback(() => {
 			if (!stateRef.hasChanged()) return;
 			coreDispatch.setFileDataState(data.id, stateRef.getState());
@@ -60,7 +57,7 @@ const connectPlugin = ({
 			};
 		}, []);
 
-		return <Component state={state} dispatch={dispatch} />;
+		return <Component state={state} dispatch={pluginDispatch} />;
 	};
 
 	return { default: ConnectedPlugin };
@@ -90,7 +87,7 @@ export const Viewer: React.FC = () => {
 
 	const activeDocument = activeFile && data.get(activeFile.data);
 
-	if (!activeFile || !activeDocument) return null;
+	if (!activeFile || !activeDocument) return null; // TODO: add placeholder
 
 	const Plugin = pluginComponents[activeFile.type];
 

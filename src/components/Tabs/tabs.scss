@@ -1,2 +1,154 @@
 .tabs {
+	&:after {
+		display: block;
+
+		height: 3px;
+
+		content: "";
+
+		background-color: #394b59;
+	}
+
+	&__bar {
+		display: flex;
+		overflow: hidden;
+
+		height: 30px;
+
+		align-items: center;
+	}
+
+	&__tab-wrapper {
+		position: relative;
+
+		flex: 1 1 60px;
+
+		min-width: 60px;
+		max-width: 200px;
+
+		&:before, &:after {
+			position: absolute;
+			z-index: 1;
+			top: 5px;
+
+			width: 1px;
+			height: 20px;
+
+			content: "";
+			transition: opacity 0.3s ease-in-out;
+
+			background-color: #394b59;
+		}
+
+		&:before {
+			left: 0;
+		}
+
+		&:after {
+			right: 0;
+		}
+
+		&:first-of-type:before {
+			content: none;
+		}
+
+		&:not(:last-of-type):after {
+			content: none;
+		}
+
+		&:hover {
+			&:before, &:after, & + .tabs__tab-wrapper:before {
+				opacity: 0;
+			}
+		}
+
+		&--active {
+			.tabs__tab-button {
+				transition: none !important;
+
+				color: inherit !important;
+				background-color: #394b59 !important;
+
+				// TODO: rounded corners should be done with clip-path and buttons should overlap each other
+				&:before, &:after {
+					position: absolute;
+					z-index: 1;
+					top: 0;
+
+					width: 8px;
+					height: 100%;
+					margin: 0;
+
+					content: "";
+
+					box-shadow: 0 10px 0 0 #394b59;
+				}
+
+				&:before {
+					right: 100%;
+
+					border-bottom-right-radius: 6px;
+				}
+
+				&:after {
+					left: 100%;
+
+					border-bottom-left-radius: 6px;
+				}
+			}
+
+			& + .tabs__tab-wrapper:before {
+				opacity: 0;
+			}
+		}
+	}
+
+	&__tab-button {
+		position: relative;
+
+		padding-right: 30px;
+
+		border-radius: 6px 6px 0 0;
+
+		justify-content: flex-start;
+
+		&:hover {
+			transition: background-color 0.3s;
+		}
+
+		> .bp3-button-text {
+			overflow: hidden;
+
+			text-overflow: ellipsis;
+
+			line-height: normal;
+		}
+	}
+
+	&__tab-close {
+		position: absolute;
+		top: 50%;
+		right: 5px;
+
+		width: 20px;
+		min-width: auto;
+		height: 20px;
+		min-height: auto;
+
+		transform: translateY(-50%);
+
+		border-radius: 50%;
+	}
+
+	&__add {
+		width: 25px;
+		min-width: auto;
+		height: 25px;
+		min-height: auto;
+		margin: 0 5px;
+
+		transition: background-color 0.3s ease-in-out;
+
+		border-radius: 50%;
+	}
 }

@@ -23,27 +23,6 @@ export const useStateRef = <S>(initialState: S) => {
 	return [state.current, setState, { getState, hasChanged }] as const;
 };
 
-export const initDispatchers = <
-	T extends Record<string, Actions.Dispatcher<any[], any>>,
-	D extends Actions.DispatcherDeps<T>,
-	R extends Actions.DispatcherMap<T>
->(
-	dispatch: Actions.Dispatch,
-	dispatchers: T,
-	deps: D = {} as D
-): R => {
-	return (Object.entries(dispatchers) as [keyof T, T[keyof T]][]).reduce(
-		(result, [name, fn]) => {
-			result[name] = fn({
-				dispatch,
-				...deps,
-			}) as R[keyof T];
-			return result;
-		},
-		{} as R
-	);
-};
-
 export const createReducer = <T>(handlers: any, initialState?: T) => {
 	const wrappedHandlers = Object.entries(handlers).reduce(
 		(acc, [type, handler]) => {

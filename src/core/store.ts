@@ -9,7 +9,7 @@ import {
 } from './persistance';
 import { fileSystem } from './fileSystem';
 import { tabs } from './tabs';
-import { createReducer, initDispatchers } from '../utils';
+import { createReducer } from '../utils';
 
 export let store: App.Store;
 
@@ -43,17 +43,32 @@ export const useSelector = <T extends any>(
 	return data;
 };
 
-// TODO: combine useDispatch with initDispatchers, add option to replace store.dispatch
+type DispatcherDeps<
+	T extends Record<string, Actions.Dispatcher<any[], any>>,
+	R extends AnyObject = OmitType<Parameters<T[keyof T]>[0], 'dispatch'>
+> = keyof R extends never ? never : R;
+
 export const useDispatch = <
 	T extends Record<string, Actions.Dispatcher<any[], any>>,
-	D extends Actions.DispatcherDeps<T>,
+	D extends DispatcherDeps<T>,
 	R extends Actions.DispatcherMap<T>
 >(
 	dispatchers: T,
-	deps: D = {} as D
+	deps: D = {} as D,
+	dispatch: Actions.Dispatch<any> = store.dispatch
 ): R => {
 	return useMemo(
-		() => initDispatchers(store.dispatch, dispatchers, deps),
+		() =>
+			(Object.entries(dispatchers) as [keyof T, T[keyof T]][]).reduce(
+				(result, [name, fn]) => {
+					result[name] = fn({
+						dispatch,
+						...deps,
+					}) as R[keyof T];
+					return result;
+				},
+				{} as R
+			),
 		Object.values(deps)
 	);
 };

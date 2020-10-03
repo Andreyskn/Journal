@@ -1,7 +1,7 @@
 import React from 'react';
 import './tabs.scss';
 import { useBEM } from '../../utils';
-import { Button, Menu, MenuItem, Popover } from '@blueprintjs/core';
+import { Alignment, Button, Menu, MenuItem, Popover } from '@blueprintjs/core';
 import { TabsDispatch } from './dispatcher';
 import { PLUGINS, PLUGINS_MAP } from '../../plugins/registry';
 
@@ -39,22 +39,43 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTabId, dispatch }) => {
 		const isActive = id === activeTabId;
 
 		return (
-			<Button
+			<div
+				className={tabsElement('tab-wrapper', { active: isActive })}
 				key={id}
-				text={name}
-				icon={PLUGINS_MAP[type].icon}
-				intent={isActive ? 'success' : 'none'}
-				onClick={isActive ? undefined : setActiveTab(id)}
-			/>
+				title={path}
+			>
+				<Button
+					text={name}
+					icon={PLUGINS_MAP[type].icon}
+					intent={isActive ? 'success' : 'none'}
+					onClick={isActive ? undefined : setActiveTab(id)}
+					className={tabsElement('tab-button')}
+					minimal
+					fill
+					alignText={Alignment.LEFT}
+				/>
+				<Button
+					icon='small-cross'
+					className={tabsElement('tab-close')}
+					minimal
+					onClick={() => dispatch.closeTab(id)}
+				/>
+			</div>
 		);
 	};
 
 	return (
 		<div className={tabsBlock()}>
-			{tabs.map(renderTab)}
-			<Popover content={createTabMenu} position='bottom-left' minimal>
-				<Button icon='add' />
-			</Popover>
+			<div className={tabsElement('bar')}>
+				{tabs.map(renderTab)}
+				<Popover content={createTabMenu} position='bottom-left' minimal>
+					<Button
+						icon='plus'
+						minimal
+						className={tabsElement('add')}
+					/>
+				</Popover>
+			</div>
 		</div>
 	);
 };

@@ -104,4 +104,7 @@ const closeTabByPath: App.Handler<{ path: App.File['path'] }> = (
 	});
 };
 
-export const handlers = { '@tabs/CREATE_TAB': createTab };
+export const handlers = {
+	'@tabs/CREATE_TAB': createTab,
+	'@tabs/CLOSE_TAB': closeTabById,
+};
