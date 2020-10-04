@@ -8,7 +8,7 @@ import {
 	NodeEditorDataRename,
 } from './common';
 import { DIRECTORY_ID } from '../../core/fileSystem/constants';
-import { PLUGINS_MAP } from '../../plugins/registry';
+import { PLUGINS_MAP } from '../../plugins';
 
 // TODO: refactor. try composite pattern
 

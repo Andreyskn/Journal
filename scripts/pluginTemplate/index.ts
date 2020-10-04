@@ -8,7 +8,7 @@ import * as iconNames from '@blueprintjs/icons/lib/cjs/generated/iconNames';
 const PATHS = {
 	pluginsFolder: path.join(__dirname, '../../src/plugins'),
 	connector: path.join(__dirname, '../../src/plugins/connector.tsx'),
-	registry: path.join(__dirname, '../../src/plugins/registry.ts'),
+	registry: path.join(__dirname, '../../src/plugins.ts'),
 	identifier: path.join(__dirname, '../../src/utils/identifier.ts'),
 };
 

@@ -3,7 +3,7 @@ import './tabs.scss';
 import { useBEM } from '../../utils';
 import { Alignment, Button, Menu, MenuItem, Popover } from '@blueprintjs/core';
 import { TabsDispatch } from './dispatcher';
-import { PLUGINS, PLUGINS_MAP } from '../../plugins/registry';
+import { PLUGINS, PLUGINS_MAP } from '../../plugins';
 
 const [tabsBlock, tabsElement] = useBEM('tabs');
 

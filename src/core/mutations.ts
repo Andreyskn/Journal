@@ -1,29 +1,30 @@
 import Events from 'events';
 
-type Mutation =
-	| App.ActionBase<
-			'FILE_CREATED',
-			{ state: App.ImmutableAppState; file: App.ImmutableFile }
-	  >
-	| App.ActionBase<
-			'FILE_DELETED',
-			{ state: App.ImmutableAppState; file: App.ImmutableFile }
-	  >
-	| App.ActionBase<
-			'FILE_UPDATED',
-			{ state: App.ImmutableAppState; file: App.ImmutableFile }
-	  >;
-
-type ExtractListener<T extends App.ActionBase<any, any>> = {
-	type: T['type'];
-	act: (
-		payload: T extends { payload: any } ? T['payload'] : undefined
-	) => void;
+type Mutations = {
+	FILE_CREATED: { state: App.ImmutableAppState; file: App.ImmutableFile };
+	FILE_DELETED: { state: App.ImmutableAppState; file: App.ImmutableFile };
+	FILE_UPDATED: { state: App.ImmutableAppState; file: App.ImmutableFile };
+	FILE_SELECTED: { state: App.ImmutableAppState; file: App.ImmutableFile };
+	SET_ACTIVE_FILE: {
+		state: App.ImmutableAppState;
+		id: App.FileSystemState['activeFile']['id'];
+	};
 };
 
+type Event = {
+	[T in keyof Mutations]: App.ActionBase<T, Mutations[T]>;
+}[keyof Mutations];
+
+type Listener = {
+	[T in keyof Mutations]: {
+		type: T;
+		act: (payload: Mutations[T]) => void;
+	};
+}[keyof Mutations];
+
 type EventEmitter = {
-	dispatch: (mutation: Mutation) => void;
-	on: (mutation: ExtractListener<Mutation>) => EventEmitter;
+	dispatch: (event: Event) => void;
+	on: (listener: Listener) => EventEmitter;
 };
 
 const eventEmitter = new Events.EventEmitter();

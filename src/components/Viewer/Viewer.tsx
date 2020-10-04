@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import './viewer.scss';
 
 import { ErrorBoundary, createReducer, useStateRef } from '../../utils';
-import { PLUGINS, PLUGINS_MAP } from '../../plugins/registry';
+import { PLUGINS, PLUGINS_MAP } from '../../plugins';
 import { useDispatch, useSelector } from '../../core';
 
 const setFileDataState: Actions.Dispatcher<[

@@ -9,11 +9,7 @@ import { Menu, MenuItem, IPopoverProps } from '@blueprintjs/core';
 import { ValidationResult } from './useValidation';
 import { useBEM } from '../../../utils';
 import { NodeEditorProps } from './NodeEditor';
-import {
-	EXTENSIONS,
-	PLUGINS_MAP,
-	TYPE_BY_EXTENSION,
-} from '../../../plugins/registry';
+import { EXTENSIONS, PLUGINS_MAP, TYPE_BY_EXTENSION } from '../../../plugins';
 
 const [autocompleteBlock, autocompleteElement] = useBEM('autocomplete-popover');
 

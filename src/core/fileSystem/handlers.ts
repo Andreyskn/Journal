@@ -2,7 +2,14 @@ import * as helpers from './helpers';
 import { generateId } from '../../utils';
 import { DIRECTORY_ID, UNTITLED } from './constants';
 import { mutations } from '../mutations';
-import { PLUGINS_MAP } from '../../plugins/registry';
+import { PLUGINS_MAP } from '../../plugins';
+
+mutations.on({
+	type: 'SET_ACTIVE_FILE',
+	act: ({ state, id }) => {
+		setActiveFile(state, { id });
+	},
+});
 
 const createFile: App.Handler<{
 	name: App.File['name'];
@@ -136,13 +143,29 @@ const renameFile: App.Handler<{
 };
 
 const setActiveFile: App.Handler<{
-	id: App.FileData['id'];
+	id: App.FileSystemState['activeFile']['id'];
 }> = (state, { id }) => {
-	return state.update('activeFile', (activeFile) => ({
-		...activeFile,
-		id,
-		path: state.files.get(id)!.path,
-	}));
+	if (!id)
+		return state.update('activeFile', (activeFile) => ({
+			...activeFile,
+			id: null,
+			path: null,
+		}));
+
+	return state.withMutations((state) => {
+		const file = state.files.get(id)!;
+
+		state.update('activeFile', (activeFile) => ({
+			...activeFile,
+			id,
+			path: file.path,
+		}));
+
+		mutations.dispatch({
+			type: 'FILE_SELECTED',
+			payload: { state, file },
+		});
+	});
 };
 
 const setFileDataState: App.Handler<{
