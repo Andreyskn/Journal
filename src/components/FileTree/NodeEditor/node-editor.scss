@@ -43,13 +43,16 @@
 	min-width: auto;
 
 	&__item {
+		display: flex;
+
 		font-size: 16px;
+
+		justify-content: space-between;
 
 		> span {
 			opacity: 0.5;
 
 			font-size: 12px;
-			font-style: italic;
 		}
 	}
 }

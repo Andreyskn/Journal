@@ -9,6 +9,7 @@ import {
 	ContextMenu,
 	Menu,
 	MenuItem,
+	MenuDivider,
 } from '@blueprintjs/core';
 import { useForceUpdate, useBEM } from '../../utils';
 import { FileTreeDispatch } from './dispatcher';
@@ -22,7 +23,7 @@ import {
 } from './useTree';
 import { fileTreeBlock, NodeEditorData } from './common';
 import { NodeEditorProps } from './NodeEditor';
-import { DIRECTORY_ID, getFilePath, PATHS } from '../../core/fileSystem';
+import { DIRECTORY_ID, getFilePath, PATHS, SEP } from '../../core/fileSystem';
 
 const [explorerBlock, explorerElement] = useBEM('file-explorer');
 
@@ -77,10 +78,12 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	};
 
 	const selectNode = (node: Node) => {
-		if (node.nodeData.path !== selection.path) {
-			setSelection({ path: node.nodeData.path });
+		const path = node.nodeData.path;
 
-			if (!isFolderNode(node)) {
+		if (path !== selection.path) {
+			setSelection({ path });
+
+			if (!isFolderNode(node) && path !== activeFilePath) {
 				dispatch.setActiveFile(node.id);
 			}
 		}
@@ -89,7 +92,6 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	const onNodeContextMenu: TreeProps['onNodeContextMenu'] = (node, _, e) => {
 		if (isEditingNode(node)) return;
 		e.preventDefault();
-		selectNode(node);
 
 		const onRename = () => {
 			const cwd = getCurrentDirectory();
@@ -111,8 +113,46 @@ export const FileTree: React.FC<FileTreeProps> = ({
 
 		const onDelete = () => dispatch.deleteFile(node.id);
 
+		const onMove = (target: App.Directory['id']) => () =>
+			dispatch.moveFile(node.id, target);
+
+		const moveTargets = [...nodesMap.folders.values()]
+			.filter((folderNode) => {
+				const isSelf = folderNode === node;
+				const isCurrentParent =
+					folderNode.id === node.nodeData.parent!.id;
+				const isChild = folderNode.nodeData.path.startsWith(
+					node.nodeData.path
+				);
+				return !isSelf && !isCurrentParent && !isChild;
+			})
+			.sort((a, b) => a.nodeData.path.localeCompare(b.nodeData.path))
+			.map((folderNode) => {
+				const label = folderNode.label || 'Root';
+				const path =
+					folderNode.nodeData.path.replace(
+						`${SEP}${DIRECTORY_ID.main}`,
+						''
+					) || SEP;
+				return { label, path, id: folderNode.id };
+			});
+
 		ContextMenu.show(
 			<Menu>
+				<MenuItem text='Move to folder' disabled={!moveTargets.length}>
+					{moveTargets.map(({ label, path, id }) => (
+						<MenuItem
+							key={id}
+							text={
+								<div className={explorerElement('move-target')}>
+									{label} <span>{path}</span>
+								</div>
+							}
+							onClick={onMove(id)}
+						/>
+					))}
+				</MenuItem>
+				<MenuDivider />
 				<MenuItem text='Rename' onClick={onRename} />
 				<MenuItem text='Delete' onClick={onDelete} />
 			</Menu>,

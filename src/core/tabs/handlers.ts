@@ -17,9 +17,7 @@ mutations
 	.on({
 		type: 'FILE_DELETED',
 		act: ({ state, file }) => {
-			if (file.type === 'directory') {
-				closeTabByPath(state, { path: file.path });
-			} else closeTabById(state, { id: file.id });
+			closeTab(state, { id: file.id });
 		},
 	})
 	.on({
@@ -37,6 +35,7 @@ const createTab: App.Handler<{ file: App.ImmutableFile }> = (
 
 	const { id, name, type, path } = file as App.RegularFile;
 
+	// TODO: open new tab right next to currently active
 	return state.update('tabs', (tabs) =>
 		tabs.set(
 			id,
@@ -54,19 +53,16 @@ const updateTab: App.Handler<{ file: App.ImmutableFile }> = (
 	state,
 	{ file: { id, name, path } }
 ) => {
-	const tab = state.tabs.get(id);
-	if (!tab) return state;
+	if (!state.tabs.get(id)) return state;
 
-	return state.update('tabs', (tabs) =>
-		tabs.update(id, (tab) =>
-			tab.withMutations((tab) => {
-				tab.set('name', name).set('path', path);
-			})
-		)
+	return (state as any).updateIn(['tabs', id], (tab: App.ImmutableTab) =>
+		tab.withMutations((tab) => {
+			tab.set('name', name).set('path', path);
+		})
 	);
 };
 
-const closeTabById: App.Handler<{ id: App.File['id'] }> = (state, { id }) => {
+const closeTab: App.Handler<{ id: App.File['id'] }> = (state, { id }) => {
 	if (!state.tabs.get(id)) return state;
 
 	const tabKeys = state.tabs.keySeq();
@@ -89,26 +85,7 @@ const closeTabById: App.Handler<{ id: App.File['id'] }> = (state, { id }) => {
 	});
 };
 
-const closeTabByPath: App.Handler<{ path: App.File['path'] }> = (
-	state,
-	{ path }
-) => {
-	const filteredTabs = state.tabs.filter((tab) => !tab.path.startsWith(path));
-
-	if (filteredTabs.size === state.tabs.size) return state;
-
-	return state.withMutations((state) => {
-		state.set('tabs', filteredTabs);
-
-		// TODO: set proper next active tab
-		mutations.dispatch({
-			type: 'SET_ACTIVE_FILE',
-			payload: { state, id: null },
-		});
-	});
-};
-
 export const handlers = {
 	'@tabs/CREATE_TAB': createTab,
-	'@tabs/CLOSE_TAB': closeTabById,
+	'@tabs/CLOSE_TAB': closeTab,
 };

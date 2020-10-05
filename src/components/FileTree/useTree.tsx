@@ -147,8 +147,6 @@ export const expandParentFolders = ({ nodeData: { parent } }: Node) => {
 	}
 };
 
-const TEMP_ITEM_PATH = '*';
-
 const maybeAppendNewItem = (
 	folder: FolderNode,
 	nodeEditorData: NodeEditorData
@@ -166,7 +164,7 @@ const maybeAppendNewItem = (
 		label: <NodeEditor {...nodeEditorData} />,
 		isNew: true,
 		parent: folder,
-		path: TEMP_ITEM_PATH,
+		path: '*',
 	});
 
 	folder.childNodes.push(newItemNode);

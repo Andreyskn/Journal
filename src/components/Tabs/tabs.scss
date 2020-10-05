@@ -27,6 +27,10 @@
 		min-width: 60px;
 		max-width: 200px;
 
+		&:last-of-type {
+			margin-right: 6px;
+		}
+
 		&:before, &:after {
 			position: absolute;
 			z-index: 1;
@@ -111,6 +115,8 @@
 
 		border-radius: 6px 6px 0 0;
 
+		font-size: 13px;
+
 		justify-content: flex-start;
 
 		&:hover {
@@ -146,7 +152,6 @@
 		min-width: auto;
 		height: 25px;
 		min-height: auto;
-		margin-left: 6px;
 
 		transition: background-color 0.3s ease-in-out;
 

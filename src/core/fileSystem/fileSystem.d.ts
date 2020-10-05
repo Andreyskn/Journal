@@ -19,15 +19,18 @@ declare global {
 			data: Immutable.OrderedMap<File['name'], File['id']>;
 			parent: App.Directory['id'] | null;
 		};
+		type TaggedDirectory = App.TaggedRecord<Directory, 'file'>;
+		type ImmutableDirectory = App.ImmutableRecord<TaggedDirectory>;
 
 		type RegularFile = BaseFile & {
 			type: string;
 			data: FileData['id'];
 			parent: App.Directory['id'];
 		};
+		type TaggedRegularFile = App.TaggedRecord<Directory, 'file'>;
+		type ImmutableRegularFile = App.ImmutableRecord<TaggedRegularFile>;
 
 		type File = RegularFile | Directory;
-
 		type TaggedFile = App.TaggedRecord<File, 'file'>;
 		type ImmutableFile = App.ImmutableRecord<TaggedFile>;
 
@@ -40,7 +43,7 @@ declare global {
 			files: Immutable.Map<File['id'], ImmutableFile>;
 			activeFile: {
 				id: File['id'] | null;
-				path: File['path'] | null;
+				path: File['path'] | null; // TODO: get it from file?
 				isPreview: boolean;
 			};
 		};

@@ -118,7 +118,7 @@ export const Autocomplete = React.forwardRef<
 						<div className={autocompleteElement('item')}>
 							{item}{' '}
 							<span>
-								({PLUGINS_MAP[TYPE_BY_EXTENSION[item]].label})
+								{PLUGINS_MAP[TYPE_BY_EXTENSION[item]].label}
 							</span>
 						</div>
 					}

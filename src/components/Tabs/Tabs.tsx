@@ -18,8 +18,16 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTabId, dispatch }) => {
 		dispatch.createFile(type);
 	};
 
-	const setActiveTab = (id: App.Tab['id']) => () => {
-		dispatch.setActiveTab(id);
+	const onSelect = (id: App.Tab['id']) => () => {
+		if (id !== activeTabId) {
+			dispatch.setActiveTab(id);
+		}
+	};
+
+	const onClose = (id: App.Tab['id']) => (e: React.MouseEvent) => {
+		if (e.button === 0 || e.button === 1) {
+			dispatch.closeTab(id);
+		}
 	};
 
 	const createTabMenu = (
@@ -48,17 +56,18 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTabId, dispatch }) => {
 					text={name}
 					icon={PLUGINS_MAP[type].icon}
 					intent={isActive ? 'success' : 'none'}
-					onClick={isActive ? undefined : setActiveTab(id)}
+					onClick={onSelect(id)}
 					className={tabsElement('tab-button')}
 					minimal
 					fill
 					alignText={Alignment.LEFT}
+					onAuxClick={onClose(id)}
 				/>
 				<Button
 					icon='small-cross'
 					className={tabsElement('tab-close')}
 					minimal
-					onClick={() => dispatch.closeTab(id)}
+					onClick={onClose(id)}
 				/>
 			</div>
 		);

@@ -39,11 +39,22 @@ const renameFile: Actions.Dispatcher<[
 	});
 };
 
+const moveFile: Actions.Dispatcher<[
+	id: App.File['id'],
+	newDir: App.File['parent']
+]> = ({ dispatch }) => (id, newDir) => {
+	dispatch({
+		type: '@fs/MOVE_FILE',
+		payload: { id, newDir },
+	});
+};
+
 export const dispatchers = {
 	setActiveFile,
 	createFile,
 	deleteFile,
 	renameFile,
+	moveFile,
 };
 
 export type FileTreeDispatch = Actions.DispatcherMap<typeof dispatchers>;

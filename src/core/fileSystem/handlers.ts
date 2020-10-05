@@ -80,26 +80,23 @@ const deleteFile: App.Handler<{
 }> = (state, { id }) => {
 	const targetFile = state.files.get(id);
 
-	if (
-		!targetFile ||
-		!targetFile.parent ||
-		!state.files.get(targetFile.parent)
-	) {
-		return state;
-	}
+	if (!targetFile) return state;
 
 	return state.withMutations((state) => {
-		state.updateIn(
-			['files', targetFile.parent, 'data'],
-			(data: App.Directory['data']) => data.delete(targetFile.name)
-		);
-		state.update('files', (files) => files.delete(id));
-
-		if (targetFile.type !== 'directory') {
+		if (helpers.isDirectory(targetFile)) {
+			targetFile.data.forEach((id) => deleteFile(state, { id }));
+		} else {
 			state.update('data', (data) =>
 				data.delete((targetFile as App.RegularFile).data)
 			);
 		}
+
+		state.updateIn(
+			['files', targetFile.parent, 'data'],
+			(data: App.Directory['data']) => data.delete(targetFile.name)
+		);
+
+		state.update('files', (files) => files.delete(id));
 
 		if (state.activeFile.id === id) {
 			state.update('activeFile', (activeFile) => ({
@@ -120,24 +117,52 @@ const renameFile: App.Handler<{
 	id: App.File['id'];
 	name: App.File['name'];
 }> = (state, { id, name }) => {
-	const originalFile = state.files.get(id);
-	if (!originalFile) return state;
+	return moveFile(state, { id, newName: name });
+};
 
-	const renamedFile = originalFile.set('name', name);
+const moveFile: App.Handler<{
+	id: App.File['id'];
+	newName?: string;
+	newDir?: App.File['parent'];
+}> = (state, { id, newName, newDir }) => {
+	const file = state.files.get(id);
 
+	if (!file) return state;
+
+	const name = newName || file.name;
+	const dest = newDir || file.parent;
+
+	// TODO: handle name collisions
 	return state.withMutations((state) => {
-		state.update('files', (files) =>
-			files.set(renamedFile.id, renamedFile)
-		);
 		(state as any).updateIn(
-			['files', originalFile.parent, 'data'],
-			(data: App.Directory['data']) => data.delete(originalFile.name)
+			['files', file.parent, 'data'],
+			(data: App.Directory['data']) => data.delete(file.name)
 		);
-		helpers.setDirectoryData(state, renamedFile.parent, renamedFile);
+
+		// TODO: add updateFile function (should handle activeFile too)
+		(state as any).updateIn(['files', id], (file: App.ImmutableFile) =>
+			file.withMutations((file) => {
+				file.set('name', name)
+					.set('parent', dest)
+					.set('path', helpers.getFilePath(state.files, name, dest));
+			})
+		);
+
+		const updatedFile = state.files.get(id)!;
+
+		// TODO: active file should store a reference to file instead of id and path
+		if (updatedFile.id === state.activeFile.id) {
+			state.update('activeFile', (activeFile) => ({
+				...activeFile,
+				path: updatedFile.path,
+			}));
+		}
+
+		helpers.setDirectoryData(state, dest, updatedFile);
 
 		mutations.dispatch({
 			type: 'FILE_UPDATED',
-			payload: { state, file: renamedFile },
+			payload: { state, file: updatedFile },
 		});
 	});
 };
@@ -183,6 +208,7 @@ export const handlers = {
 	'@fs/CREATE_UNTITLED_FILE': createUntitledFile,
 	'@fs/DELETE_FILE': deleteFile,
 	'@fs/RENAME_FILE': renameFile,
+	'@fs/MOVE_FILE': moveFile,
 	'@fs/SET_ACTIVE_FILE': setActiveFile,
 	'@fs/SET_FILE_DATA_STATE': setFileDataState,
 };

@@ -15,6 +15,7 @@ $explorer: ".file-explorer";
 $controls: "#{$explorer}__controls";
 $treeContainer: "#{$explorer}__tree-container";
 $filler: "#{$explorer}__filler";
+$moveTarget: "#{$explorer}__move-target";
 
 #{$explorer} {
 	height: 100%;
@@ -47,5 +48,19 @@ $filler: "#{$explorer}__filler";
 
 			height: 0;
 		}
+	}
+}
+
+#{$moveTarget} {
+	display: flex;
+
+	justify-content: space-between;
+
+	span {
+		margin-left: 15px;
+
+		opacity: 0.5;
+
+		font-size: 12px;
 	}
 }

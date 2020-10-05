@@ -79,6 +79,10 @@ export const getFileType = (name: string): App.File['type'] => {
 	return extension ? TYPE_BY_EXTENSION[extension] : 'directory';
 };
 
+export const isDirectory = (
+	file: App.ImmutableFile
+): file is App.ImmutableDirectory => file.type === 'directory';
+
 export const getFilePath = (
 	files: App.FileSystemState['files'],
 	fileName: App.File['name'],
