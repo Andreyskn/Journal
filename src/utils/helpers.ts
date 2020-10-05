@@ -1,5 +1,11 @@
 import { useReducer, useRef } from 'react';
 
+export const noop: AnyFunction = () => {};
+
+export const except: AnyFunction = (message: string) => () => {
+	throw Error(message);
+};
+
 export const useForceUpdate = () => {
 	const [, forceUpdate] = useReducer((s) => s + 1, 0);
 	return { forceUpdate };

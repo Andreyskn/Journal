@@ -11,7 +11,7 @@ import {
 	MenuItem,
 	MenuDivider,
 } from '@blueprintjs/core';
-import { useForceUpdate, useBEM } from '../../utils';
+import { useForceUpdate, useBEM, noop } from '../../utils';
 import { FileTreeDispatch } from './dispatcher';
 import {
 	useTree,
@@ -24,6 +24,7 @@ import {
 import { fileTreeBlock, NodeEditorData } from './common';
 import { NodeEditorProps } from './NodeEditor';
 import { DIRECTORY_ID, getFilePath, PATHS, SEP } from '../../core/fileSystem';
+import { useAppContext } from '../context';
 
 const [explorerBlock, explorerElement] = useBEM('file-explorer');
 
@@ -38,6 +39,8 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	files,
 	activeFilePath,
 }) => {
+	const { showAlert } = useAppContext();
+
 	const [selection, setSelection] = useState<{ path: string | null }>({
 		path: activeFilePath,
 	});
@@ -89,6 +92,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 		}
 	};
 
+	// TODO: move to separate module
 	const onNodeContextMenu: TreeProps['onNodeContextMenu'] = (node, _, e) => {
 		if (isEditingNode(node)) return;
 		e.preventDefault();
@@ -113,18 +117,40 @@ export const FileTree: React.FC<FileTreeProps> = ({
 
 		const onDelete = () => dispatch.deleteFile(node.id);
 
-		const onMove = (target: App.Directory['id']) => () =>
-			dispatch.moveFile(node.id, target);
+		const onMove = (target: App.Directory['id']) => () => {
+			new Promise((resolve, reject) => {
+				const targetData = (files.get(target) as App.Directory).data;
+				const hasNameCollision = targetData.has(node.label as string);
+
+				if (!hasNameCollision) return resolve();
+
+				showAlert({
+					icon: 'warning-sign',
+					confirmButtonText: 'Replace',
+					cancelButtonText: 'Cancel',
+					intent: 'warning',
+					content: (
+						<p>
+							A {node.nodeData.type} with the name{' '}
+							<b>"{node.label}"</b>
+							already exists in the destination folder. Do you
+							want to replace it?
+						</p>
+					),
+					onConfirm: resolve,
+					onCancel: reject,
+				});
+			}).then(() => dispatch.moveFile(node.id, target), noop);
+		};
 
 		const moveTargets = [...nodesMap.folders.values()]
 			.filter((folderNode) => {
 				const isSelf = folderNode === node;
-				const isCurrentParent =
-					folderNode.id === node.nodeData.parent!.id;
-				const isChild = folderNode.nodeData.path.startsWith(
+				const isParent = folderNode.id === node.nodeData.parent!.id;
+				const isDescendant = folderNode.nodeData.path.startsWith(
 					node.nodeData.path
 				);
-				return !isSelf && !isCurrentParent && !isChild;
+				return !isSelf && !isParent && !isDescendant;
 			})
 			.sort((a, b) => a.nodeData.path.localeCompare(b.nodeData.path))
 			.map((folderNode) => {

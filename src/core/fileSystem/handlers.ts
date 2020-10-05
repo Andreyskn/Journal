@@ -130,9 +130,8 @@ const moveFile: App.Handler<{
 	if (!file) return state;
 
 	const name = newName || file.name;
-	const dest = newDir || file.parent;
+	const dest = newDir || file.parent!; // TODO: fix null parent type
 
-	// TODO: handle name collisions
 	return state.withMutations((state) => {
 		(state as any).updateIn(
 			['files', file.parent, 'data'],
@@ -157,6 +156,12 @@ const moveFile: App.Handler<{
 				path: updatedFile.path,
 			}));
 		}
+
+		// Replace file in case of name collision
+		const fileToReplace = (state.files.get(
+			dest
+		) as App.ImmutableDirectory).data.get(name);
+		if (fileToReplace) deleteFile(state, { id: fileToReplace });
 
 		helpers.setDirectoryData(state, dest, updatedFile);
 
