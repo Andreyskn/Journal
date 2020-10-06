@@ -182,7 +182,7 @@ export const isEditingNode = (node: Node) => {
 export const useTree = (
 	files: FileTreeProps['files'],
 	editorData: NodeEditorData,
-	selectedPath: string | null
+	selectedPath: Maybe<string>
 ) => {
 	const prevNodesMap = useRef<NodesMap | undefined>();
 	const rootDir = files.get(DIRECTORY_ID.main)!;

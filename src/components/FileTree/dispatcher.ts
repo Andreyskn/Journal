@@ -41,11 +41,11 @@ const renameFile: Actions.Dispatcher<[
 
 const moveFile: Actions.Dispatcher<[
 	id: App.File['id'],
-	newDir: App.File['parent']
-]> = ({ dispatch }) => (id, newDir) => {
+	newParent: App.File['parent']
+]> = ({ dispatch }) => (id, newParent) => {
 	dispatch({
 		type: '@fs/MOVE_FILE',
-		payload: { id, newDir },
+		payload: { id, newParent },
 	});
 };
 

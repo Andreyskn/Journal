@@ -74,6 +74,11 @@ export const setDirectoryData = (
 	);
 };
 
+export const createActiveFile = Immutable.Record<App.TaggedActiveFile>({
+	_tag: 'active-file',
+	ref: null,
+});
+
 export const getFileType = (name: string): App.File['type'] => {
 	const extension = /(\..+)$/.exec(name)?.[1] as Maybe<App.FileExtension>;
 	return extension ? TYPE_BY_EXTENSION[extension] : 'directory';
@@ -82,6 +87,10 @@ export const getFileType = (name: string): App.File['type'] => {
 export const isDirectory = (
 	file: App.ImmutableFile
 ): file is App.ImmutableDirectory => file.type === 'directory';
+
+export const isRegularFile = (
+	file: App.ImmutableFile
+): file is App.ImmutableRegularFile => file.type !== 'directory';
 
 export const getFilePath = (
 	files: App.FileSystemState['files'],

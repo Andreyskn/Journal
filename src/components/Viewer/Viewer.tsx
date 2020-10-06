@@ -76,14 +76,10 @@ const pluginComponents = Object.fromEntries(
 >;
 
 export const Viewer: React.FC = () => {
-	const { activeFileId, data, files } = useSelector((state) => ({
-		activeFileId: state.activeFile.id,
-		files: state.files,
+	const { activeFile, data } = useSelector((state) => ({
+		activeFile: state.activeFile.ref,
 		data: state.data,
 	}));
-
-	const activeFile =
-		activeFileId && (files.get(activeFileId) as App.RegularFile);
 
 	const activeDocument = activeFile && data.get(activeFile.data);
 

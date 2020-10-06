@@ -27,7 +27,7 @@ declare global {
 			data: FileData['id'];
 			parent: App.Directory['id'];
 		};
-		type TaggedRegularFile = App.TaggedRecord<Directory, 'file'>;
+		type TaggedRegularFile = App.TaggedRecord<RegularFile, 'file'>;
 		type ImmutableRegularFile = App.ImmutableRecord<TaggedRegularFile>;
 
 		type File = RegularFile | Directory;
@@ -38,14 +38,18 @@ declare global {
 		type FileExtension = string;
 		type FileData = { id: string; state: unknown };
 
+		type ActiveFile = {
+			ref: Maybe<ImmutableRegularFile>;
+		};
+		type TaggedActiveFile = App.TaggedRecord<ActiveFile, 'active-file'>;
+		type ImmutableActiveFile = App.ImmutableRecord<TaggedActiveFile>;
+
+		type ActiveFileId = Maybe<RegularFile['id']>;
+
 		type FileSystemState = {
 			data: Immutable.Map<FileData['id'], FileData>;
 			files: Immutable.Map<File['id'], ImmutableFile>;
-			activeFile: {
-				id: File['id'] | null;
-				path: File['path'] | null; // TODO: get it from file?
-				isPreview: boolean;
-			};
+			activeFile: ImmutableActiveFile;
 		};
 
 		type FileSystemStateImmutableNonRecordKey =

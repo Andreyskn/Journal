@@ -30,18 +30,19 @@ const [explorerBlock, explorerElement] = useBEM('file-explorer');
 
 export type FileTreeProps = {
 	files: App.FileSystemState['files'];
-	activeFilePath: App.FileSystemState['activeFile']['path'];
+	activeFile: App.ImmutableActiveFile['ref'];
 	dispatch: FileTreeDispatch;
 };
 
 export const FileTree: React.FC<FileTreeProps> = ({
 	dispatch,
 	files,
-	activeFilePath,
+	activeFile,
 }) => {
 	const { showAlert } = useAppContext();
+	const activeFilePath = activeFile?.path;
 
-	const [selection, setSelection] = useState<{ path: string | null }>({
+	const [selection, setSelection] = useState<{ path: Maybe<string> }>({
 		path: activeFilePath,
 	});
 	const [nodeEditorData, setNodeEditorData] = useState<NodeEditorData>(null);
@@ -56,11 +57,11 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	useEffect(() => {
 		if (selection.path !== activeFilePath) {
 			setSelection({ path: activeFilePath });
-			const newSelectedNode =
+			const selectedNode =
 				activeFilePath && nodesMap.files.get(activeFilePath);
-			newSelectedNode && expandParentFolders(newSelectedNode);
+			selectedNode && expandParentFolders(selectedNode);
 		}
-	}, [activeFilePath]);
+	}, [activeFile]);
 
 	const getCurrentDirectory = () => {
 		if (!selection.path) return DIRECTORY_ID.main;

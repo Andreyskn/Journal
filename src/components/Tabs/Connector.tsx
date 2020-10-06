@@ -10,7 +10,7 @@ const WrappedTabs = React.memo(Tabs);
 export const TabsConnector: React.FC = () => {
 	const { tabs, activeTabId } = useSelector((state) => ({
 		tabs: state.tabs,
-		activeTabId: state.activeFile.id,
+		activeTabId: state.activeFile.ref?.id,
 	}));
 
 	const tabsArray = useMemo(() => tabs.valueSeq().toArray(), [tabs]);

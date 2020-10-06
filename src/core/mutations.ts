@@ -7,7 +7,7 @@ type Mutations = {
 	FILE_SELECTED: { state: App.ImmutableAppState; file: App.ImmutableFile };
 	SET_ACTIVE_FILE: {
 		state: App.ImmutableAppState;
-		id: App.FileSystemState['activeFile']['id'];
+		id: App.ActiveFileId;
 	};
 };
 

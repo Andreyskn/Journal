@@ -46,7 +46,7 @@ declare global {
 			| TabsImmutableNonRecordKey
 			| FileSystemStateImmutableNonRecordKey;
 
-		type RecordTag = 'tab' | 'file';
+		type RecordTag = 'tab' | 'file' | 'active-file';
 
 		type TaggedRecord<O extends AnyObject, T extends RecordTag> = O & {
 			_tag: T;

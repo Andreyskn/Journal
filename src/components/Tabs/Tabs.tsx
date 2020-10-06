@@ -10,7 +10,7 @@ const [tabsBlock, tabsElement] = useBEM('tabs');
 export type TabsProps = {
 	dispatch: TabsDispatch;
 	tabs: App.Tab[];
-	activeTabId: App.FileSystemState['activeFile']['id'];
+	activeTabId: App.ActiveFileId;
 };
 
 export const Tabs: React.FC<TabsProps> = ({ tabs, activeTabId, dispatch }) => {

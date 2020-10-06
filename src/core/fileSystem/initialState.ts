@@ -1,5 +1,5 @@
 import Immutable from 'immutable';
-import { createDirectory, createFileRecord } from './helpers';
+import { createActiveFile, createDirectory, createFileRecord } from './helpers';
 import { DIRECTORY_ID, ROOT_NAME, PATHS } from './constants';
 
 const main = createDirectory({
@@ -42,17 +42,15 @@ export const state: App.FileSystemState = {
 		[trash.id, trash],
 		[favorites.id, favorites],
 	]),
-	activeFile: {
-		id: null,
-		path: null,
-		isPreview: false,
-	},
+	activeFile: createActiveFile(),
 };
 
 export const reviver: App.StateReviver = (tag, key, value) => {
 	switch (tag) {
 		case 'file':
 			return createFileRecord(value);
+		case 'active-file':
+			return createActiveFile(value);
 	}
 
 	switch (key) {
