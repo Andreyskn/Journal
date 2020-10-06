@@ -8,8 +8,8 @@ import { dispatchers } from './dispatcher';
 const WrappedFileTree = React.memo(FileTree);
 
 export const FileTreeConnector: React.FC = () => {
-	const { files, activeFile } = useSelector((state) => ({
-		activeFile: state.activeFile.ref,
+	const { files, activeFilePath } = useSelector((state) => ({
+		activeFilePath: state.activeFile.ref?.path,
 		files: state.files,
 	}));
 
@@ -19,7 +19,7 @@ export const FileTreeConnector: React.FC = () => {
 		<ErrorBoundary name='FileTree'>
 			<WrappedFileTree
 				files={files}
-				activeFile={activeFile}
+				activeFilePath={activeFilePath}
 				dispatch={dispatch}
 			/>
 		</ErrorBoundary>

@@ -135,7 +135,8 @@ const updateFile: App.Handler<{
 	const updatedFile = file.withMutations((file) => {
 		file.set('name', name)
 			.set('parent', parent)
-			.set('path', helpers.getFilePath(state.files, name, parent));
+			.set('path', helpers.getFilePath(state.files, name, parent))
+			.set('lastModifiedAt', Date.now());
 	});
 
 	return state.withMutations((state) => {

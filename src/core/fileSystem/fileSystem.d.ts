@@ -45,6 +45,7 @@ declare global {
 		type ImmutableActiveFile = App.ImmutableRecord<TaggedActiveFile>;
 
 		type ActiveFileId = Maybe<RegularFile['id']>;
+		type ActiveFilePath = Maybe<RegularFile['path']>;
 
 		type FileSystemState = {
 			data: Immutable.Map<FileData['id'], FileData>;

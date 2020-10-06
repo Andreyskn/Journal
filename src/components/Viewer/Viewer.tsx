@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import './viewer.scss';
 
@@ -19,6 +19,55 @@ const setFileDataState: Actions.Dispatcher<[
 	});
 };
 
+const useStateHistory = (
+	initialState: unknown,
+	setState: (state: unknown) => void
+) => {
+	const history = useRef<unknown[]>([initialState]);
+	const cursor = useRef(0);
+
+	const push = (state: unknown) => {
+		const preserved = history.current.slice(0, cursor.current + 1);
+		history.current = preserved.concat(state);
+		cursor.current++;
+	};
+
+	const undo = () => {
+		if (cursor.current > 0) {
+			cursor.current--;
+			setState(history.current[cursor.current]);
+		}
+	};
+
+	const redo = () => {
+		if (cursor.current < history.current.length - 1) {
+			cursor.current++;
+			setState(history.current[cursor.current]);
+		}
+	};
+
+	const setReversibleState = (state: unknown) => {
+		setState(state);
+		push(state);
+	};
+
+	const onKeyDown = useCallback((e: KeyboardEvent) => {
+		if (e.code === 'KeyZ' && e.ctrlKey) {
+			e.preventDefault();
+			e.shiftKey ? redo() : undo();
+		}
+	}, []);
+
+	useEffect(() => {
+		window.addEventListener('keydown', onKeyDown);
+		return () => {
+			window.removeEventListener('keydown', onKeyDown);
+		};
+	}, []);
+
+	return { setReversibleState };
+};
+
 const connectPlugin = ({
 	Component,
 	init,
@@ -30,11 +79,12 @@ const connectPlugin = ({
 	const ConnectedPlugin: React.FC<{ data: App.FileData }> = ({ data }) => {
 		const initialState = useMemo(() => init(data.state), []);
 		const [state, setState, stateRef] = useStateRef(initialState);
+		const { setReversibleState } = useStateHistory(initialState, setState);
 
 		const coreDispatch = useDispatch({ setFileDataState });
 
 		const localDispatch = useCallback((action: Actions.AnyAction) => {
-			setState(reducer(stateRef.getState(), action));
+			setReversibleState(reducer(stateRef.getState(), action));
 		}, []);
 
 		const pluginDispatch = useDispatch(

@@ -8,20 +8,15 @@ import { useBEM } from '../../utils';
 import { FileTree } from '../FileTree';
 import { Tabs } from '../Tabs';
 import { Viewer } from '../Viewer';
-import { AppContext, AppContextValue, useAlert } from '../context';
+import { useAppContextProvider } from '../context';
 
 const [appBlock, appElement] = useBEM('app');
 
 export const App: React.FC = hot(() => {
-	const { Alert, showAlert } = useAlert();
-
-	const contextValue: AppContextValue = {
-		showAlert,
-	};
+	const { AppContextProvider } = useAppContextProvider();
 
 	return (
-		<AppContext.Provider value={contextValue}>
-			<Alert />
+		<AppContextProvider>
 			<div className={appBlock(null, Classes.DARK)}>
 				<div className={appElement('file-tree')}>
 					<FileTree />
@@ -33,6 +28,6 @@ export const App: React.FC = hot(() => {
 					<Viewer />
 				</div>
 			</div>
-		</AppContext.Provider>
+		</AppContextProvider>
 	);
 });
