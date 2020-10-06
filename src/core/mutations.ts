@@ -5,10 +5,7 @@ type Mutations = {
 	FILE_DELETED: { state: App.ImmutableAppState; file: App.ImmutableFile };
 	FILE_UPDATED: { state: App.ImmutableAppState; file: App.ImmutableFile };
 	FILE_SELECTED: { state: App.ImmutableAppState; file: App.ImmutableFile };
-	SET_ACTIVE_FILE: {
-		state: App.ImmutableAppState;
-		id: App.ActiveFileId;
-	};
+	SET_ACTIVE_FILE: { state: App.ImmutableAppState; id: App.ActiveFileId };
 };
 
 type Event = {

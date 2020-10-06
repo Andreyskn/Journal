@@ -1,7 +1,22 @@
 .qa-item {
+	margin: 0 15px 15px;
+
+	&__question {
+		border: 1px solid #00000040;
+	}
+
 	&__textarea {
-		min-height: 40px !important;
+		padding: 15px;
 
 		resize: none;
+
+		&--question {
+			position: relative;
+			z-index: 1;
+		}
+
+		&--answer {
+			min-height: 60px !important;
+		}
 	}
 }

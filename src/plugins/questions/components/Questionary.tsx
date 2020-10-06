@@ -41,17 +41,10 @@ export const Questionary: React.FC<QuestionaryProps> = ({
 					)}
 					placeholder='New question...'
 				/>
-				{/* <TextArea
-					large
-					growVertically
-					fill
-					placeholder='New question...'
-					
-				/> */}
 			</form>
 			<div>
 				{questionary.items.map((qaBlock) => (
-					<QAItem qaBlock={qaBlock} key={qaBlock.id} />
+					<QAItem {...qaBlock} dispatch={dispatch} key={qaBlock.id} />
 				))}
 			</div>
 		</div>

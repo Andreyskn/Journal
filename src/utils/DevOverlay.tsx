@@ -10,6 +10,7 @@ const style: React.CSSProperties = {
 	padding: 15,
 	borderRadius: 5,
 	backgroundColor: '#00000030',
+	zIndex: 1000,
 };
 
 const DevOverlay: React.FC = () => {

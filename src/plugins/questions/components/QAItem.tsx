@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import './qa-item.scss';
 
@@ -6,63 +6,114 @@ import { useBEM } from '../../../utils';
 import {
 	Alignment,
 	Button,
-	ButtonGroup,
 	Collapse,
 	TextArea,
+	ITextAreaProps,
+	ContextMenu,
+	Menu,
+	MenuItem,
+	IButtonProps,
 } from '@blueprintjs/core';
 
-type QAItemProps = {
-	qaBlock: Questions.QABlock;
+type QAItemProps = Questions.QABlock & {
+	dispatch: Questions.Dispatch;
 };
 
-const [itemBlock, itemElement] = useBEM('qa-item');
+const [qaBlock, qaElement] = useBEM('qa-item');
 
-export const QAItem: React.FC<QAItemProps> = ({ qaBlock }) => {
-	const [isAnswerOpen, setIsAnswerOpen] = useState(false);
-	const [answer, setAnswer] = useState(qaBlock.answer);
+export const QAItem: React.FC<QAItemProps> = ({
+	id,
+	question,
+	answer,
+	isExpanded,
+	dispatch,
+}) => {
 	const [isEditing, setIsEditing] = useState(false);
+	const answerRef = useRef<HTMLTextAreaElement | null>(null);
+	const questionRef = useRef<HTMLTextAreaElement | null>(null);
+
+	const onChangeAnswer: ITextAreaProps['onChange'] = (e) => {
+		dispatch.setAnswer(id, e.target.value);
+	};
+
+	const onChangeQuestion: ITextAreaProps['onChange'] = (e) => {
+		dispatch.setQuestion(id, e.target.value);
+	};
+
+	const toggleExpanded = () => dispatch.setExpanded(id, !isExpanded);
+
+	const onBlur = () => setIsEditing(false);
+
+	const onKeyDown: ITextAreaProps['onKeyDown'] = (e) => {
+		if (e.key === 'Enter' && !e.shiftKey) {
+			e.preventDefault();
+			answerRef.current?.blur();
+			questionRef.current?.blur();
+		}
+	};
+
+	const onContextMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.preventDefault();
+
+		const onEdit = () => setIsEditing(true);
+
+		const onDelete = () => dispatch.deleteQuestion(id);
+
+		ContextMenu.show(
+			<Menu>
+				<MenuItem icon='edit' text='Edit' onClick={onEdit} />
+				<MenuItem icon='cross' text='Delete' onClick={onDelete} />
+			</Menu>,
+			{ left: e.pageX, top: e.pageY },
+			undefined,
+			true
+		);
+	};
+
+	const intent = ((): IButtonProps['intent'] => {
+		if (isExpanded) return 'none';
+		return answer ? 'success' : 'danger';
+	})();
 
 	return (
-		<div className={itemBlock()}>
-			<ButtonGroup large fill>
-				<Button
-					icon='caret-down'
-					onClick={() => setIsAnswerOpen(!isAnswerOpen)}
-				/>
-				<Button
-					fill
-					alignText={Alignment.LEFT}
-					disabled={isEditing}
-					onClick={() => setIsAnswerOpen(!isAnswerOpen)}
-				>
-					{isEditing ? (
-						<TextArea
-							defaultValue={qaBlock.question}
-							growVertically
-							fill
-							large
-							className={itemElement('textarea')}
-						/>
-					) : (
-						qaBlock.question
-					)}
-				</Button>
-				<Button icon='edit' onClick={() => setIsEditing(!isEditing)} />
-				<Button
-					icon='cross'
-					onClick={() => setIsAnswerOpen(!isAnswerOpen)}
-				/>
-			</ButtonGroup>
-
-			<Collapse isOpen={isAnswerOpen} keepChildrenMounted>
+		<div className={qaBlock()}>
+			{isEditing ? (
 				<TextArea
 					large
+					inputRef={(ref) => (questionRef.current = ref)}
+					value={question}
+					onChange={onChangeQuestion}
+					onKeyDown={onKeyDown}
+					onBlur={onBlur}
+					growVertically
+					fill
+					autoFocus
+					className={qaElement('textarea', { question: true })}
+				/>
+			) : (
+				<Button
+					minimal
+					fill
+					large
+					alignText={Alignment.LEFT}
+					onClick={toggleExpanded}
+					text={question}
+					className={qaElement('question')}
+					intent={intent}
+					onContextMenu={onContextMenu}
+				/>
+			)}
+			<Collapse isOpen={isExpanded} keepChildrenMounted>
+				<TextArea
+					large
+					inputRef={(ref) => (answerRef.current = ref)}
 					value={answer}
-					onChange={(e) => setAnswer(e.target.value)}
+					onChange={onChangeAnswer}
+					onKeyDown={onKeyDown}
 					growVertically
 					fill
 					placeholder='Enter answer...'
-					className={itemElement('textarea')}
+					className={qaElement('textarea', { answer: true })}
 				/>
 			</Collapse>
 		</div>

@@ -24,6 +24,7 @@ declare global {
 			id: string;
 			question: string;
 			answer: string;
+			isExpanded: boolean;
 		};
 	}
 }
