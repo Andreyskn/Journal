@@ -23,7 +23,7 @@ export const Questionary: React.FC<QuestionaryProps> = ({
 
 		if (!input.value) return;
 
-		dispatch.addQuestion(input.value);
+		dispatch.addQuestion({ question: input.value });
 		event.currentTarget.reset();
 	};
 
@@ -39,7 +39,7 @@ export const Questionary: React.FC<QuestionaryProps> = ({
 						Classes.FILL,
 						Classes.LARGE
 					)}
-					placeholder='New question...'
+					placeholder='New question'
 				/>
 			</form>
 			<div>

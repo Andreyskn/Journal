@@ -7,7 +7,6 @@ declare global {
 		type LazyModule = {
 			Component: React.FC<Plugin.ComponentProps<any, any>>;
 			init: Initializer<any>;
-			dispatchers: any;
 			handlers: any;
 		};
 
@@ -24,5 +23,17 @@ declare global {
 			state: T;
 			dispatch: D;
 		};
+
+		type Dispatchers<T extends AnyObject> = {
+			[K in keyof T]: Actions.Dispatcher<
+				[payload: Parameters<T[K]>[1]],
+				{},
+				Actions.ExtractActions<T>
+			>;
+		};
+
+		type Dispatch<T extends AnyObject> = Actions.DispatcherMap<
+			Plugin.Dispatchers<T>
+		>;
 	}
 }

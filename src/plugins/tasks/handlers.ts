@@ -23,28 +23,28 @@ const addTask: TaskList.Handler<{
 };
 
 const deleteTask: TaskList.Handler<{
-	taskId: TaskList.Task['id'];
-}> = (state, { taskId }) => {
+	id: TaskList.Task['id'];
+}> = (state, { id }) => {
 	return {
 		...state,
-		tasks: state.tasks.filter((t) => t.id !== taskId),
+		tasks: state.tasks.filter((t) => t.id !== id),
 	};
 };
 
 const toggleTaskDone: TaskList.Handler<{
-	taskId: TaskList.Task['id'];
-}> = (state, { taskId }) => {
+	id: TaskList.Task['id'];
+}> = (state, { id }) => {
 	return {
 		...state,
 		tasks: state.tasks.map((t) =>
-			t.id === taskId ? { ...t, done: !t.done } : t
+			t.id === id ? { ...t, done: !t.done } : t
 		),
 	};
 };
 
 export const handlers = {
-	ADD_TASK: addTask,
-	DELETE_TASK: deleteTask,
-	TOGGLE_TASK_DONE: toggleTaskDone,
-	SET_TASK_LIST_TITLE: setTaskListTitle,
+	addTask,
+	deleteTask,
+	toggleTaskDone,
+	setTaskListTitle,
 };

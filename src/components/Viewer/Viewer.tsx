@@ -68,13 +68,21 @@ const useStateHistory = (
 	return { setReversibleState };
 };
 
-const connectPlugin = ({
-	Component,
-	init,
-	dispatchers,
-	handlers,
-}: Plugin.LazyModule) => {
+const createDispatchers = <T extends AnyObject>(handlers: T) => {
+	return (Object.keys(handlers) as (keyof T)[]).reduce((result, type) => {
+		const dispatcher: Actions.Dispatcher<[any], {}, any> = ({
+			dispatch,
+		}) => (payload) => {
+			dispatch({ type, payload });
+		};
+		result[type] = dispatcher;
+		return result;
+	}, {} as Plugin.Dispatchers<T>);
+};
+
+const connectPlugin = ({ Component, init, handlers }: Plugin.LazyModule) => {
 	const reducer = createReducer(handlers);
+	const dispatchers = createDispatchers(handlers);
 
 	const ConnectedPlugin: React.FC<{ data: App.FileData }> = ({ data }) => {
 		const initialState = useMemo(() => init(data.state), []);

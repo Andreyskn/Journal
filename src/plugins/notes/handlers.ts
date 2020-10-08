@@ -5,5 +5,5 @@ const setText: Notes.Handler<{
 };
 
 export const handlers = {
-	SET_TEXT: setText,
+	setText,
 };

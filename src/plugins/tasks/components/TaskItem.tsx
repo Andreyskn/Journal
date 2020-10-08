@@ -3,27 +3,31 @@ import './task-item.scss';
 import { useBEM } from '../../../utils';
 import { Switch, Button } from '@blueprintjs/core';
 
-export type TaskItemProps = {
-	task: TaskList.Task;
+export type TaskItemProps = TaskList.Task & {
 	dispatch: TaskList.Dispatch;
 };
 
 const [itemBlock, itemElement] = useBEM('task-item');
 
-export const TaskItem: React.FC<TaskItemProps> = ({ task, dispatch }) => {
+export const TaskItem: React.FC<TaskItemProps> = ({
+	id,
+	done,
+	text,
+	dispatch,
+}) => {
 	const toggleDoneStatus = useCallback(() => {
-		dispatch.toggleDone(task.id);
+		dispatch.toggleTaskDone({ id });
 	}, []);
 
 	const deleteTask = useCallback(() => {
-		dispatch.deleteTask(task.id);
+		dispatch.deleteTask({ id });
 	}, []);
 
 	return (
 		<div className={itemBlock()}>
 			<Switch
-				checked={task.done}
-				label={task.text}
+				checked={done}
+				label={text}
 				onChange={toggleDoneStatus}
 				large
 			/>

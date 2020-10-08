@@ -62,9 +62,9 @@ const deleteQuestion: Questions.Handler<{
 };
 
 export const handlers = {
-	ADD_QUESTION: addQuestion,
-	DELETE_QUESTION: deleteQuestion,
-	SET_ANSWER: setAnswer,
-	SET_QUESTION: setQuestion,
-	SET_EXPANDED: setExpanded,
+	addQuestion,
+	deleteQuestion,
+	setAnswer,
+	setQuestion,
+	setExpanded,
 };

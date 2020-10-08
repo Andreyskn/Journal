@@ -14,8 +14,8 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
 	state: note,
 	dispatch,
 }) => {
-	const onChange: ITextAreaProps['onChange'] = ({ target: { value } }) => {
-		dispatch.setText(value);
+	const onChange: ITextAreaProps['onChange'] = (e) => {
+		dispatch.setText({ text: e.target.value });
 	};
 
 	return (

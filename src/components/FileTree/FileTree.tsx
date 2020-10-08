@@ -132,9 +132,8 @@ export const FileTree: React.FC<FileTreeProps> = ({
 					content: (
 						<p>
 							A {node.nodeData.type} with the name{' '}
-							<b>"{node.label}"</b>
-							already exists in the destination folder. Do you
-							want to replace it?
+							<b>"{node.label}"</b> already exists in the
+							destination folder. Do you want to replace it?
 						</p>
 					),
 					onConfirm: resolve,

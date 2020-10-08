@@ -33,14 +33,16 @@ export const QAItem: React.FC<QAItemProps> = ({
 	const questionRef = useRef<HTMLTextAreaElement | null>(null);
 
 	const onChangeAnswer: ITextAreaProps['onChange'] = (e) => {
-		dispatch.setAnswer(id, e.target.value);
+		dispatch.setAnswer({ id, answer: e.target.value });
 	};
 
 	const onChangeQuestion: ITextAreaProps['onChange'] = (e) => {
-		dispatch.setQuestion(id, e.target.value);
+		dispatch.setQuestion({ id, question: e.target.value });
 	};
 
-	const toggleExpanded = () => dispatch.setExpanded(id, !isExpanded);
+	const toggleExpanded = () => {
+		dispatch.setExpanded({ id, isExpanded: !isExpanded });
+	};
 
 	const onBlur = () => setIsEditing(false);
 
@@ -57,7 +59,7 @@ export const QAItem: React.FC<QAItemProps> = ({
 
 		const onEdit = () => setIsEditing(true);
 
-		const onDelete = () => dispatch.deleteQuestion(id);
+		const onDelete = () => dispatch.deleteQuestion({ id });
 
 		ContextMenu.show(
 			<Menu>
@@ -112,7 +114,7 @@ export const QAItem: React.FC<QAItemProps> = ({
 					onKeyDown={onKeyDown}
 					growVertically
 					fill
-					placeholder='Enter answer...'
+					placeholder='Answer'
 					className={qaElement('textarea', { answer: true })}
 				/>
 			</Collapse>

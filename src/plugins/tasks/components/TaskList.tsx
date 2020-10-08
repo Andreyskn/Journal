@@ -23,12 +23,12 @@ export const TaskList: React.FC<TaskListProps> = ({
 
 		if (!input.value) return;
 
-		dispatch.addTask(input.value);
+		dispatch.addTask({ text: input.value });
 		event.currentTarget.reset();
 	};
 
-	const onTitleChange: IEditableTextProps['onConfirm'] = (value) => {
-		dispatch.renameTaskList(value);
+	const onTitleChange: IEditableTextProps['onConfirm'] = (title) => {
+		dispatch.setTaskListTitle({ title });
 	};
 
 	return (
@@ -50,12 +50,12 @@ export const TaskList: React.FC<TaskListProps> = ({
 						Classes.INPUT,
 						Classes.FILL
 					)}
-					placeholder='New task...'
+					placeholder='New task'
 				/>
 			</form>
 			<div>
 				{taskList.tasks.map((task) => (
-					<TaskItem key={task.id} task={task} dispatch={dispatch} />
+					<TaskItem key={task.id} {...task} dispatch={dispatch} />
 				))}
 			</div>
 		</div>

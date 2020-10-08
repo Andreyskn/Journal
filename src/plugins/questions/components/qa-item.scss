@@ -2,6 +2,8 @@
 	margin: 0 15px 15px;
 
 	&__question {
+		transition: background-color 0.3s ease-in-out;
+
 		border: 1px solid #00000040;
 	}
 
