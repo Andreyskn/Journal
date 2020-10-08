@@ -86,6 +86,6 @@ const closeTab: App.Handler<{ id: App.File['id'] }> = (state, { id }) => {
 };
 
 export const handlers = {
-	'@tabs/CREATE_TAB': createTab,
-	'@tabs/CLOSE_TAB': closeTab,
+	'@tabs/createTab': createTab,
+	'@tabs/closeTab': closeTab,
 };

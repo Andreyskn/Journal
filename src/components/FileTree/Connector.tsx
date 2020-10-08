@@ -1,9 +1,8 @@
 import React from 'react';
 
-import { useSelector, useDispatch } from '../../core';
+import { useSelector, useEnhancedDispatch } from '../../core';
 import { ErrorBoundary } from '../../utils';
 import { FileTree } from './FileTree';
-import { dispatchers } from './dispatcher';
 
 const WrappedFileTree = React.memo(FileTree);
 
@@ -13,7 +12,7 @@ export const FileTreeConnector: React.FC = () => {
 		files: state.files,
 	}));
 
-	const dispatch = useDispatch(dispatchers);
+	const dispatch = useEnhancedDispatch();
 
 	return (
 		<ErrorBoundary name='FileTree'>

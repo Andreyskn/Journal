@@ -1,6 +1,7 @@
 import Immutable from 'immutable';
 import { Dispatch as ReduxDispatch, Store as ReduxStore } from 'redux';
 import { Dispatch as ReactDispatch } from 'react';
+import { CoreDispatch as CoreDispatchImpl } from './store';
 
 declare global {
 	namespace Actions {
@@ -14,13 +15,8 @@ declare global {
 
 		type Dispatcher<
 			T extends any[] = undefined[],
-			D extends AnyObject = {},
 			A extends AnyAction = AppAction
-		> = (
-			deps: D & {
-				dispatch: Dispatch<A>;
-			}
-		) => (...args: T) => void;
+		> = (deps: { dispatch: Dispatch<A> }) => (...args: T) => void;
 
 		type DispatcherMap<T extends Record<string, Dispatcher<any[], any>>> = {
 			[K in keyof T]: ReturnType<T[K]>;
@@ -85,5 +81,7 @@ declare global {
 				action: ActionBase<any, AnyObject>
 			) => ImmutableAppState
 		>;
+
+		type CoreDispatch = CoreDispatchImpl;
 	}
 }

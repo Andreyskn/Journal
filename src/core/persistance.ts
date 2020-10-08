@@ -35,7 +35,7 @@ export const initPersistance = (store: App.Store) => {
 		.then((savedState) => {
 			if (!savedState) return;
 			store.dispatch({
-				type: '@persistance/HYDRATE_STORE',
+				type: '@persistance/hydrateStore',
 				payload: { savedState },
 			});
 		})
@@ -58,7 +58,7 @@ const hydrateStore: App.Handler<{ savedState?: App.AppState }> = (
 ) => (savedState ? reviveState(savedState) : state);
 
 export const persistanceHandlers = {
-	'@persistance/HYDRATE_STORE': hydrateStore,
+	'@persistance/hydrateStore': hydrateStore,
 };
 
 declare global {

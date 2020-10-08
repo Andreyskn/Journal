@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
 
-import { useSelector, useDispatch } from '../../core';
+import { useSelector, useEnhancedDispatch } from '../../core';
 import { Tabs } from './Tabs';
-import { dispatchers } from './dispatcher';
 import { ErrorBoundary } from '../../utils';
 
 const WrappedTabs = React.memo(Tabs);
@@ -14,7 +13,7 @@ export const TabsConnector: React.FC = () => {
 	}));
 
 	const tabsArray = useMemo(() => tabs.valueSeq().toArray(), [tabs]);
-	const dispatch = useDispatch(dispatchers);
+	const dispatch = useEnhancedDispatch();
 
 	return (
 		<ErrorBoundary name='Tabs'>

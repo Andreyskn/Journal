@@ -2,31 +2,30 @@ import React from 'react';
 import './tabs.scss';
 import { useBEM } from '../../utils';
 import { Alignment, Button, Menu, MenuItem, Popover } from '@blueprintjs/core';
-import { TabsDispatch } from './dispatcher';
 import { PLUGINS, PLUGINS_MAP } from '../../plugins';
 
 const [tabsBlock, tabsElement] = useBEM('tabs');
 
 export type TabsProps = {
-	dispatch: TabsDispatch;
+	dispatch: App.CoreDispatch;
 	tabs: App.Tab[];
 	activeTabId: App.ActiveFileId;
 };
 
 export const Tabs: React.FC<TabsProps> = ({ tabs, activeTabId, dispatch }) => {
 	const createFile = (type: App.RegularFile['type']) => () => {
-		dispatch.createFile(type);
+		dispatch.fs.createUntitledFile({ type });
 	};
 
 	const onSelect = (id: App.Tab['id']) => () => {
 		if (id !== activeTabId) {
-			dispatch.setActiveTab(id);
+			dispatch.fs.setActiveFile({ id });
 		}
 	};
 
 	const onClose = (id: App.Tab['id']) => (e: React.MouseEvent) => {
 		if (e.button === 0 || e.button === 1) {
-			dispatch.closeTab(id);
+			dispatch.tabs.closeTab({ id });
 		}
 	};
 

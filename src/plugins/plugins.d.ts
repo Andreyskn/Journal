@@ -19,7 +19,7 @@ declare global {
 			getLazyModule: () => Promise<LazyModule>;
 		}>;
 
-		type ComponentProps<T, D extends Actions.DispatcherMap<any>> = {
+		type ComponentProps<T, D extends Dispatch<any>> = {
 			state: T;
 			dispatch: D;
 		};
@@ -27,7 +27,6 @@ declare global {
 		type Dispatchers<T extends AnyObject> = {
 			[K in keyof T]: Actions.Dispatcher<
 				[payload: Parameters<T[K]>[1]],
-				{},
 				Actions.ExtractActions<T>
 			>;
 		};

@@ -223,11 +223,11 @@ const setFileDataState: App.Handler<{
 };
 
 export const handlers = {
-	'@fs/CREATE_FILE': createFile,
-	'@fs/CREATE_UNTITLED_FILE': createUntitledFile,
-	'@fs/DELETE_FILE': deleteFile,
-	'@fs/RENAME_FILE': renameFile,
-	'@fs/MOVE_FILE': moveFile,
-	'@fs/SET_ACTIVE_FILE': setActiveFile,
-	'@fs/SET_FILE_DATA_STATE': setFileDataState,
+	'@fs/createFile': createFile,
+	'@fs/createUntitledFile': createUntitledFile,
+	'@fs/deleteFile': deleteFile,
+	'@fs/renameFile': renameFile,
+	'@fs/moveFile': moveFile,
+	'@fs/setActiveFile': setActiveFile,
+	'@fs/setFileDataState': setFileDataState,
 };

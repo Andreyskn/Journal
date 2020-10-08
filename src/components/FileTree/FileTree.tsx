@@ -11,8 +11,7 @@ import {
 	MenuItem,
 	MenuDivider,
 } from '@blueprintjs/core';
-import { useForceUpdate, useBEM, noop } from '../../utils';
-import { FileTreeDispatch } from './dispatcher';
+import { useForceUpdate, useBEM } from '../../utils';
 import {
 	useTree,
 	TreeProps,
@@ -31,7 +30,7 @@ const [explorerBlock, explorerElement] = useBEM('file-explorer');
 export type FileTreeProps = {
 	files: App.FileSystemState['files'];
 	activeFilePath: App.ActiveFilePath;
-	dispatch: FileTreeDispatch;
+	dispatch: App.CoreDispatch;
 };
 
 export const FileTree: React.FC<FileTreeProps> = ({
@@ -87,7 +86,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 			setSelection({ path });
 
 			if (!isFolderNode(node) && path !== activeFilePath) {
-				dispatch.setActiveFile(node.id);
+				dispatch.fs.setActiveFile({ id: node.id });
 			}
 		}
 	};
@@ -101,7 +100,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 			const cwd = getCurrentDirectory();
 			const onDismiss = () => setNodeEditorData(null);
 			const onCreate: NodeEditorProps['onConfirm'] = (name) => {
-				dispatch.renameFile(node.id, name);
+				dispatch.fs.renameFile({ id: node.id, name });
 				onDismiss();
 			};
 			setNodeEditorData({
@@ -115,14 +114,14 @@ export const FileTree: React.FC<FileTreeProps> = ({
 			});
 		};
 
-		const onDelete = () => dispatch.deleteFile(node.id);
+		const onDelete = () => dispatch.fs.deleteFile({ id: node.id });
 
 		const onMove = (target: App.Directory['id']) => () => {
-			new Promise((resolve, reject) => {
+			new Promise<boolean>((resolve) => {
 				const targetData = (files.get(target) as App.Directory).data;
 				const hasNameCollision = targetData.has(node.label as string);
 
-				if (!hasNameCollision) return resolve();
+				if (!hasNameCollision) return resolve(true);
 
 				showAlert({
 					icon: 'warning-sign',
@@ -132,14 +131,18 @@ export const FileTree: React.FC<FileTreeProps> = ({
 					content: (
 						<p>
 							A {node.nodeData.type} with the name{' '}
-							<b>"{node.label}"</b> already exists in the
+							<b>{node.label}</b> already exists in the
 							destination folder. Do you want to replace it?
 						</p>
 					),
-					onConfirm: resolve,
-					onCancel: reject,
+					onConfirm: () => resolve(true),
+					onCancel: () => resolve(false),
 				});
-			}).then(() => dispatch.moveFile(node.id, target), noop);
+			}).then(
+				(confirm) =>
+					confirm &&
+					dispatch.fs.moveFile({ id: node.id, newParent: target })
+			);
 		};
 
 		const moveTargets = [...nodesMap.folders.values()]
@@ -202,7 +205,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 			if (type === 'folder') {
 				setSelection({ path: getFilePath(files, name, cwd) });
 			}
-			dispatch.createFile(name, cwd);
+			dispatch.fs.createFile({ name, parent: cwd });
 			onDismiss();
 		};
 		setNodeEditorData({

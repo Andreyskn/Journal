@@ -4,20 +4,7 @@ import './viewer.scss';
 
 import { ErrorBoundary, createReducer, useStateRef } from '../../utils';
 import { PLUGINS, PLUGINS_MAP } from '../../plugins';
-import { useDispatch, useSelector } from '../../core';
-
-const setFileDataState: Actions.Dispatcher<[
-	id: App.File['id'],
-	dataState: App.FileData['state']
-]> = ({ dispatch }) => (id, dataState) => {
-	dispatch({
-		type: '@fs/SET_FILE_DATA_STATE',
-		payload: {
-			id,
-			dataState,
-		},
-	});
-};
+import { useSelector, useEnhancedDispatch } from '../../core';
 
 const useStateHistory = (
 	initialState: unknown,
@@ -68,43 +55,32 @@ const useStateHistory = (
 	return { setReversibleState };
 };
 
-const createDispatchers = <T extends AnyObject>(handlers: T) => {
-	return (Object.keys(handlers) as (keyof T)[]).reduce((result, type) => {
-		const dispatcher: Actions.Dispatcher<[any], {}, any> = ({
-			dispatch,
-		}) => (payload) => {
-			dispatch({ type, payload });
-		};
-		result[type] = dispatcher;
-		return result;
-	}, {} as Plugin.Dispatchers<T>);
-};
-
 const connectPlugin = ({ Component, init, handlers }: Plugin.LazyModule) => {
 	const reducer = createReducer(handlers);
-	const dispatchers = createDispatchers(handlers);
 
 	const ConnectedPlugin: React.FC<{ data: App.FileData }> = ({ data }) => {
 		const initialState = useMemo(() => init(data.state), []);
 		const [state, setState, stateRef] = useStateRef(initialState);
 		const { setReversibleState } = useStateHistory(initialState, setState);
 
-		const coreDispatch = useDispatch({ setFileDataState });
+		const coreDispatch = useEnhancedDispatch();
 
 		const localDispatch = useCallback((action: Actions.AnyAction) => {
 			setReversibleState(reducer(stateRef.getState(), action));
 		}, []);
 
-		const pluginDispatch = useDispatch(
-			dispatchers,
-			undefined,
-			localDispatch
-		);
+		const pluginDispatch = useEnhancedDispatch({
+			dispatch: localDispatch,
+			handlers,
+		});
 
 		// TODO: add debounced save
 		const saveState = useCallback(() => {
 			if (!stateRef.hasChanged()) return;
-			coreDispatch.setFileDataState(data.id, stateRef.getState());
+			coreDispatch.fs.setFileDataState({
+				id: data.id,
+				dataState: stateRef.getState(),
+			});
 		}, []);
 
 		useEffect(() => {
