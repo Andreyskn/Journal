@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 
 import './qa-item.scss';
 
-import { useBEM } from '../../../utils';
+import { bem } from '../../../utils';
 import {
 	Alignment,
 	Button,
@@ -19,7 +19,7 @@ type QAItemProps = Questions.QABlock & {
 	dispatch: Questions.Dispatch;
 };
 
-const [qaBlock, qaElement] = useBEM('qa-item');
+const classes = bem('qa-item', ['textarea', 'question'] as const);
 
 export const QAItem: React.FC<QAItemProps> = ({
 	id,
@@ -78,7 +78,7 @@ export const QAItem: React.FC<QAItemProps> = ({
 	})();
 
 	return (
-		<div className={qaBlock()}>
+		<div className={classes.qaItemBlock()}>
 			{isEditing ? (
 				<TextArea
 					large
@@ -90,7 +90,7 @@ export const QAItem: React.FC<QAItemProps> = ({
 					growVertically
 					fill
 					autoFocus
-					className={qaElement('textarea', { question: true })}
+					className={classes.textareaElement({ question: true })}
 				/>
 			) : (
 				<Button
@@ -100,7 +100,7 @@ export const QAItem: React.FC<QAItemProps> = ({
 					alignText={Alignment.LEFT}
 					onClick={toggleExpanded}
 					text={question}
-					className={qaElement('question')}
+					className={classes.questionElement()}
 					intent={intent}
 					onContextMenu={onContextMenu}
 				/>
@@ -115,7 +115,7 @@ export const QAItem: React.FC<QAItemProps> = ({
 					growVertically
 					fill
 					placeholder='Answer'
-					className={qaElement('textarea', { answer: true })}
+					className={classes.textareaElement({ answer: true })}
 				/>
 			</Collapse>
 		</div>

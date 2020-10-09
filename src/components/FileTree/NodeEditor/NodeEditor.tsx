@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import './node-editor.scss';
 
-import { useBEM } from '../../../utils';
+import { bem } from '../../../utils';
 import { Classes, EditableText, Popover, Position } from '@blueprintjs/core';
 import { useValidation } from './useValidation';
 import { useAutocomplete } from './useAutocomplete';
@@ -19,7 +19,13 @@ export type NodeEditorProps = Pick<App.FileSystemState, 'files'> &
 		onDismiss: () => void;
 	};
 
-const [nodeEditorBlock, nodeEditorElement] = useBEM('node-editor');
+const classes = bem('node-editor', [
+	'content',
+	'input',
+	'renamer',
+	'extension',
+	'popover',
+] as const);
 
 // TODO: use validation and autocomplete as effects on changing the input value
 
@@ -103,14 +109,13 @@ export const NodeEditor: React.FC<NodeEditorProps> = (props) => {
 				return (
 					<form
 						onSubmit={onSubmit}
-						className={nodeEditorElement('content')}
+						className={classes.contentElement()}
 					>
 						<input
 							value={inputValue}
 							onChange={(e) => onChange(e.target.value)}
 							onKeyDown={onKeyDown}
-							className={nodeEditorElement(
-								'input',
+							className={classes.inputElement(
 								null,
 								Classes.INPUT,
 								validation.error && Classes.INTENT_DANGER
@@ -131,10 +136,10 @@ export const NodeEditor: React.FC<NodeEditorProps> = (props) => {
 				}
 
 				return (
-					<div className={nodeEditorElement('content')}>
+					<div className={classes.contentElement()}>
 						<EditableText
 							isEditing
-							className={nodeEditorElement('renamer')}
+							className={classes.renamerElement()}
 							defaultValue={name}
 							selectAllOnFocus
 							minWidth={0}
@@ -147,7 +152,7 @@ export const NodeEditor: React.FC<NodeEditorProps> = (props) => {
 							}}
 						/>
 						{extension && (
-							<span className={nodeEditorElement('extension')}>
+							<span className={classes.extensionElement()}>
 								{extension}
 							</span>
 						)}
@@ -159,7 +164,7 @@ export const NodeEditor: React.FC<NodeEditorProps> = (props) => {
 
 	return (
 		<div
-			className={nodeEditorBlock()}
+			className={classes.nodeEditorBlock()}
 			key={type}
 			ref={editor}
 			onClick={(e) => e.stopPropagation()}
@@ -174,7 +179,7 @@ export const NodeEditor: React.FC<NodeEditorProps> = (props) => {
 				fill
 				minimal
 				ref={popover}
-				popoverClassName={nodeEditorElement('popover')}
+				popoverClassName={classes.popoverElement()}
 			>
 				{renderEditor()}
 			</Popover>

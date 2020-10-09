@@ -2,11 +2,7 @@ import React, { useRef } from 'react';
 import { ITreeProps, ITreeNode } from '@blueprintjs/core';
 import { FileTreeProps } from './FileTree';
 import { NodeEditor } from './NodeEditor';
-import {
-	fileTreeElement,
-	NodeEditorData,
-	NodeEditorDataRename,
-} from './common';
+import { classes, NodeEditorData, NodeEditorDataRename } from './common';
 import { DIRECTORY_ID } from '../../core/fileSystem/constants';
 import { PLUGINS_MAP } from '../../plugins';
 
@@ -58,7 +54,7 @@ type NodesMap = {
 };
 
 const getNodeClass = (isEditing: boolean) => {
-	return fileTreeElement('node', { editing: isEditing });
+	return classes.nodeElement({ editing: isEditing });
 };
 
 const createFolderNode = ({

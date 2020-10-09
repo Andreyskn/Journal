@@ -1,8 +1,8 @@
-import { useBEM } from '../../utils';
+import { bem } from '../../utils';
 import { NodeEditorProps } from './NodeEditor';
 import { Node } from './useTree';
 
-export const [fileTreeBlock, fileTreeElement] = useBEM('file-tree');
+export const classes = bem('file-tree', ['node'] as const);
 
 export type NodeEditorDataCreate = { mode: 'create' } & OmitType<
 	NodeEditorProps,

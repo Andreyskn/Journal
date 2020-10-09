@@ -1,6 +1,6 @@
 import React from 'react';
 import './task-list.scss';
-import { useBEM } from '../../../utils';
+import { bem } from '../../../utils';
 import { TaskItem } from './TaskItem';
 import {
 	Classes,
@@ -9,7 +9,7 @@ import {
 	IEditableTextProps,
 } from '@blueprintjs/core';
 
-const [taskListBlock, taskListElement] = useBEM('task-list');
+const classes = bem('task-list', ['title', 'form', 'input'] as const);
 
 type TaskListProps = Plugin.ComponentProps<TaskList.State, TaskList.Dispatch>;
 
@@ -32,8 +32,8 @@ export const TaskList: React.FC<TaskListProps> = ({
 	};
 
 	return (
-		<div className={taskListBlock()}>
-			<H1 className={taskListElement('title')}>
+		<div className={classes.taskListBlock()}>
+			<H1 className={classes.titleElement()}>
 				<EditableText
 					defaultValue={taskList.title}
 					confirmOnEnterKey
@@ -41,11 +41,10 @@ export const TaskList: React.FC<TaskListProps> = ({
 					onConfirm={onTitleChange}
 				/>
 			</H1>
-			<form onSubmit={addTask} className={taskListElement('form')}>
+			<form onSubmit={addTask} className={classes.formElement()}>
 				<input
 					type='text'
-					className={taskListElement(
-						'input',
+					className={classes.inputElement(
 						null,
 						Classes.INPUT,
 						Classes.FILL

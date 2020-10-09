@@ -1,13 +1,13 @@
 import React, { useCallback } from 'react';
 import './task-item.scss';
-import { useBEM } from '../../../utils';
+import { bem } from '../../../utils';
 import { Switch, Button } from '@blueprintjs/core';
 
 export type TaskItemProps = TaskList.Task & {
 	dispatch: TaskList.Dispatch;
 };
 
-const [itemBlock, itemElement] = useBEM('task-item');
+const classes = bem('task-item', ['delete-btn'] as const);
 
 export const TaskItem: React.FC<TaskItemProps> = ({
 	id,
@@ -24,7 +24,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 	}, []);
 
 	return (
-		<div className={itemBlock()}>
+		<div className={classes.taskItemBlock()}>
 			<Switch
 				checked={done}
 				label={text}
@@ -35,7 +35,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 				icon='delete'
 				intent='danger'
 				minimal
-				className={itemElement('delete-btn')}
+				className={classes.deleteBtnElement()}
 				onClick={deleteTask}
 			/>
 		</div>

@@ -11,7 +11,7 @@ import {
 	MenuItem,
 	MenuDivider,
 } from '@blueprintjs/core';
-import { useForceUpdate, useBEM } from '../../utils';
+import { useForceUpdate, bem } from '../../utils';
 import {
 	useTree,
 	TreeProps,
@@ -20,12 +20,17 @@ import {
 	Node,
 	isEditingNode,
 } from './useTree';
-import { fileTreeBlock, NodeEditorData } from './common';
+import { classes as fileTreeClasses, NodeEditorData } from './common';
 import { NodeEditorProps } from './NodeEditor';
 import { DIRECTORY_ID, getFilePath, PATHS, SEP } from '../../core/fileSystem';
 import { useAppContext } from '../context';
 
-const [explorerBlock, explorerElement] = useBEM('file-explorer');
+const explorerClasses = bem('file-explorer', [
+	'move-target',
+	'controls',
+	'tree-container',
+	'filler',
+] as const);
 
 export type FileTreeProps = {
 	files: App.FileSystemState['files'];
@@ -172,7 +177,9 @@ export const FileTree: React.FC<FileTreeProps> = ({
 						<MenuItem
 							key={id}
 							text={
-								<div className={explorerElement('move-target')}>
+								<div
+									className={explorerClasses.moveTargetElement()}
+								>
 									{label} <span>{path}</span>
 								</div>
 							}
@@ -236,12 +243,12 @@ export const FileTree: React.FC<FileTreeProps> = ({
 		onNodeContextMenu: onNodeContextMenu,
 		onNodeExpand: onToggleExpanded,
 		onNodeCollapse: onToggleExpanded,
-		className: fileTreeBlock({ insert: nodeEditorData }),
+		className: fileTreeClasses.fileTreeBlock({ insert: nodeEditorData }),
 	};
 
 	return (
-		<div className={explorerBlock()}>
-			<div className={explorerElement('controls')}>
+		<div className={explorerClasses.fileExplorerBlock()}>
+			<div className={explorerClasses.controlsElement()}>
 				<ButtonGroup>
 					<Button
 						icon='document'
@@ -262,13 +269,13 @@ export const FileTree: React.FC<FileTreeProps> = ({
 				/>
 			</div>
 			<div
-				className={explorerElement('tree-container', {
+				className={explorerClasses.treeContainerElement({
 					selected: !nodeEditorData && selection.path === PATHS.main,
 				})}
 			>
 				<Tree {...(treeProps as ITreeProps<any>)} />
 				<div
-					className={explorerElement('filler')}
+					className={explorerClasses.fillerElement()}
 					onClick={onRootSelect}
 				/>
 			</div>

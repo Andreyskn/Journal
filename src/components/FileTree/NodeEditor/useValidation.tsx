@@ -1,13 +1,13 @@
 import React, { useRef, useState } from 'react';
 import { EXTENSIONS } from '../../../plugins';
 
-import { useBEM } from '../../../utils';
+import { bem } from '../../../utils';
 import { NodeEditorProps } from './NodeEditor';
 
-const [errorBlock] = useBEM('validation-popover');
+const classes = bem('validation-popover');
 
 const ErrorMessage: React.FC = ({ children }) => (
-	<div className={errorBlock()}>{children}</div>
+	<div className={classes.validationPopoverBlock()}>{children}</div>
 );
 
 const errors = {

@@ -7,11 +7,11 @@ import React, {
 
 import { Menu, MenuItem, IPopoverProps } from '@blueprintjs/core';
 import { ValidationResult } from './useValidation';
-import { useBEM } from '../../../utils';
+import { bem } from '../../../utils';
 import { NodeEditorProps } from './NodeEditor';
 import { EXTENSIONS, PLUGINS_MAP, TYPE_BY_EXTENSION } from '../../../plugins';
 
-const [autocompleteBlock, autocompleteElement] = useBEM('autocomplete-popover');
+const classes = bem('autocomplete-popover', ['item'] as const);
 
 export const useAutocomplete = (
 	onSelectProp: (value: string) => void,
@@ -110,12 +110,12 @@ export const Autocomplete = React.forwardRef<
 	}));
 
 	return (
-		<Menu className={autocompleteBlock()}>
+		<Menu className={classes.autocompletePopoverBlock()}>
 			{items.map((item, index) => (
 				<MenuItem
 					key={item}
 					text={
-						<div className={autocompleteElement('item')}>
+						<div className={classes.itemElement()}>
 							{item}{' '}
 							<span>
 								{PLUGINS_MAP[TYPE_BY_EXTENSION[item]].label}

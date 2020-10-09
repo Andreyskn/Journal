@@ -1,8 +1,8 @@
 import React from 'react';
 import { Callout } from '@blueprintjs/core';
-import { useBEM } from './useBEM';
+import { bem } from './bem';
 
-const [boundaryBlock] = useBEM('error-boundary');
+const { errorBoundaryBlock } = bem('error-boundary');
 
 type BoundaryProps = {
 	name: string;
@@ -33,7 +33,7 @@ export class ErrorBoundary extends React.Component<
 				<Callout
 					title={`${name} failed to render`}
 					intent='danger'
-					className={boundaryBlock()}
+					className={errorBoundaryBlock()}
 				/>
 			);
 		}

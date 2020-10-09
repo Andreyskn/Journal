@@ -1,9 +1,9 @@
 import React from 'react';
 
 import './questionary.scss';
-import { Classes, TextArea } from '@blueprintjs/core';
+import { Classes } from '@blueprintjs/core';
 
-import { useBEM } from '../../../utils';
+import { bem } from '../../../utils';
 import { QAItem } from './QAItem';
 
 type QuestionaryProps = Plugin.ComponentProps<
@@ -11,7 +11,7 @@ type QuestionaryProps = Plugin.ComponentProps<
 	Questions.Dispatch
 >;
 
-const [questionaryBlock, questionaryElement] = useBEM('questionary');
+const classes = bem('questionary', ['form', 'input'] as const);
 
 export const Questionary: React.FC<QuestionaryProps> = ({
 	state: questionary,
@@ -28,12 +28,11 @@ export const Questionary: React.FC<QuestionaryProps> = ({
 	};
 
 	return (
-		<div className={questionaryBlock()}>
-			<form onSubmit={addQuestion} className={questionaryElement('form')}>
+		<div className={classes.questionaryBlock()}>
+			<form onSubmit={addQuestion} className={classes.formElement()}>
 				<input
 					type='text'
-					className={questionaryElement(
-						'input',
+					className={classes.inputElement(
 						null,
 						Classes.INPUT,
 						Classes.FILL,
