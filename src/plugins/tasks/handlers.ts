@@ -14,6 +14,8 @@ const addTask: TaskList.Handler<{
 		done: false,
 		id: generateId(),
 		text,
+		priority: 'medium',
+		inProgress: false,
 	};
 
 	return {
@@ -42,9 +44,43 @@ const toggleTaskDone: TaskList.Handler<{
 	};
 };
 
+const toggleInProgress: TaskList.Handler<{
+	id: TaskList.Task['id'];
+}> = (state, { id }) => {
+	return {
+		...state,
+		tasks: state.tasks.map((t) =>
+			t.id === id ? { ...t, inProgress: !t.inProgress } : t
+		),
+	};
+};
+
+const setTaskPriority: TaskList.Handler<{
+	id: TaskList.Task['id'];
+	priority: TaskList.Task['priority'];
+}> = (state, { id, priority }) => {
+	return {
+		...state,
+		tasks: state.tasks.map((t) => (t.id === id ? { ...t, priority } : t)),
+	};
+};
+
+const setTaskText: TaskList.Handler<{
+	id: TaskList.Task['id'];
+	text: TaskList.Task['text'];
+}> = (state, { id, text }) => {
+	return {
+		...state,
+		tasks: state.tasks.map((t) => (t.id === id ? { ...t, text } : t)),
+	};
+};
+
 export const handlers = {
 	addTask,
 	deleteTask,
 	toggleTaskDone,
 	setTaskListTitle,
+	setTaskPriority,
+	setTaskText,
+	toggleInProgress,
 };

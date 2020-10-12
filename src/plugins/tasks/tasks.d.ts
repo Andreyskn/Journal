@@ -19,6 +19,8 @@ declare global {
 			createdAt: Timestamp;
 			text: string;
 			done: boolean;
+			priority: 'high' | 'medium' | 'low';
+			inProgress: boolean;
 		};
 	}
 }

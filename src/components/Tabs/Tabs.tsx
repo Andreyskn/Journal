@@ -35,19 +35,6 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTabId, dispatch }) => {
 		}
 	};
 
-	const createTabMenu = (
-		<Menu>
-			{PLUGINS.map((plugin) => (
-				<MenuItem
-					key={plugin.type}
-					icon={plugin.icon}
-					text={`New ${plugin.label}`}
-					onClick={createFile(plugin.type)}
-				/>
-			))}
-		</Menu>
-	);
-
 	const renderTab = ({ id, name, type, path }: App.Tab) => {
 		const isActive = id === activeTabId;
 
@@ -82,12 +69,22 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTabId, dispatch }) => {
 		<div className={classes.tabsBlock()}>
 			<div className={classes.barElement()}>
 				{tabs.map(renderTab)}
-				<Popover content={createTabMenu} position='bottom-left' minimal>
+				<Popover position='bottom-left' minimal>
 					<Button
 						icon='plus'
 						minimal
 						className={classes.addElement()}
 					/>
+					<Menu>
+						{PLUGINS.map((plugin) => (
+							<MenuItem
+								key={plugin.type}
+								icon={plugin.icon}
+								text={`New ${plugin.label}`}
+								onClick={createFile(plugin.type)}
+							/>
+						))}
+					</Menu>
 				</Popover>
 			</div>
 		</div>

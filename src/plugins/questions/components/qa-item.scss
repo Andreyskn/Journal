@@ -8,6 +8,8 @@
 	}
 
 	&__textarea {
+		overflow: hidden;
+
 		padding: 15px;
 
 		resize: none;

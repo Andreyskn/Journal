@@ -1,20 +1,108 @@
 .task-item {
-	display: flex;
+	position: relative;
 
-	justify-content: space-between;
+	display: flex;
+	overflow: hidden;
+
+	min-height: 50px;
+	margin-bottom: 15px;
+
+	border-radius: 3px;
+	background-color: #293742;
+	box-shadow: 0 0 3px 1px rgba(16, 22, 26, 0.4);
+
 	align-items: center;
 
-	& + & {
-		margin-top: 15px;
-	}
-
-	&:hover {
-		.task-item__delete-btn {
-			opacity: 1;
+	&--done {
+		.task-item__text, .task-item__priority, .task-item__more {
+			opacity: 0.5;
 		}
 	}
 
-	&__delete-btn {
-		opacity: 0;
+	&__priority {
+		position: absolute;
+
+		width: 10px;
+		height: 100%;
+
+		&--active:hover &-target, .bp3-popover-open &-target {
+			cursor: pointer;
+			transform: translateX(0);
+		}
+
+		.bp3-popover-target {
+			height: 100%;
+		}
+
+		&-target {
+			height: 100%;
+			padding: 0;
+
+			transition: transform 0.2s;
+			transform: translateX(-50%);
+
+			border: none;
+			background: none;
+		}
+	}
+
+	&__indicator {
+		top: -5px;
+		left: 0;
+
+		width: 12px;
+		height: calc(100% + 10px);
+
+		.bp3-progress-meter {
+			animation-duration: 1s !important;
+
+			background-color: #0e5a8a !important;
+		}
+
+		&--priority-high {
+			.bp3-progress-meter {
+				background-color: #a82a2a !important;
+			}
+		}
+
+		&--priority-low {
+			.bp3-progress-meter {
+				background-color: #5c7080 !important;
+			}
+		}
+	}
+
+	&__checkbox {
+		margin: 0 0 0 15px;
+
+		.bp3-control-indicator {
+			display: inline-flex;
+
+			align-items: center;
+			justify-content: center;
+		}
+	}
+
+	&__text {
+		flex: 1 1 auto;
+
+		padding: 10px 5px;
+
+		cursor: pointer;
+		user-select: none;
+		text-align: left;
+	}
+
+	&__text-editor {
+		overflow: hidden;
+
+		margin: 10px 5px;
+		padding: 15px 5px 0 !important;
+
+		resize: none;
+	}
+
+	&__more {
+		margin-right: 10px;
 	}
 }
