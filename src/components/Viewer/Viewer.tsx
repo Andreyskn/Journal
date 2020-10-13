@@ -2,9 +2,10 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import './viewer.scss';
 
-import { ErrorBoundary, createReducer, useStateRef } from '../../utils';
+import { ErrorBoundary, createReducer, useStateRef, bem } from '../../utils';
 import { PLUGINS, PLUGINS_MAP } from '../../plugins';
 import { useSelector, useEnhancedDispatch } from '../../core';
+import { Toolbar, ToolbarProps } from './Toolbar/Toolbar';
 
 const useStateHistory = (
 	initialState: unknown,
@@ -55,11 +56,13 @@ const useStateHistory = (
 	return { setReversibleState };
 };
 
-const connectPlugin = ({ Component, init, handlers }: Plugin.LazyModule) => {
+const classes = bem('viewer', ['toolbar', 'main'] as const);
+
+const connectPlugin = ({ render, initState, handlers }: Plugin.LazyModule) => {
 	const reducer = createReducer(handlers);
 
 	const ConnectedPlugin: React.FC<{ data: App.FileData }> = ({ data }) => {
-		const initialState = useMemo(() => init(data.state), []);
+		const initialState = useMemo(() => initState(data.state), []);
 		const [state, setState, stateRef] = useStateRef(initialState);
 		const { setReversibleState } = useStateHistory(initialState, setState);
 
@@ -91,7 +94,26 @@ const connectPlugin = ({ Component, init, handlers }: Plugin.LazyModule) => {
 			};
 		}, []);
 
-		return <Component state={state} dispatch={pluginDispatch} />;
+		const { main, toolbarContent } = render(state, pluginDispatch);
+
+		const viewerElement = useRef<HTMLDivElement>(null);
+
+		const onFullscreen = () => {
+			// TODO: add layout state to core
+		};
+
+		const options: ToolbarProps['options'] = [
+			{ icon: 'fullscreen', text: 'Fullscreen', onClick: onFullscreen },
+		];
+
+		return (
+			<div className={classes.viewerBlock()} ref={viewerElement}>
+				<div className={classes.toolbarElement()}>
+					<Toolbar content={toolbarContent} options={options} />
+				</div>
+				<div className={classes.mainElement()}>{main}</div>
+			</div>
+		);
 	};
 
 	return { default: ConnectedPlugin };

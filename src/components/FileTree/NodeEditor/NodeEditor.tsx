@@ -32,8 +32,8 @@ const classes = bem('node-editor', [
 export const NodeEditor: React.FC<NodeEditorProps> = (props) => {
 	const { type, onDismiss, onConfirm } = props;
 
-	const editor = useRef<HTMLDivElement | null>(null);
-	const popover = useRef<Popover | null>(null);
+	const editor = useRef<HTMLDivElement>(null);
+	const popover = useRef<Popover>(null);
 	const [inputValue, setInputValue] = useState('');
 
 	const validation = useValidation(props);

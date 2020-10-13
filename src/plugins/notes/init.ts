@@ -1,6 +1,14 @@
-export { NoteEditor as Component } from './components/NoteEditor';
-export { handlers } from './handlers';
+import { render as renderImpl } from './components';
+import { handlers as handlersImpl } from './handlers';
 
-export const init: Plugin.Initializer<Notes.State> = (s) => {
+const init: Plugin.Initializer<Notes.State> = (s) => {
 	return s || { text: '' };
 };
+
+const lazyModule: Plugin.LazyModule = {
+	render: renderImpl,
+	handlers: handlersImpl,
+	initState: init,
+};
+
+export const { render, handlers, initState } = lazyModule;

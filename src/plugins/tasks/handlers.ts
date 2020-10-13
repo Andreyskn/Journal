@@ -11,11 +11,10 @@ const addTask: TaskList.Handler<{
 }> = (state, { text }) => {
 	const task: TaskList.Task = {
 		createdAt: Date.now(),
-		done: false,
+		status: 'to-do',
 		id: generateId(),
 		text,
 		priority: 'medium',
-		inProgress: false,
 	};
 
 	return {
@@ -33,25 +32,13 @@ const deleteTask: TaskList.Handler<{
 	};
 };
 
-const toggleTaskDone: TaskList.Handler<{
+const setTaskStatus: TaskList.Handler<{
 	id: TaskList.Task['id'];
-}> = (state, { id }) => {
+	status: TaskList.Task['status'];
+}> = (state, { id, status }) => {
 	return {
 		...state,
-		tasks: state.tasks.map((t) =>
-			t.id === id ? { ...t, done: !t.done } : t
-		),
-	};
-};
-
-const toggleInProgress: TaskList.Handler<{
-	id: TaskList.Task['id'];
-}> = (state, { id }) => {
-	return {
-		...state,
-		tasks: state.tasks.map((t) =>
-			t.id === id ? { ...t, inProgress: !t.inProgress } : t
-		),
+		tasks: state.tasks.map((t) => (t.id === id ? { ...t, status } : t)),
 	};
 };
 
@@ -78,9 +65,8 @@ const setTaskText: TaskList.Handler<{
 export const handlers = {
 	addTask,
 	deleteTask,
-	toggleTaskDone,
+	setTaskStatus,
 	setTaskListTitle,
 	setTaskPriority,
 	setTaskText,
-	toggleInProgress,
 };

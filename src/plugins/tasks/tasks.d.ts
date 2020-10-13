@@ -18,9 +18,8 @@ declare global {
 			id: string;
 			createdAt: Timestamp;
 			text: string;
-			done: boolean;
 			priority: 'high' | 'medium' | 'low';
-			inProgress: boolean;
+			status: 'to-do' | 'in-progress' | 'done';
 		};
 	}
 }

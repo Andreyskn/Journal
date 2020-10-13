@@ -1,13 +1,21 @@
-export {};
+import { ReactNode } from 'react';
 
 declare global {
 	namespace Plugin {
 		type Initializer<S> = (prevState: Maybe<S>) => S;
 
+		type Render<S, D extends Dispatch<any>> = (
+			state: S,
+			dispatch: D
+		) => {
+			main: ReactNode;
+			toolbarContent?: ReactNode | ReactNode[];
+		};
+
 		type LazyModule = {
-			Component: React.FC<Plugin.ComponentProps<any, any>>;
-			init: Initializer<any>;
+			initState: Initializer<any>;
 			handlers: any;
+			render: Render<any, any>;
 		};
 
 		type Configuration = Readonly<{
@@ -19,8 +27,8 @@ declare global {
 			getLazyModule: () => Promise<LazyModule>;
 		}>;
 
-		type ComponentProps<T, D extends Dispatch<any>> = {
-			state: T;
+		type ComponentProps<S, D extends Dispatch<any>> = {
+			state: S;
 			dispatch: D;
 		};
 

@@ -1,6 +1,14 @@
-export { TaskList as Component } from './components/TaskList';
-export { handlers } from './handlers';
+import { render as renderImpl } from './components';
+import { handlers as handlersImpl } from './handlers';
 
-export const init: Plugin.Initializer<TaskList.State> = (s) => {
+const init: Plugin.Initializer<TaskList.State> = (s) => {
 	return s || { tasks: [], title: 'Task List' };
 };
+
+const lazyModule: Plugin.LazyModule = {
+	render: renderImpl,
+	handlers: handlersImpl,
+	initState: init,
+};
+
+export const { render, handlers, initState } = lazyModule;

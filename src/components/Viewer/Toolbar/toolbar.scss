@@ -1,0 +1,13 @@
+.toolbar {
+	display: flex;
+
+	padding: 10px 15px;
+
+	background-color: #394b59;
+
+	align-items: center;
+
+	&__settings {
+		margin-left: auto;
+	}
+}

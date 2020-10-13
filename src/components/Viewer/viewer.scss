@@ -1,3 +1,19 @@
 .viewer {
-	
+	display: grid;
+
+	height: 100%;
+
+	background-color: var(--primary-background);
+
+	grid-template: "toolbar" auto
+	"main" minmax(0, 1fr) /
+	1fr;
+
+	&__toolbar {
+		grid-area: toolbar;
+	}
+
+	&__main {
+		grid-area: main;
+	}
 }

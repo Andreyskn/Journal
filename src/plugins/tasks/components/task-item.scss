@@ -14,7 +14,11 @@
 	align-items: center;
 
 	&--done {
-		.task-item__text, .task-item__priority, .task-item__more {
+		.task-item__text {
+			text-decoration: line-through;
+		}
+
+		.task-item__text, .task-item__priority {
 			opacity: 0.5;
 		}
 	}
@@ -73,7 +77,7 @@
 	}
 
 	&__checkbox {
-		margin: 0 0 0 15px;
+		margin: 0 0 0 20px;
 
 		.bp3-control-indicator {
 			display: inline-flex;
@@ -104,5 +108,19 @@
 
 	&__more {
 		margin-right: 10px;
+	}
+
+	&__controls {
+		margin-right: 10px;
+
+		.bp3-button {
+			transition: opacity 0.2s ease-in-out;
+
+			opacity: 0.5;
+
+			&:hover {
+				opacity: 1;
+			}
+		}
 	}
 }

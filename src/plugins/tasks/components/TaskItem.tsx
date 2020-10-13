@@ -3,6 +3,7 @@ import './task-item.scss';
 import { bem } from '../../../utils';
 import {
 	Button,
+	ButtonGroup,
 	Checkbox,
 	ITextAreaProps,
 	Menu,
@@ -20,7 +21,7 @@ export type TaskItemProps = TaskList.Task & {
 const classes = bem('task-item', [
 	'checkbox',
 	'text',
-	'more',
+	'controls',
 	'priority',
 	'priority-target',
 	'text-editor',
@@ -41,18 +42,30 @@ const priorities: PriorityMenuItem[] = [
 
 export const TaskItem: React.FC<TaskItemProps> = ({
 	id,
-	done,
 	text,
 	dispatch,
 	priority,
-	inProgress,
+	status,
 }) => {
+	const isDone = status === 'done';
+	const isInProgress = status === 'in-progress';
+
 	const [isEditing, setIsEditing] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-	const onToggleDone = () => dispatch.toggleTaskDone({ id });
+	const onToggleDone = () => {
+		dispatch.setTaskStatus({
+			id,
+			status: status === 'done' ? 'to-do' : 'done',
+		});
+	};
 
-	const onToggleInProgress = () => dispatch.toggleInProgress({ id });
+	const onToggleInProgress = () => {
+		dispatch.setTaskStatus({
+			id,
+			status: status === 'in-progress' ? 'to-do' : 'in-progress',
+		});
+	};
 
 	const onDelete = () => dispatch.deleteTask({ id });
 
@@ -78,19 +91,19 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 	};
 
 	return (
-		<div className={classes.taskItemBlock({ done })}>
+		<div className={classes.taskItemBlock({ done: isDone })}>
 			<Popover
 				position='bottom-left'
 				minimal
-				className={classes.priorityElement({ active: !done })}
-				disabled={done}
+				className={classes.priorityElement({ active: !isDone })}
+				disabled={isDone}
 			>
 				<button
 					type='button'
 					className={classes.priorityTargetElement()}
 				>
 					<ProgressBar
-						stripes={inProgress}
+						stripes={isInProgress}
 						className={classes.indicatorElement({
 							[`priority-${priority}`]: priority !== 'medium',
 						})}
@@ -101,7 +114,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 						icon='build'
 						text='In progress'
 						onClick={onToggleInProgress}
-						active={inProgress}
+						active={isInProgress}
 					/>
 					<MenuDivider title='Priority' />
 					{priorities.map(({ icon, text, value }) => (
@@ -117,7 +130,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 			</Popover>
 			<Checkbox
 				id={id}
-				checked={done}
+				checked={isDone}
 				onChange={onToggleDone}
 				large
 				className={classes.checkboxElement()}
@@ -138,21 +151,14 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 					{text}
 				</label>
 			)}
-			<Popover
-				position='bottom-right'
-				minimal
-				className={classes.moreElement()}
-			>
-				<Button icon='more' minimal />
-				<Menu>
-					<MenuItem
-						icon='edit'
-						text='Edit'
-						onClick={() => setIsEditing(true)}
-					/>
-					<MenuItem icon='cross' text='Delete' onClick={onDelete} />
-				</Menu>
-			</Popover>
+			<ButtonGroup minimal className={classes.controlsElement()}>
+				<Button
+					icon='edit'
+					onClick={() => setIsEditing(true)}
+					title='Edit'
+				/>
+				<Button icon='trash' onClick={onDelete} title='Delete' />
+			</ButtonGroup>
 		</div>
 	);
 };
