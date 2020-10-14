@@ -12,6 +12,8 @@ declare global {
 			toolbarContent?: ReactNode | ReactNode[];
 		};
 
+		type Show<S> = (state: S) => string;
+
 		type LazyModule = {
 			initState: Initializer<any>;
 			handlers: any;
@@ -25,6 +27,7 @@ declare global {
 			icon: Icon;
 			label: string;
 			getLazyModule: () => Promise<LazyModule>;
+			show: Show<any>;
 		}>;
 
 		type ComponentProps<S, D extends Dispatch<any>> = {

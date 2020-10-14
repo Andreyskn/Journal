@@ -61,7 +61,10 @@ const classes = bem('viewer', ['toolbar', 'main'] as const);
 const connectPlugin = ({ render, initState, handlers }: Plugin.LazyModule) => {
 	const reducer = createReducer(handlers);
 
-	const ConnectedPlugin: React.FC<{ data: App.FileData }> = ({ data }) => {
+	const ConnectedPlugin: React.FC<{
+		data: App.FileData;
+		file: App.RegularFile;
+	}> = ({ data, file }) => {
 		const initialState = useMemo(() => initState(data.state), []);
 		const [state, setState, stateRef] = useStateRef(initialState);
 		const { setReversibleState } = useStateHistory(initialState, setState);
@@ -102,8 +105,27 @@ const connectPlugin = ({ render, initState, handlers }: Plugin.LazyModule) => {
 			// TODO: add layout state to core
 		};
 
+		const onExport = () => {
+			const text = `[${file.name}]::\n\n${PLUGINS_MAP[file.type].show(
+				state
+			)}`;
+			const url = URL.createObjectURL(
+				new Blob([text], {
+					type: 'text/markdown',
+				})
+			);
+			const a = document.createElement('a');
+			a.style.display = 'none';
+			a.href = url;
+			a.download = `${file.name.replace(/\..*/, '')}.md`;
+			document.body.appendChild(a);
+			a.click();
+			window.URL.revokeObjectURL(url);
+		};
+
 		const options: ToolbarProps['options'] = [
 			{ icon: 'fullscreen', text: 'Fullscreen', onClick: onFullscreen },
+			{ icon: 'export', text: 'Export', onClick: onExport },
 		];
 
 		return (
@@ -143,10 +165,16 @@ export const Viewer: React.FC = () => {
 
 	const Plugin = pluginComponents[activeFile.type];
 
+	console.log(PLUGINS_MAP[activeFile.type].show(activeDocument.state));
+
 	return (
 		<ErrorBoundary name={`${PLUGINS_MAP[activeFile.type].label}`}>
 			<React.Suspense fallback={null}>
-				<Plugin data={activeDocument} key={activeDocument.id} />
+				<Plugin
+					file={activeFile}
+					data={activeDocument}
+					key={activeDocument.id}
+				/>
 			</React.Suspense>
 		</ErrorBoundary>
 	);

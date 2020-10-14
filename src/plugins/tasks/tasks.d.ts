@@ -10,7 +10,6 @@ declare global {
 		>;
 
 		type State = {
-			title: string;
 			tasks: Task[];
 		};
 

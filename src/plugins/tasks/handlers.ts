@@ -1,11 +1,5 @@
 import { generateId } from '../../utils';
 
-const setTaskListTitle: TaskList.Handler<{
-	title: TaskList.State['title'];
-}> = (state, { title }) => {
-	return { ...state, title };
-};
-
 const addTask: TaskList.Handler<{
 	text: TaskList.Task['text'];
 }> = (state, { text }) => {
@@ -66,7 +60,6 @@ export const handlers = {
 	addTask,
 	deleteTask,
 	setTaskStatus,
-	setTaskListTitle,
 	setTaskPriority,
 	setTaskText,
 };

@@ -1,3 +1,5 @@
+const show: Plugin.Show<Notes.State> = (state) => state.text;
+
 export const config: Plugin.Configuration = {
 	order: 2,
 	type: 'note',
@@ -5,4 +7,5 @@ export const config: Plugin.Configuration = {
 	icon: 'manual',
 	label: 'Note',
 	getLazyModule: () => import('./init'),
+	show,
 };
