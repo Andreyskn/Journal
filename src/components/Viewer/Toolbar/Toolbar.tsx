@@ -16,7 +16,7 @@ export type ToolbarProps = {
 	options: IMenuItemProps[];
 };
 
-const classes = bem('toolbar', ['settings'] as const);
+const classes = bem('toolbar', ['options'] as const);
 
 export const Toolbar: React.FC<ToolbarProps> = ({ content, options }) => {
 	return (
@@ -25,9 +25,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({ content, options }) => {
 			<Popover
 				position='bottom-right'
 				minimal
-				className={classes.settingsElement()}
+				className={classes.optionsElement()}
 			>
-				<Button minimal icon='cog' />
+				<Button minimal icon='more' />
 				<Menu>
 					{options.map((opt, i) => (
 						<MenuItem {...opt} key={i} />

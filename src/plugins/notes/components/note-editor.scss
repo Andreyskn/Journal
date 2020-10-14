@@ -1,22 +1,42 @@
-.note-editor {
-	display: flex;
+.note {
+	display: grid;
 	overflow: auto;
 
 	height: 100%;
 
-	&__text-area {
-		width: 50%;
-		height: 100%;
+	&--layout-editor {
+		grid-template: "editor" auto / minmax(0, 1fr);
+	}
+
+	&--layout-preview {
+		grid-template: "preview" auto / minmax(0, 1fr);
+	}
+
+	&--layout-split {
+		grid-template: "editor preview" auto / minmax(0, 1fr) minmax(0, 1fr);
+	}
+
+	&__editor {
+		overflow: hidden;
+
+		padding: 30px !important;
 
 		resize: none;
 
 		box-shadow: none !important;
+
+		grid-area: editor;
 	}
 
-	&__viewer {
-		width: 50%;
-		padding: 0 15px;
+	&__preview {
+		padding: 30px;
 
 		font-size: 16px;
+
+		grid-area: preview;
+
+		h1:first-child, h2:first-child, h3:first-child, h4:first-child, h5:first-child, h6:first-child {
+			margin-top: 0;
+		}
 	}
 }

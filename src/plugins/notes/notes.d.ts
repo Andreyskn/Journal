@@ -11,6 +11,7 @@ declare global {
 
 		type State = {
 			text: string;
+			layout: 'editor' | 'preview' | 'split';
 		};
 	}
 }

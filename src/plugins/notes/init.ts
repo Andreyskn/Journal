@@ -2,7 +2,7 @@ import { render as renderImpl } from './components';
 import { handlers as handlersImpl } from './handlers';
 
 const init: Plugin.Initializer<Notes.State> = (s) => {
-	return s || { text: '' };
+	return s || { text: '', layout: 'split' };
 };
 
 const lazyModule: Plugin.LazyModule = {

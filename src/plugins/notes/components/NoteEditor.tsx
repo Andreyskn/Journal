@@ -8,10 +8,10 @@ import { bem } from '../../../utils';
 
 type NoteEditorProps = Plugin.ComponentProps<Notes.State, Notes.Dispatch>;
 
-const classes = bem('note-editor', ['text-area', 'viewer'] as const);
+const classes = bem('note', ['editor', 'preview'] as const);
 
 export const NoteEditor: React.FC<NoteEditorProps> = ({
-	state: note,
+	state: { text, layout },
 	dispatch,
 }) => {
 	const onChange: ITextAreaProps['onChange'] = (e) => {
@@ -19,18 +19,25 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
 	};
 
 	return (
-		<div className={classes.noteEditorBlock()}>
-			<TextArea
-				large
-				value={note.text}
-				growVertically
-				className={classes.textAreaElement()}
-				onChange={onChange}
-			/>
-			<ReactMarkdown
-				source={note.text}
-				className={classes.viewerElement(null, Classes.RUNNING_TEXT)}
-			/>
+		<div className={classes.noteBlock({ [`layout-${layout}`]: true })}>
+			{layout !== 'preview' && (
+				<TextArea
+					large
+					value={text}
+					growVertically
+					className={classes.editorElement()}
+					onChange={onChange}
+				/>
+			)}
+			{layout !== 'editor' && (
+				<ReactMarkdown
+					source={text}
+					className={classes.previewElement(
+						null,
+						Classes.RUNNING_TEXT
+					)}
+				/>
+			)}
 		</div>
 	);
 };
