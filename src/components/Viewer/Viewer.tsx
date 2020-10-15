@@ -106,6 +106,7 @@ const connectPlugin = ({ render, initState, handlers }: Plugin.LazyModule) => {
 		};
 
 		const onExport = () => {
+			// TODO: use browser.downloads
 			const text = `[${file.name}]::\n\n${PLUGINS_MAP[file.type].show(
 				state
 			)}`;
@@ -164,8 +165,6 @@ export const Viewer: React.FC = () => {
 	if (!activeFile || !activeDocument) return null; // TODO: add placeholder
 
 	const Plugin = pluginComponents[activeFile.type];
-
-	console.log(PLUGINS_MAP[activeFile.type].show(activeDocument.state));
 
 	return (
 		<ErrorBoundary name={`${PLUGINS_MAP[activeFile.type].label}`}>
