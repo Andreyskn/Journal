@@ -26,38 +26,40 @@ const isTop = (pos: Position): pos is Top & HorizontalPosition => 'top' in pos;
 
 type AlignmentData<T> = {
 	side: T;
-	adjust: (amount: number) => any;
+	adjust: (amount: number) => void;
 };
 
-type MousePos = { x: number; y: number };
-const stubMousePos: MousePos = { x: 0, y: 0 };
+const stubMousePos: Coordinates = { x: 0, y: 0 };
 
 type OnMoveEndCallback<P extends Position> = (position: P) => void;
 
-// TODO: forbid moving items past screen edge, handle window resize
+// TODO:
+// forbid moving items past screen edge
+// handle window resize
+// add css class for disabling user-select
 export const useMove = <P extends Position>(initPos: P) => {
 	const containerRef = useRef<HTMLElement | null>(null);
 	const handlerRef = useRef<HTMLElement | null>(null);
 	const handler = useRef<HTMLElement | null>(null);
 	const position = useRef<P>(initPos);
-	const lastMousePos = useRef<MousePos>(stubMousePos);
+	const lastMousePos = useRef<Coordinates>(stubMousePos);
 	const onMoveEndCallback = useRef<OnMoveEndCallback<P>>(noop);
 
-	const alignment = useMemo((): {
-		h: AlignmentData<keyof P>;
-		v: AlignmentData<keyof P>;
-	} => {
-		const pos = position.current;
-		const inc = (v1: number) => (v2: number) => (v1 += v2);
-		const dec = (v1: number) => (v2: number) => (v1 -= v2);
+	const alignment = useMemo(() => {
+		const inc = (side: Alignment) => (amount: number) =>
+			//@ts-ignore
+			(position.current[side] += amount);
+		const dec = (side: Alignment) => (amount: number) =>
+			//@ts-ignore
+			(position.current[side] -= amount);
 
-		const h: AlignmentData<HorizontalAlignment> = isLeft(pos)
-			? { side: 'left', adjust: inc(pos.left) }
-			: { side: 'right', adjust: dec((pos as Right).right) };
+		const h: AlignmentData<HorizontalAlignment> = isLeft(position.current)
+			? { side: 'left', adjust: inc('left') }
+			: { side: 'right', adjust: dec('right') };
 
-		const v: AlignmentData<VerticalAlignment> = isTop(pos)
-			? { side: 'top', adjust: inc(pos.top) }
-			: { side: 'bottom', adjust: dec((pos as Bottom).bottom) };
+		const v: AlignmentData<VerticalAlignment> = isTop(position.current)
+			? { side: 'top', adjust: inc('top') }
+			: { side: 'bottom', adjust: dec('bottom') };
 
 		return {
 			h: h as AlignmentData<keyof P>,
@@ -91,9 +93,8 @@ export const useMove = <P extends Position>(initPos: P) => {
 		lastMousePos.current.x = e.clientX;
 		lastMousePos.current.y = e.clientY;
 
-		const pos = position.current;
-		pos[alignment.h.side] = alignment.h.adjust(deltaX);
-		pos[alignment.v.side] = alignment.v.adjust(deltaY);
+		alignment.h.adjust(deltaX);
+		alignment.v.adjust(deltaY);
 
 		applyPositionStyles(containerRef.current as HTMLElement);
 	}, []);
@@ -116,7 +117,6 @@ export const useMove = <P extends Position>(initPos: P) => {
 		handler.current?.addEventListener('mousedown', onGrab);
 		return () => {
 			handler.current?.removeEventListener('mousedown', onGrab);
-			onRelease();
 		};
 	}, [handler.current]);
 

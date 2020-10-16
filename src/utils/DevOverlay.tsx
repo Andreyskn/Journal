@@ -1,16 +1,10 @@
-import { Button, Classes } from '@blueprintjs/core';
-import React from 'react';
+import { Button, ButtonGroup, Classes } from '@blueprintjs/core';
+import React, { useState } from 'react';
 import ReactDom from 'react-dom';
 import { clear } from 'idb-keyval';
 
 import { useMove, Position } from './useMove';
-
-const style: React.CSSProperties = {
-	padding: 15,
-	borderRadius: 5,
-	backgroundColor: '#00000030',
-	zIndex: 1000,
-};
+import { Resize, ResizeProps } from './Resize/Resize';
 
 const POSITION_STORAGE_KEY = 'journal:dev-overlay-position';
 
@@ -19,8 +13,17 @@ const initialPosition = ((): Position => {
 	if (savedPosition) {
 		return JSON.parse(savedPosition) as Position;
 	}
-	return { bottom: 5, right: 5 };
+	return { bottom: 150, left: 150 };
 })();
+
+const style: React.CSSProperties = {
+	padding: 15,
+	borderRadius: 5,
+	backgroundColor: '#00000030',
+	zIndex: 1000,
+	position: 'fixed',
+	...initialPosition,
+};
 
 const DevOverlay: React.FC = () => {
 	const { containerRef, onMoveEnd } = useMove(initialPosition);
@@ -38,9 +41,36 @@ const DevOverlay: React.FC = () => {
 		});
 	});
 
+	const [side, setSide] = useState<any>('bottom');
+
 	return (
-		<div className={Classes.DARK} style={style} ref={containerRef}>
-			<Button text='Clear state' icon='refresh' onClick={onClear} />
+		<div className={Classes.DARK}>
+			<Resize style={style} mode='freeform' key={side}>
+				{/* <Resize style={style} mode='directed' side={side} key={side}> */}
+				{/* <Button text='Clear state' icon='refresh' onClick={onClear} /> */}
+				<ButtonGroup>
+					<Button
+						text='left'
+						onClick={() => setSide('left')}
+						active={side === 'left'}
+					/>
+					<Button
+						text='right'
+						onClick={() => setSide('right')}
+						active={side === 'right'}
+					/>
+					<Button
+						text='top'
+						onClick={() => setSide('top')}
+						active={side === 'top'}
+					/>
+					<Button
+						text='bottom'
+						onClick={() => setSide('bottom')}
+						active={side === 'bottom'}
+					/>
+				</ButtonGroup>
+			</Resize>
 		</div>
 	);
 };
