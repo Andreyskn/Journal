@@ -1,5 +1,7 @@
 import { useReducer, useRef } from 'react';
 
+export const ORIGIN: Coordinates = { x: 0, y: 0 };
+
 export const noop: AnyFunction = () => {};
 
 export const except: AnyFunction = (message: string) => () => {
@@ -47,4 +49,21 @@ export const createReducer = <T>(handlers: any, initialState?: T) => {
 	};
 
 	return reducer;
+};
+
+export const mergeExcluding = <T extends AnyObject, K extends keyof any>(
+	o1: T,
+	o2: T,
+	exclude: Partial<Record<K, boolean>>
+): T => {
+	const keysToExclude = Object.keys(exclude).filter(
+		(key) => exclude[key as K]
+	);
+	return [...Object.entries(o1), ...Object.entries(o2)].reduce(
+		(result, [key, value]) => {
+			if (!keysToExclude.includes(key)) result[key as keyof T] = value;
+			return result;
+		},
+		{} as T
+	);
 };

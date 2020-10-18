@@ -1,8 +1,19 @@
-import React, { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
+import React, {
+	forwardRef,
+	PropsWithChildren,
+	RefObject,
+	useCallback,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+} from 'react';
 
 import './resize.scss';
 
 import { bem } from '../bem';
+import { ORIGIN } from '../helpers';
+// TODO: move Position to common types
+import { PartialPosition } from '../useMove';
 
 const classes = bem('resize', ['handle'] as const);
 
@@ -30,55 +41,65 @@ type Freeform = {
 
 type Mode = Directed | Freeform;
 
-export type ResizeProps = Mode & {
-	initialWidth?: number;
-	initialHeight?: number;
-	style?: React.CSSProperties;
-};
+export type ResizeProps = PropsWithChildren<
+	Mode & {
+		initialWidth?: number;
+		initialHeight?: number;
+		style?: React.CSSProperties;
+		className?: string;
+		onPositionChange?: (position: PartialPosition) => void;
+	}
+>;
 
 type Size = { width: number; height: number };
-
-const stubMousePos: Coordinates = { x: 0, y: 0 };
 const stubSize: Size = { width: undefined as any, height: undefined as any };
 
 const emptyWeakMap = new WeakMap<any>();
 
 /**
  * TODO:
- * - useMove compatibility
  * - min and max size
+ * - will-change
  * - aspect ratio (?)
  */
-export const Resize: React.FC<ResizeProps> = (props) => {
-	const { initialWidth, initialHeight, children, style } = props;
+export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
+	const {
+		initialWidth,
+		initialHeight,
+		children,
+		style,
+		className,
+		onPositionChange,
+	} = props;
+	const container = ref as RefObject<HTMLDivElement>;
 
-	const container = useRef<HTMLDivElement | null>(null);
 	const handles = useRef<WeakMap<HTMLDivElement, HandleSide>>(emptyWeakMap);
 	const size = useRef(stubSize);
-	const initialMousePos = useRef<Coordinates>(stubMousePos);
+	const lastMousePos = useRef(ORIGIN);
 	const activeHandle = useRef<HTMLDivElement>();
 
 	useLayoutEffect(() => {
-		size.current.width = initialWidth ?? containerElement.width;
-		size.current.height = initialHeight ?? containerElement.height;
+		size.current.width = initialWidth ?? containerSize.width;
+		size.current.height = initialHeight ?? containerSize.height;
 	}, []);
 
-	const containerElement = useMemo(
+	const containerSize = useMemo(
 		() => ({
 			get width() {
 				return container.current!.offsetWidth;
 			},
 			set width(width: number) {
-				container.current!.style.width = `${width}px`;
+				requestAnimationFrame(() => {
+					container.current!.style.width = `${width}px`;
+				});
 			},
 			get height() {
 				return container.current!.offsetHeight;
 			},
 			set height(height: number) {
-				container.current!.style.height = `${height}px`;
-			},
-			get size(): Size {
-				return { width: this.width, height: this.height };
+				requestAnimationFrame(() => {
+					container.current!.style.height = `${height}px`;
+				});
 			},
 		}),
 		[]
@@ -88,20 +109,20 @@ export const Resize: React.FC<ResizeProps> = (props) => {
 		const { width, height } = size.current;
 
 		const resizeLeft = () => {
-			containerElement.width =
-				width + initialMousePos.current.x - e.clientX;
+			size.current.width = width + lastMousePos.current.x - e.clientX;
+			containerSize.width = size.current.width;
 		};
 		const resizeRight = () => {
-			containerElement.width =
-				width + e.clientX - initialMousePos.current.x;
+			size.current.width = width + e.clientX - lastMousePos.current.x;
+			containerSize.width = size.current.width;
 		};
 		const resizeTop = () => {
-			containerElement.height =
-				height + initialMousePos.current.y - e.clientY;
+			size.current.height = height + lastMousePos.current.y - e.clientY;
+			containerSize.height = size.current.height;
 		};
 		const resizeBottom = () => {
-			containerElement.height =
-				height + e.clientY - initialMousePos.current.y;
+			size.current.height = height + e.clientY - lastMousePos.current.y;
+			containerSize.height = size.current.height;
 		};
 
 		const actions: Record<HandleSide, void> = {
@@ -136,30 +157,42 @@ export const Resize: React.FC<ResizeProps> = (props) => {
 		};
 
 		actions[handles.current.get(activeHandle.current!)!];
+
+		lastMousePos.current.x = e.clientX;
+		lastMousePos.current.y = e.clientY;
 	}, []);
 
 	const setAnchorPoint = (handle: HTMLDivElement) => {
 		const cnt = container.current!;
 		const rect = cnt.getBoundingClientRect();
+		const position: PartialPosition = {};
 
 		const anchorLeft = () => {
 			cnt.style.right = 'auto';
-			cnt.style.left = `${rect.left}px`;
+			const left = rect.left;
+			cnt.style.left = `${left}px`;
+			position.left = left;
 		};
 
 		const anchorRight = () => {
 			cnt.style.left = 'auto';
-			cnt.style.right = `${window.innerWidth - rect.right}px`;
+			const right = window.innerWidth - rect.right;
+			cnt.style.right = `${right}px`;
+			position.right = right;
 		};
 
 		const anchorTop = () => {
 			cnt.style.bottom = 'auto';
+			const top = rect.top;
 			cnt.style.top = `${rect.top}px`;
+			position.top = top;
 		};
 
 		const anchorBottom = () => {
 			cnt.style.top = 'auto';
-			cnt.style.bottom = `${window.innerHeight - rect.bottom}px`;
+			const bottom = window.innerHeight - rect.bottom;
+			cnt.style.bottom = `${bottom}px`;
+			position.bottom = bottom;
 		};
 
 		const actions: Record<HandleSide, void> = {
@@ -194,6 +227,7 @@ export const Resize: React.FC<ResizeProps> = (props) => {
 		};
 
 		actions[handles.current.get(handle)!];
+		onPositionChange?.(position);
 	};
 
 	const onGrab = useCallback((e: React.MouseEvent) => {
@@ -203,13 +237,12 @@ export const Resize: React.FC<ResizeProps> = (props) => {
 		}
 		activeHandle.current = e.target as HTMLDivElement;
 		document.body.style.userSelect = 'none';
-		initialMousePos.current = { x: e.clientX, y: e.clientY };
+		lastMousePos.current = { x: e.clientX, y: e.clientY };
 		document.addEventListener('mouseup', onRelease);
 		document.addEventListener('mousemove', onResize);
 	}, []);
 
 	const onRelease = useCallback(() => {
-		size.current = containerElement.size;
 		document.body.removeAttribute('style');
 		document.removeEventListener('mouseup', onRelease);
 		document.removeEventListener('mousemove', onResize);
@@ -223,7 +256,7 @@ export const Resize: React.FC<ResizeProps> = (props) => {
 				height: size.current.height,
 				position: props.mode === 'freeform' ? 'fixed' : 'relative',
 			}}
-			className={classes.resizeBlock()}
+			className={classes.resizeBlock(null, className)}
 			ref={container}
 		>
 			{children}
@@ -242,4 +275,4 @@ export const Resize: React.FC<ResizeProps> = (props) => {
 			)}
 		</div>
 	);
-};
+});

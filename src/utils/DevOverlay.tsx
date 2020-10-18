@@ -1,5 +1,5 @@
-import { Button, ButtonGroup, Classes } from '@blueprintjs/core';
-import React, { useState } from 'react';
+import { Button, Classes } from '@blueprintjs/core';
+import React from 'react';
 import ReactDom from 'react-dom';
 import { clear } from 'idb-keyval';
 
@@ -22,56 +22,45 @@ const style: React.CSSProperties = {
 	backgroundColor: '#00000030',
 	zIndex: 1000,
 	position: 'fixed',
-	...initialPosition,
 };
 
+// TODO: add generic Window component
 const DevOverlay: React.FC = () => {
-	const { containerRef, onMoveEnd } = useMove(initialPosition);
+	const { containerRef, handlerRef, onMoveEnd, setPosition } = useMove(
+		initialPosition
+	);
 
 	const onClear = () => {
 		clear().then(() => document.location.reload());
 	};
 
 	onMoveEnd((position) => {
-		(window as any).requestIdleCallback(() => {
-			localStorage.setItem(
-				POSITION_STORAGE_KEY,
-				JSON.stringify(position)
-			);
-		});
+		// (window as any).requestIdleCallback(() => {
+		// 	localStorage.setItem(
+		// 		POSITION_STORAGE_KEY,
+		// 		JSON.stringify(position)
+		// 	);
+		// });
 	});
 
-	const [side, setSide] = useState<any>('bottom');
+	const onPositionChange: ResizeProps['onPositionChange'] = (position) => {
+		setPosition(position);
+	};
 
 	return (
-		<div className={Classes.DARK}>
-			<Resize style={style} mode='freeform' key={side}>
-				{/* <Resize style={style} mode='directed' side={side} key={side}> */}
-				{/* <Button text='Clear state' icon='refresh' onClick={onClear} /> */}
-				<ButtonGroup>
-					<Button
-						text='left'
-						onClick={() => setSide('left')}
-						active={side === 'left'}
-					/>
-					<Button
-						text='right'
-						onClick={() => setSide('right')}
-						active={side === 'right'}
-					/>
-					<Button
-						text='top'
-						onClick={() => setSide('top')}
-						active={side === 'top'}
-					/>
-					<Button
-						text='bottom'
-						onClick={() => setSide('bottom')}
-						active={side === 'bottom'}
-					/>
-				</ButtonGroup>
-			</Resize>
-		</div>
+		<Resize
+			style={style}
+			className={Classes.DARK}
+			mode='freeform'
+			ref={containerRef}
+			onPositionChange={onPositionChange}
+		>
+			<div
+				style={{ height: 15, background: 'white', marginBottom: 10 }}
+				ref={handlerRef}
+			/>
+			<Button text='Clear state' icon='refresh' onClick={onClear} />
+		</Resize>
 	);
 };
 

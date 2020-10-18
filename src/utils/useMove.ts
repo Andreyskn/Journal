@@ -5,7 +5,7 @@ import React, {
 	useMemo,
 	useRef,
 } from 'react';
-import { noop } from './helpers';
+import { mergeExcluding, noop, ORIGIN } from './helpers';
 
 type HorizontalAlignment = keyof Pick<CSSStyleDeclaration, 'left' | 'right'>;
 type VerticalAlignment = keyof Pick<CSSStyleDeclaration, 'top' | 'bottom'>;
@@ -20,32 +20,29 @@ type Bottom = Side<'bottom'>;
 type HorizontalPosition = Right | Left;
 type VerticalPosition = Top | Bottom;
 export type Position = HorizontalPosition & VerticalPosition;
+export type PartialPosition = Partial<Left & Right & Top & Bottom>;
 
-const isLeft = (pos: Position): pos is Left & VerticalPosition => 'left' in pos;
-const isTop = (pos: Position): pos is Top & HorizontalPosition => 'top' in pos;
-
-type AlignmentData<T> = {
-	side: T;
-	adjust: (amount: number) => void;
+type AlignmentData = {
+	h: { side: HorizontalAlignment; adjust: (amount: number) => void };
+	v: { side: VerticalAlignment; adjust: (amount: number) => void };
 };
 
-const stubMousePos: Coordinates = { x: 0, y: 0 };
-
-type OnMoveEndCallback<P extends Position> = (position: P) => void;
+type OnMoveEndCallback = (position: Position) => void;
 
 // TODO:
 // forbid moving items past screen edge
-// handle window resize
+// handle window resize (set position in percents)
 // add css class for disabling user-select
-export const useMove = <P extends Position>(initPos: P) => {
+export const useMove = (initPos: Position) => {
 	const containerRef = useRef<HTMLElement | null>(null);
 	const handlerRef = useRef<HTMLElement | null>(null);
 	const handler = useRef<HTMLElement | null>(null);
-	const position = useRef<P>(initPos);
-	const lastMousePos = useRef<Coordinates>(stubMousePos);
-	const onMoveEndCallback = useRef<OnMoveEndCallback<P>>(noop);
 
-	const alignment = useMemo(() => {
+	const position = useRef(initPos);
+	const lastMousePos = useRef(ORIGIN);
+	const onMoveEndCallback = useRef<OnMoveEndCallback>(noop);
+
+	const getAlignmentData = useCallback((): AlignmentData => {
 		const inc = (side: Alignment) => (amount: number) =>
 			//@ts-ignore
 			(position.current[side] += amount);
@@ -53,29 +50,55 @@ export const useMove = <P extends Position>(initPos: P) => {
 			//@ts-ignore
 			(position.current[side] -= amount);
 
-		const h: AlignmentData<HorizontalAlignment> = isLeft(position.current)
-			? { side: 'left', adjust: inc('left') }
-			: { side: 'right', adjust: dec('right') };
+		const h: AlignmentData['h'] =
+			'left' in position.current
+				? { side: 'left', adjust: inc('left') }
+				: { side: 'right', adjust: dec('right') };
 
-		const v: AlignmentData<VerticalAlignment> = isTop(position.current)
-			? { side: 'top', adjust: inc('top') }
-			: { side: 'bottom', adjust: dec('bottom') };
+		const v: AlignmentData['v'] =
+			'top' in position.current
+				? { side: 'top', adjust: inc('top') }
+				: { side: 'bottom', adjust: dec('bottom') };
 
-		return {
-			h: h as AlignmentData<keyof P>,
-			v: v as AlignmentData<keyof P>,
-		};
+		return { h, v };
 	}, []);
+
+	const alignmentData = useRef(useMemo(getAlignmentData, []));
+
+	//#region public calls
+
+	const setPosition = (newPosition: PartialPosition) => {
+		position.current = mergeExcluding<Position, Alignment>(
+			position.current,
+			newPosition as Position,
+			{
+				left: 'right' in newPosition,
+				right: 'left' in newPosition,
+				bottom: 'top' in newPosition,
+				top: 'bottom' in newPosition,
+			}
+		);
+
+		alignmentData.current = getAlignmentData();
+	};
+
+	const onMoveEnd = (callback: OnMoveEndCallback) => {
+		onMoveEndCallback.current = callback;
+	};
+
+	//#endregion
 
 	useEffect(() => {
 		handler.current = handlerRef.current || containerRef.current;
 	}, [handlerRef.current, containerRef.current]);
 
 	const applyPositionStyles = useCallback((container: HTMLElement) => {
-		const pos = position.current;
-		const { h, v } = alignment;
-		container.style[h.side as HorizontalAlignment] = `${pos[h.side]}px`;
-		container.style[v.side as VerticalAlignment] = `${pos[v.side]}px`;
+		requestAnimationFrame(() => {
+			const pos = position.current;
+			const { h, v } = alignmentData.current;
+			container.style[h.side] = `${pos[h.side as keyof typeof pos]}px`;
+			container.style[v.side] = `${pos[v.side as keyof typeof pos]}px`;
+		});
 	}, []);
 
 	useLayoutEffect(() => {
@@ -93,8 +116,8 @@ export const useMove = <P extends Position>(initPos: P) => {
 		lastMousePos.current.x = e.clientX;
 		lastMousePos.current.y = e.clientY;
 
-		alignment.h.adjust(deltaX);
-		alignment.v.adjust(deltaY);
+		alignmentData.current.h.adjust(deltaX);
+		alignmentData.current.v.adjust(deltaY);
 
 		applyPositionStyles(containerRef.current as HTMLElement);
 	}, []);
@@ -120,13 +143,10 @@ export const useMove = <P extends Position>(initPos: P) => {
 		};
 	}, [handler.current]);
 
-	const onMoveEnd = (callback: OnMoveEndCallback<P>) => {
-		onMoveEndCallback.current = callback;
-	};
-
 	return {
 		containerRef: containerRef as React.RefObject<any>,
 		handlerRef: handlerRef as React.RefObject<any>,
 		onMoveEnd,
+		setPosition,
 	};
 };

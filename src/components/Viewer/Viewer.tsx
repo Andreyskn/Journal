@@ -110,15 +110,11 @@ const connectPlugin = ({ render, initState, handlers }: Plugin.LazyModule) => {
 			const text = `[${file.name}]::\n\n${PLUGINS_MAP[file.type].show(
 				state
 			)}`;
-			const url = URL.createObjectURL(
-				new Blob([text], {
-					type: 'text/markdown',
-				})
-			);
+			const url = URL.createObjectURL(new Blob([text]));
 			const a = document.createElement('a');
 			a.style.display = 'none';
 			a.href = url;
-			a.download = `${file.name.replace(/\..*/, '')}.md`;
+			a.download = `${file.name}.md`;
 			document.body.appendChild(a);
 			a.click();
 			window.URL.revokeObjectURL(url);
