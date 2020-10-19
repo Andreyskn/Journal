@@ -16,12 +16,20 @@ const initialPosition = ((): Position => {
 	return { bottom: 150, left: 150 };
 })();
 
-const style: React.CSSProperties = {
-	padding: 15,
+const containerStyle: React.CSSProperties = {
+	padding: '0 15px 15px',
 	borderRadius: 5,
 	backgroundColor: '#00000030',
 	zIndex: 1000,
 	position: 'fixed',
+	...initialPosition,
+};
+
+const handlerStyle: React.CSSProperties = {
+	height: 15,
+	backgroundColor: 'rgb(19 124 189 / 50%)',
+	borderRadius: '5px 5px 0 0',
+	margin: '0 -15px 10px',
 };
 
 // TODO: add generic Window component
@@ -35,12 +43,12 @@ const DevOverlay: React.FC = () => {
 	};
 
 	onMoveEnd((position) => {
-		// (window as any).requestIdleCallback(() => {
-		// 	localStorage.setItem(
-		// 		POSITION_STORAGE_KEY,
-		// 		JSON.stringify(position)
-		// 	);
-		// });
+		(window as any).requestIdleCallback(() => {
+			localStorage.setItem(
+				POSITION_STORAGE_KEY,
+				JSON.stringify(position)
+			);
+		});
 	});
 
 	const onPositionChange: ResizeProps['onPositionChange'] = (position) => {
@@ -49,16 +57,13 @@ const DevOverlay: React.FC = () => {
 
 	return (
 		<Resize
-			style={style}
+			style={containerStyle}
 			className={Classes.DARK}
 			mode='freeform'
 			ref={containerRef}
 			onPositionChange={onPositionChange}
 		>
-			<div
-				style={{ height: 15, background: 'white', marginBottom: 10 }}
-				ref={handlerRef}
-			/>
+			<div style={handlerStyle} ref={handlerRef} />
 			<Button text='Clear state' icon='refresh' onClick={onClear} />
 		</Resize>
 	);

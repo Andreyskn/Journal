@@ -8,6 +8,15 @@ export const except: AnyFunction = (message: string) => () => {
 	throw Error(message);
 };
 
+export const userSelect = {
+	disable: (element: HTMLElement) => {
+		element.classList.add('disable-selection');
+	},
+	enable: (element: HTMLElement) => {
+		element.classList.remove('disable-selection');
+	},
+};
+
 export const useForceUpdate = () => {
 	const [, forceUpdate] = useReducer((s) => s + 1, 0);
 	return { forceUpdate };
