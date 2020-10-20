@@ -11,7 +11,7 @@ import React, {
 import './resize.scss';
 
 import { bem } from '../bem';
-import { ORIGIN, userSelect } from '../helpers';
+import { userSelect } from '../helpers';
 import { PartialPosition } from '../useMove';
 
 const classes = bem('resize', ['handle'] as const);
@@ -54,24 +54,17 @@ export type ResizeProps = PropsWithChildren<
 	}
 >;
 
-type Size = { width: number; height: number };
-const stubSize: Size = { width: undefined as any, height: undefined as any };
-
 const emptyWeakMap = new WeakMap<any>();
 
-/**
- * TODO:
- * - min and max size
- * - aspect ratio
- */
+// TODO: aspect ratio
 export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 	const {
 		initialWidth,
 		initialHeight,
 		minHeight = 0,
 		minWidth = 0,
-		maxHeight = 1000,
-		maxWidth = 1000,
+		maxHeight = 1,
+		maxWidth = 1,
 		children,
 		style,
 		className,
@@ -82,16 +75,50 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 		(ref as RefObject<HTMLDivElement>) || useRef<HTMLDivElement>(null);
 
 	const handles = useRef<WeakMap<HTMLDivElement, HandleSide>>(emptyWeakMap);
-	const size = useRef(stubSize);
-	const lastMousePos = useRef(ORIGIN);
 	const activeHandle = useRef<HTMLDivElement>();
+	const initialContainerRect = useRef<DOMRect>(null as any);
 
 	useLayoutEffect(() => {
-		size.current.width = initialWidth ?? containerSize.width;
-		size.current.height = initialHeight ?? containerSize.height;
+		if (initialWidth || containerDOMSize.width < sizeLimits.width.min) {
+			containerDOMSize.width = initialWidth ?? sizeLimits.width.min;
+		}
+		if (initialHeight || containerDOMSize.height < sizeLimits.height.min) {
+			containerDOMSize.height = initialHeight ?? sizeLimits.height.min;
+		}
 	}, []);
 
-	const containerSize = useMemo(
+	const sizeLimits = useMemo(
+		() => ({
+			width: {
+				get min() {
+					return minWidth <= 1
+						? minWidth * window.innerWidth
+						: minWidth;
+				},
+				get max() {
+					return maxWidth <= 1
+						? maxWidth * window.innerWidth
+						: maxWidth;
+				},
+			},
+			height: {
+				get min() {
+					return minHeight <= 1
+						? minHeight * window.innerHeight
+						: minHeight;
+				},
+
+				get max() {
+					return maxHeight <= 1
+						? maxHeight * window.innerHeight
+						: maxHeight;
+				},
+			},
+		}),
+		[minWidth, minHeight, maxWidth, maxHeight]
+	);
+
+	const containerDOMSize = useMemo(
 		() => ({
 			get width() {
 				return container.current!.offsetWidth;
@@ -114,21 +141,42 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 	);
 
 	const onResize = useCallback((e: MouseEvent) => {
-		const { width, height } = size.current;
-		let newWidth!: number;
-		let newHeight!: number;
+		const { width, height } = sizeLimits;
+		const { left, right, top, bottom } = initialContainerRect.current;
+
+		const clamp = (value: number, min: number, max: number) => {
+			if (value < min) return min;
+			if (value > max) return max;
+			return value;
+		};
 
 		const resizeLeft = () => {
-			newWidth = width + lastMousePos.current.x - e.clientX;
+			containerDOMSize.width = clamp(
+				right - e.clientX,
+				width.min,
+				width.max
+			);
 		};
 		const resizeRight = () => {
-			newWidth = width + e.clientX - lastMousePos.current.x;
+			containerDOMSize.width = clamp(
+				e.clientX - left,
+				width.min,
+				width.max
+			);
 		};
 		const resizeTop = () => {
-			newHeight = height + lastMousePos.current.y - e.clientY;
+			containerDOMSize.height = clamp(
+				bottom - e.clientY,
+				height.min,
+				height.max
+			);
 		};
 		const resizeBottom = () => {
-			newHeight = height + e.clientY - lastMousePos.current.y;
+			containerDOMSize.height = clamp(
+				e.clientY - top,
+				height.min,
+				height.max
+			);
 		};
 
 		const actions: Record<HandleSide, void> = {
@@ -163,24 +211,11 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 		};
 
 		actions[handles.current.get(activeHandle.current!)!];
-
-		if (newWidth >= minWidth && newWidth <= maxWidth) {
-			size.current.width = newWidth;
-			containerSize.width = size.current.width;
-		}
-
-		if (newHeight >= minHeight && newHeight <= maxHeight) {
-			size.current.height = newHeight;
-			containerSize.height = size.current.height;
-		}
-
-		lastMousePos.current.x = e.clientX;
-		lastMousePos.current.y = e.clientY;
 	}, []);
 
 	const setAnchorPoint = (handle: HTMLDivElement) => {
 		const cnt = container.current!;
-		const rect = cnt.getBoundingClientRect();
+		const rect = initialContainerRect.current;
 		const position: PartialPosition = {};
 
 		const anchorLeft = () => {
@@ -248,18 +283,18 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 
 	const onGrab = useCallback((e: React.MouseEvent) => {
 		e.stopPropagation();
+		initialContainerRect.current = container.current!.getBoundingClientRect();
 		if (props.mode === 'freeform') {
 			setAnchorPoint(e.target as HTMLDivElement);
 		}
 		activeHandle.current = e.target as HTMLDivElement;
-		userSelect.disable(document.body);
-		lastMousePos.current = { x: e.clientX, y: e.clientY };
+		userSelect.disable();
 		document.addEventListener('mouseup', onRelease);
 		document.addEventListener('mousemove', onResize);
 	}, []);
 
 	const onRelease = useCallback(() => {
-		userSelect.enable(document.body);
+		userSelect.enable();
 		document.removeEventListener('mouseup', onRelease);
 		document.removeEventListener('mousemove', onResize);
 	}, []);
@@ -268,8 +303,6 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 		<div
 			style={{
 				...style,
-				width: size.current.width,
-				height: size.current.height,
 				position: props.mode === 'freeform' ? 'fixed' : 'relative',
 			}}
 			className={classes.resizeBlock(null, className)}

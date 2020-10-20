@@ -29,7 +29,7 @@ const classes = bem('task-item', [
 ] as const);
 
 type PriorityMenuItem = {
-	icon: Icon;
+	icon: IconType;
 	value: TaskList.Task['priority'];
 	text: string;
 };

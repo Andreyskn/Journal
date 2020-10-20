@@ -5,8 +5,6 @@ $resize-handler-width: 6px;
 	&__handle {
 		position: absolute;
 
-		// background-color: #b92a2a60;
-
 		&--left, &--right {
 			top: 0;
 
@@ -26,24 +24,24 @@ $resize-handler-width: 6px;
 		}
 
 		&--left {
-			left: -$resize-handler-width;
+			left: -$resize-handler-width + 1;
 		}
 
 		&--right {
-			right: -$resize-handler-width;
+			right: -$resize-handler-width + 1;
 		}
 
 		&--top {
-			top: -$resize-handler-width;
+			top: -$resize-handler-width + 1;
 		}
 
 		&--bottom {
-			bottom: -$resize-handler-width;
+			bottom: -$resize-handler-width + 1;
 		}
 
 		&--top-left {
-			top: -$resize-handler-width;
-			left: -$resize-handler-width;
+			top: -$resize-handler-width + 1;
+			left: -$resize-handler-width + 1;
 
 			width: $resize-handler-width;
 			height: $resize-handler-width;
@@ -52,8 +50,8 @@ $resize-handler-width: 6px;
 		}
 
 		&--top-right {
-			top: -$resize-handler-width;
-			right: -$resize-handler-width;
+			top: -$resize-handler-width + 1;
+			right: -$resize-handler-width + 1;
 
 			width: $resize-handler-width;
 			height: $resize-handler-width;
@@ -62,8 +60,8 @@ $resize-handler-width: 6px;
 		}
 
 		&--bottom-left {
-			bottom: -$resize-handler-width;
-			left: -$resize-handler-width;
+			bottom: -$resize-handler-width + 1;
+			left: -$resize-handler-width + 1;
 
 			width: $resize-handler-width;
 			height: $resize-handler-width;
@@ -72,8 +70,8 @@ $resize-handler-width: 6px;
 		}
 
 		&--bottom-right {
-			right: -$resize-handler-width;
-			bottom: -$resize-handler-width;
+			right: -$resize-handler-width + 1;
+			bottom: -$resize-handler-width + 1;
 
 			width: $resize-handler-width;
 			height: $resize-handler-width;

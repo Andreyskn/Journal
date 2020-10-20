@@ -19,7 +19,5 @@ declare global {
 
 	type Path = string;
 
-	type Icon = IconName | MaybeElement;
-
-	type Coordinates = { x: number; y: number };
+	type IconType = IconName | MaybeElement;
 }

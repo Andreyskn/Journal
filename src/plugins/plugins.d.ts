@@ -24,7 +24,7 @@ declare global {
 			order: number;
 			type: string;
 			extension: string;
-			icon: Icon;
+			icon: IconType;
 			label: string;
 			getLazyModule: () => Promise<LazyModule>;
 			show: Show<any>;

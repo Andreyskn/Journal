@@ -3,7 +3,7 @@ import { Button, ButtonGroup } from '@blueprintjs/core';
 import { NoteEditor } from './NoteEditor';
 
 type LayoutOption = {
-	icon: Icon;
+	icon: IconType;
 	value: Notes.State['layout'];
 	text: string;
 };

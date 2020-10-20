@@ -69,7 +69,7 @@ const toAbsolute = (position: PartialPosition) => {
 	}, {} as Position);
 };
 
-export const useMove = (initPos: Position) => {
+export const useMove = (initialPosition: Position) => {
 	const containerRef = useRef<HTMLElement | null>(null);
 	const handlerRef = useRef<HTMLElement | null>(null);
 	const handler = useRef<HTMLElement | null>(null);
@@ -137,8 +137,7 @@ export const useMove = (initPos: Position) => {
 
 	useLayoutEffect(() => {
 		containerRef.current!.style.position = 'fixed';
-		containerRef.current!.style.willChange = 'left, right, top, bottom';
-		position.init(initPos);
+		position.init(initialPosition);
 	}, []);
 
 	const onMove = useCallback((e: MouseEvent) => {
@@ -169,27 +168,22 @@ export const useMove = (initPos: Position) => {
 	}, []);
 
 	const onGrab = useCallback((e: MouseEvent) => {
-		const {
-			left,
-			right,
-			top,
-			bottom,
-		} = containerRef.current!.getBoundingClientRect();
+		const rect = containerRef.current!.getBoundingClientRect();
 
 		grabOffset.current = {
-			left: e.clientX - left,
-			right: right - e.clientX,
-			top: e.clientY - top,
-			bottom: bottom - e.clientY,
+			left: e.clientX - rect.left,
+			right: rect.right - e.clientX,
+			top: e.clientY - rect.top,
+			bottom: rect.bottom - e.clientY,
 		};
 
-		userSelect.disable(document.body);
+		userSelect.disable();
 		document.addEventListener('mouseup', onRelease);
 		document.addEventListener('mousemove', onMove);
 	}, []);
 
 	const onRelease = useCallback(() => {
-		userSelect.enable(document.body);
+		userSelect.enable();
 		onMoveEndCallback.current(position.absolute);
 		document.removeEventListener('mouseup', onRelease);
 		document.removeEventListener('mousemove', onMove);

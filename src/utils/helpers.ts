@@ -1,7 +1,5 @@
 import { useReducer, useRef } from 'react';
 
-export const ORIGIN: Coordinates = { x: 0, y: 0 };
-
 export const noop: AnyFunction = () => {};
 
 export const except: AnyFunction = (message: string) => () => {
@@ -9,11 +7,11 @@ export const except: AnyFunction = (message: string) => () => {
 };
 
 export const userSelect = {
-	disable: (element: HTMLElement) => {
-		element.classList.add('disable-selection');
+	disable: () => {
+		document.body.classList.add('disable-selection');
 	},
-	enable: (element: HTMLElement) => {
-		element.classList.remove('disable-selection');
+	enable: () => {
+		document.body.classList.remove('disable-selection');
 	},
 };
 

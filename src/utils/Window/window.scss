@@ -1,0 +1,54 @@
+.window {
+	z-index: 99999;
+
+	background-color: var(--secondary-background);
+
+	&__header {
+		display: flex;
+
+		height: 30px;
+
+		background-color: #171717;
+
+		align-items: center;
+	}
+
+	&__title {
+		overflow: hidden;
+
+		padding: 0 5px;
+
+		cursor: default;
+		user-select: none;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+
+		font-size: 13px;
+		line-height: 30px;
+
+		flex-grow: 1;
+	}
+
+	&__icon {
+		margin-right: 5px;
+	}
+
+	&__controls {
+		flex-shrink: 0;
+
+		button {
+			border-radius: 0;
+		}
+
+		svg {
+			fill: #c0c0c0 !important;
+		}
+	}
+
+	&__body {
+		height: calc(100% - 30px);
+
+		border: 1px solid #171717;
+		border-top: none;
+	}
+}
