@@ -5,16 +5,13 @@ import React, {
 	useMemo,
 	useRef,
 } from 'react';
-import { mergeExcluding, noop, userSelect } from './helpers';
-
-type Pixels = number;
-type Percentage = number;
+import { mergeExcluding, userSelect, toViewportUnits } from './helpers';
 
 type HorizontalAlignment = keyof Pick<CSSStyleDeclaration, 'left' | 'right'>;
 type VerticalAlignment = keyof Pick<CSSStyleDeclaration, 'top' | 'bottom'>;
 type Alignment = HorizontalAlignment | VerticalAlignment;
 
-type Side<T extends Alignment> = Record<T, Pixels | Percentage>;
+type Side<T extends Alignment> = Record<T, ViewportRelativeUnits>;
 type Left = Side<'left'>;
 type Right = Side<'right'>;
 type Top = Side<'top'>;
@@ -26,110 +23,67 @@ export type Position = HorizontalPosition & VerticalPosition;
 export type PartialPosition = Partial<Left & Right & Top & Bottom>;
 
 type AlignmentData = {
-	sideX: { name: HorizontalAlignment; value: Percentage };
-	sideY: { name: VerticalAlignment; value: Percentage };
+	sideX: { name: HorizontalAlignment; value: ViewportRelativeUnits };
+	sideY: { name: VerticalAlignment; value: ViewportRelativeUnits };
 };
-
-type GrabOffset = Record<Alignment, Pixels>;
 
 type OnMoveEndCallback = (position: Position) => void;
 
-const pixelsToPercentage = (side: Alignment, value: Pixels): Percentage => {
-	return (
-		(value /
-			(side === 'left' || side === 'right'
-				? window.innerWidth
-				: window.innerHeight)) *
-		100
-	);
-};
-
-const percentageToPixels = (side: Alignment, value: Percentage): Pixels => {
-	return (
-		(value / 100) *
-		(side === 'left' || side === 'right'
-			? window.innerWidth
-			: window.innerHeight)
-	);
-};
-
-const toRelative = (position: PartialPosition) => {
-	return Object.keys(position).reduce((result, side) => {
-		//@ts-ignore
-		result[side] = pixelsToPercentage(side, position[side]);
-		return result;
-	}, {} as PartialPosition);
-};
-
-const toAbsolute = (position: PartialPosition) => {
-	return Object.keys(position).reduce((result, side) => {
-		//@ts-ignore
-		result[side] = percentageToPixels(side, position[side]);
-		return result;
-	}, {} as Position);
-};
-
-export const useMove = (initialPosition: Position) => {
+export const useMove = (
+	initialPosition: Position,
+	onMoveEnd: OnMoveEndCallback
+) => {
 	const containerRef = useRef<HTMLElement | null>(null);
 	const handlerRef = useRef<HTMLElement | null>(null);
 	const handler = useRef<HTMLElement | null>(null);
+	const grabPoint = useRef<Record<Alignment, Pixels>>(null as any);
 
-	const grabOffset = useRef<GrabOffset>(null as any);
-	const onMoveEndCallback = useRef<OnMoveEndCallback>(noop);
-
-	const position = useMemo(() => {
-		let relativePosition: PartialPosition = {};
-
-		const set = (x: Percentage, y: Percentage) => {
-			relativePosition[position.sideX.name] = x;
-			relativePosition[position.sideY.name] = y;
-			requestAnimationFrame(() => {
-				containerRef.current!.style[position.sideX.name] = x + '%';
-				containerRef.current!.style[position.sideY.name] = y + '%';
-			});
-		};
-
-		const init = (newPosition: PartialPosition) => {
-			relativePosition = mergeExcluding<PartialPosition, Alignment>(
-				relativePosition,
-				toRelative(newPosition),
-				{
-					left: 'right' in newPosition,
-					right: 'left' in newPosition,
-					bottom: 'top' in newPosition,
-					top: 'bottom' in newPosition,
-				}
-			);
-
-			position.sideX =
-				'left' in relativePosition
-					? { name: 'left', value: relativePosition.left! }
-					: {
-							name: 'right',
-							value: relativePosition.right!,
-					  };
-
-			position.sideY =
-				'top' in relativePosition
-					? { name: 'top', value: relativePosition.top! }
-					: {
-							name: 'bottom',
-							value: relativePosition.bottom!,
-					  };
-
-			set(position.sideX.value, position.sideY.value);
-		};
-
-		return {
+	const position = useMemo(
+		() => ({
+			value: {} as PartialPosition,
 			sideX: (null as unknown) as AlignmentData['sideX'],
 			sideY: (null as unknown) as AlignmentData['sideY'],
-			set,
-			init,
-			get absolute() {
-				return toAbsolute(relativePosition);
+			set: (x: ViewportRelativeUnits, y: ViewportRelativeUnits) => {
+				position.value[position.sideX.name] = x;
+				position.value[position.sideY.name] = y;
+				requestAnimationFrame(() => {
+					containerRef.current!.style[position.sideX.name] = `${x}vw`;
+					containerRef.current!.style[position.sideY.name] = `${y}vh`;
+				});
 			},
-		};
-	}, []);
+			init: (newPosition: PartialPosition) => {
+				position.value = mergeExcluding<PartialPosition, Alignment>(
+					position.value,
+					newPosition,
+					{
+						left: 'right' in newPosition,
+						right: 'left' in newPosition,
+						bottom: 'top' in newPosition,
+						top: 'bottom' in newPosition,
+					}
+				);
+
+				position.sideX =
+					'left' in position.value
+						? { name: 'left', value: position.value.left! }
+						: {
+								name: 'right',
+								value: position.value.right!,
+						  };
+
+				position.sideY =
+					'top' in position.value
+						? { name: 'top', value: position.value.top! }
+						: {
+								name: 'bottom',
+								value: position.value.bottom!,
+						  };
+
+				position.set(position.sideX.value, position.sideY.value);
+			},
+		}),
+		[]
+	);
 
 	useEffect(() => {
 		handler.current = handlerRef.current || containerRef.current;
@@ -151,26 +105,28 @@ export const useMove = (initialPosition: Position) => {
 		}
 
 		const { sideX, sideY } = position;
-		const { left, right, top, bottom } = grabOffset.current;
+		const { left, right, top, bottom } = grabPoint.current;
 		let newX: Pixels;
 		let newY: Pixels;
 
-		if (sideX.name === 'left') newX = e.clientX - left;
-		else newX = window.innerWidth - e.clientX - right;
+		if (sideX.name === 'left')
+			newX = toViewportUnits(e.clientX - left, 'x');
+		else newX = toViewportUnits(window.innerWidth - e.clientX - right, 'x');
 
-		if (sideY.name === 'top') newY = e.clientY - top;
-		else newY = window.innerHeight - e.clientY - bottom;
+		if (sideY.name === 'top') newY = toViewportUnits(e.clientY - top, 'y');
+		else
+			newY = toViewportUnits(
+				window.innerHeight - e.clientY - bottom,
+				'y'
+			);
 
-		position.set(
-			pixelsToPercentage(sideX.name, newX),
-			pixelsToPercentage(sideY.name, newY)
-		);
+		position.set(newX, newY);
 	}, []);
 
 	const onGrab = useCallback((e: MouseEvent) => {
 		const rect = containerRef.current!.getBoundingClientRect();
 
-		grabOffset.current = {
+		grabPoint.current = {
 			left: e.clientX - rect.left,
 			right: rect.right - e.clientX,
 			top: e.clientY - rect.top,
@@ -184,7 +140,7 @@ export const useMove = (initialPosition: Position) => {
 
 	const onRelease = useCallback(() => {
 		userSelect.enable();
-		onMoveEndCallback.current(position.absolute);
+		onMoveEnd(position.value as Position);
 		document.removeEventListener('mouseup', onRelease);
 		document.removeEventListener('mousemove', onMove);
 	}, []);
@@ -200,8 +156,5 @@ export const useMove = (initialPosition: Position) => {
 		containerRef: containerRef as React.RefObject<any>,
 		handlerRef: handlerRef as React.RefObject<any>,
 		setPosition: position.init,
-		onMoveEnd: useCallback((callback: OnMoveEndCallback) => {
-			onMoveEndCallback.current = callback;
-		}, []),
 	};
 };

@@ -74,3 +74,12 @@ export const mergeExcluding = <T extends AnyObject, K extends keyof any>(
 		{} as T
 	);
 };
+
+export const toViewportUnits = (
+	value: Pixels,
+	axis: 'x' | 'y'
+): ViewportRelativeUnits => {
+	return (
+		(value / (axis === 'x' ? window.innerWidth : window.innerHeight)) * 100
+	);
+};

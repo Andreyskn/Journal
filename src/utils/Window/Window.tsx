@@ -14,7 +14,7 @@ const classes = bem('window', [
 	'body',
 ] as const);
 
-const defaultPosition: Position = { top: 150, left: 150 };
+const defaultPosition: Position = { top: 5, left: 5 };
 
 export type WindowProps = Pick<
 	ResizeProps,
@@ -37,28 +37,21 @@ export const Window: React.FC<WindowProps> = (props) => {
 		onReposition,
 	} = props;
 
-	const { containerRef, handlerRef, onMoveEnd, setPosition } = useMove(
-		initialPosition
+	const { containerRef, handlerRef, setPosition } = useMove(
+		initialPosition,
+		onReposition
 	);
-
-	onMoveEnd(onReposition);
-
-	const onPositionChange: ResizeProps['onPositionChange'] = (position) => {
-		setPosition(position);
-	};
 
 	return (
 		<Resize
 			className={classes.windowBlock(null, Classes.DARK)}
 			mode='freeform'
 			ref={containerRef}
-			onPositionChange={onPositionChange}
+			onSetAnchor={setPosition}
 			initialWidth={initialWidth}
 			initialHeight={initialHeight}
 			minWidth={140}
 			minHeight={120}
-			maxWidth={1}
-			maxHeight={1}
 		>
 			<div className={classes.headerElement()}>
 				<div className={classes.titleElement()} ref={handlerRef}>

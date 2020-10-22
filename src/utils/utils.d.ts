@@ -20,4 +20,8 @@ declare global {
 	type Path = string;
 
 	type IconType = IconName | MaybeElement;
+
+	type Pixels = number;
+
+	type ViewportRelativeUnits = number;
 }

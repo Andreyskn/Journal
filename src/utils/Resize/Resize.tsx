@@ -11,7 +11,7 @@ import React, {
 import './resize.scss';
 
 import { bem } from '../bem';
-import { userSelect } from '../helpers';
+import { toViewportUnits, userSelect } from '../helpers';
 import { PartialPosition } from '../useMove';
 
 const classes = bem('resize', ['handle'] as const);
@@ -36,6 +36,7 @@ type Directed = {
 
 type Freeform = {
 	mode: 'freeform';
+	onSetAnchor: (position: PartialPosition) => void;
 };
 
 type Mode = Directed | Freeform;
@@ -48,9 +49,7 @@ export type ResizeProps = PropsWithChildren<
 		minHeight?: number;
 		maxWidth?: number;
 		maxHeight?: number;
-		style?: React.CSSProperties;
 		className?: string;
-		onPositionChange?: (position: PartialPosition) => void;
 	}
 >;
 
@@ -66,9 +65,7 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 		maxHeight = 1,
 		maxWidth = 1,
 		children,
-		style,
 		className,
-		onPositionChange,
 	} = props;
 
 	const container =
@@ -76,15 +73,17 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 
 	const handles = useRef<WeakMap<HTMLDivElement, HandleSide>>(emptyWeakMap);
 	const activeHandle = useRef<HTMLDivElement>();
-	const initialContainerRect = useRef<DOMRect>(null as any);
+	const containerRect = useRef<DOMRect>(null as any);
 
 	useLayoutEffect(() => {
-		if (initialWidth || containerDOMSize.width < sizeLimits.width.min) {
-			containerDOMSize.width = initialWidth ?? sizeLimits.width.min;
-		}
-		if (initialHeight || containerDOMSize.height < sizeLimits.height.min) {
-			containerDOMSize.height = initialHeight ?? sizeLimits.height.min;
-		}
+		containerDOMSize.width = sizeLimits.clamp(
+			initialWidth ?? containerDOMSize.width,
+			'x'
+		);
+		containerDOMSize.height = sizeLimits.clamp(
+			initialHeight ?? containerDOMSize.height,
+			'y'
+		);
 	}, []);
 
 	const sizeLimits = useMemo(
@@ -114,6 +113,14 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 						: maxHeight;
 				},
 			},
+			clamp: (value: number, axis: 'x' | 'y') => {
+				const { width, height } = sizeLimits;
+				const min = axis === 'x' ? width.min : height.min;
+				const max = axis === 'x' ? width.max : height.max;
+				if (value < min) return min;
+				if (value > max) return max;
+				return value;
+			},
 		}),
 		[minWidth, minHeight, maxWidth, maxHeight]
 	);
@@ -141,42 +148,20 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 	);
 
 	const onResize = useCallback((e: MouseEvent) => {
-		const { width, height } = sizeLimits;
-		const { left, right, top, bottom } = initialContainerRect.current;
-
-		const clamp = (value: number, min: number, max: number) => {
-			if (value < min) return min;
-			if (value > max) return max;
-			return value;
-		};
+		const { clamp } = sizeLimits;
+		const { left, right, top, bottom } = containerRect.current;
 
 		const resizeLeft = () => {
-			containerDOMSize.width = clamp(
-				right - e.clientX,
-				width.min,
-				width.max
-			);
+			containerDOMSize.width = clamp(right - e.clientX, 'x');
 		};
 		const resizeRight = () => {
-			containerDOMSize.width = clamp(
-				e.clientX - left,
-				width.min,
-				width.max
-			);
+			containerDOMSize.width = clamp(e.clientX - left, 'x');
 		};
 		const resizeTop = () => {
-			containerDOMSize.height = clamp(
-				bottom - e.clientY,
-				height.min,
-				height.max
-			);
+			containerDOMSize.height = clamp(bottom - e.clientY, 'y');
 		};
 		const resizeBottom = () => {
-			containerDOMSize.height = clamp(
-				e.clientY - top,
-				height.min,
-				height.max
-			);
+			containerDOMSize.height = clamp(e.clientY - top, 'y');
 		};
 
 		const actions: Record<HandleSide, void> = {
@@ -213,37 +198,37 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 		actions[handles.current.get(activeHandle.current!)!];
 	}, []);
 
-	const setAnchorPoint = (handle: HTMLDivElement) => {
+	const setAnchorPoint = useCallback(() => {
+		if (props.mode !== 'freeform') return;
+
 		const cnt = container.current!;
-		const rect = initialContainerRect.current;
+		const rect = containerRect.current;
 		const position: PartialPosition = {};
 
 		const anchorLeft = () => {
 			cnt.style.right = 'auto';
-			const left = rect.left;
-			cnt.style.left = `${left}px`;
-			position.left = left;
+			position.left = toViewportUnits(rect.left, 'x');
 		};
 
 		const anchorRight = () => {
 			cnt.style.left = 'auto';
-			const right = window.innerWidth - rect.right;
-			cnt.style.right = `${right}px`;
-			position.right = right;
+			position.right = toViewportUnits(
+				window.innerWidth - rect.right,
+				'x'
+			);
 		};
 
 		const anchorTop = () => {
 			cnt.style.bottom = 'auto';
-			const top = rect.top;
-			cnt.style.top = `${rect.top}px`;
-			position.top = top;
+			position.top = toViewportUnits(rect.top, 'y');
 		};
 
 		const anchorBottom = () => {
 			cnt.style.top = 'auto';
-			const bottom = window.innerHeight - rect.bottom;
-			cnt.style.bottom = `${bottom}px`;
-			position.bottom = bottom;
+			position.bottom = toViewportUnits(
+				window.innerHeight - rect.bottom,
+				'y'
+			);
 		};
 
 		const actions: Record<HandleSide, void> = {
@@ -277,17 +262,15 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 			},
 		};
 
-		actions[handles.current.get(handle)!];
-		onPositionChange?.(position);
-	};
+		actions[handles.current.get(activeHandle.current!)!];
+		props.onSetAnchor(position);
+	}, [(props as Freeform).onSetAnchor]);
 
 	const onGrab = useCallback((e: React.MouseEvent) => {
 		e.stopPropagation();
-		initialContainerRect.current = container.current!.getBoundingClientRect();
-		if (props.mode === 'freeform') {
-			setAnchorPoint(e.target as HTMLDivElement);
-		}
+		containerRect.current = container.current!.getBoundingClientRect();
 		activeHandle.current = e.target as HTMLDivElement;
+		setAnchorPoint();
 		userSelect.disable();
 		document.addEventListener('mouseup', onRelease);
 		document.addEventListener('mousemove', onResize);
@@ -300,14 +283,7 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 	}, []);
 
 	return (
-		<div
-			style={{
-				...style,
-				position: props.mode === 'freeform' ? 'fixed' : 'relative',
-			}}
-			className={classes.resizeBlock(null, className)}
-			ref={container}
-		>
+		<div className={classes.resizeBlock(null, className)} ref={container}>
 			{children}
 			{handleSides.map(
 				(side) =>
