@@ -11,6 +11,7 @@ import {
 	MenuItem,
 	Popover,
 	ProgressBar,
+	Switch,
 	TextArea,
 } from '@blueprintjs/core';
 
@@ -26,6 +27,7 @@ const classes = bem('task-item', [
 	'priority-target',
 	'text-editor',
 	'indicator',
+	'dropdown',
 ] as const);
 
 type PriorityMenuItem = {
@@ -109,12 +111,16 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 						})}
 					/>
 				</button>
-				<Menu>
+				<Menu className={classes.dropdownElement()}>
 					<MenuItem
-						icon='build'
-						text='In progress'
-						onClick={onToggleInProgress}
-						active={isInProgress}
+						text={
+							<Switch
+								label='In progress'
+								checked={isInProgress}
+								onChange={onToggleInProgress}
+							/>
+						}
+						shouldDismissPopover={false}
 					/>
 					<MenuDivider title='Priority' />
 					{priorities.map(({ icon, text, value }) => (

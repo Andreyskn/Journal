@@ -7,24 +7,9 @@ import React, {
 } from 'react';
 import { mergeExcluding, userSelect, toViewportUnits } from './helpers';
 
-type HorizontalAlignment = keyof Pick<CSSStyleDeclaration, 'left' | 'right'>;
-type VerticalAlignment = keyof Pick<CSSStyleDeclaration, 'top' | 'bottom'>;
-type Alignment = HorizontalAlignment | VerticalAlignment;
-
-type Side<T extends Alignment> = Record<T, ViewportRelativeUnits>;
-type Left = Side<'left'>;
-type Right = Side<'right'>;
-type Top = Side<'top'>;
-type Bottom = Side<'bottom'>;
-
-type HorizontalPosition = Right | Left;
-type VerticalPosition = Top | Bottom;
-export type Position = HorizontalPosition & VerticalPosition;
-export type PartialPosition = Partial<Left & Right & Top & Bottom>;
-
 type AlignmentData = {
-	sideX: { name: HorizontalAlignment; value: ViewportRelativeUnits };
-	sideY: { name: VerticalAlignment; value: ViewportRelativeUnits };
+	sideX: { name: HorizontalCSSSide; value: ViewportRelativeUnits };
+	sideY: { name: VerticalCSSSide; value: ViewportRelativeUnits };
 };
 
 type OnMoveEndCallback = (position: Position) => void;
@@ -36,7 +21,7 @@ export const useMove = (
 	const containerRef = useRef<HTMLElement | null>(null);
 	const handlerRef = useRef<HTMLElement | null>(null);
 	const handler = useRef<HTMLElement | null>(null);
-	const grabPoint = useRef<Record<Alignment, Pixels>>(null as any);
+	const grabPoint = useRef<Record<CSSSide, Pixels>>(null as any);
 
 	const position = useMemo(
 		() => ({
@@ -52,7 +37,7 @@ export const useMove = (
 				});
 			},
 			init: (newPosition: PartialPosition) => {
-				position.value = mergeExcluding<PartialPosition, Alignment>(
+				position.value = mergeExcluding<PartialPosition, CSSSide>(
 					position.value,
 					newPosition,
 					{
@@ -79,6 +64,11 @@ export const useMove = (
 								value: position.value.bottom!,
 						  };
 
+				const cnt = containerRef.current!;
+				cnt.style.left = 'auto';
+				cnt.style.right = 'auto';
+				cnt.style.top = 'auto';
+				cnt.style.bottom = 'auto';
 				position.set(position.sideX.value, position.sideY.value);
 			},
 		}),

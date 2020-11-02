@@ -9,6 +9,7 @@ import {
 } from './persistance';
 import { fileSystem } from './fileSystem';
 import { tabs } from './tabs';
+import { windows } from "./windows";
 import { createReducer } from '../utils';
 
 export let store: App.Store;
@@ -17,6 +18,7 @@ const coreHandlers = {
 	...persistanceHandlers,
 	...fileSystem.handlers,
 	...tabs.handlers,
+	...windows.handlers,
 };
 
 const reducer = createReducer(coreHandlers, getInitialState());

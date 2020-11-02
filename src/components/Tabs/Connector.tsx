@@ -12,7 +12,7 @@ export const TabsConnector: React.FC = () => {
 		activeTabId: state.activeFile.ref?.id,
 	}));
 
-	const tabsArray = useMemo(() => tabs.valueSeq().toArray(), [tabs]);
+	const tabsArray = useMemo(() => Array.from(tabs.values()), [tabs]);
 	const dispatch = useEnhancedDispatch();
 
 	return (

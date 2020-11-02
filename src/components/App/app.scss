@@ -11,7 +11,8 @@
 	height: 100vh;
 
 	grid-template: "file-tree tabs" auto
-	"file-tree viewer" minmax(0, 1fr) /
+	"file-tree viewer" minmax(0, 1fr)
+	"taskbar taskbar" auto /
 	200px minmax(0, 1fr);
 
 	&__file-tree {
@@ -30,6 +31,12 @@
 		background-color: var(--primary-background);
 
 		grid-area: viewer;
+	}
+
+	&__taskbar {
+		background-color: #394b59;
+
+		grid-area: taskbar;
 	}
 }
 

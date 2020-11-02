@@ -10,16 +10,16 @@ declare global {
 
 	namespace App {
 		type Tab = {
-			id: App.RegularFile['id'];
-			name: App.RegularFile['name'];
-			type: App.RegularFile['type'];
+			id: RegularFile['id'];
+			name: RegularFile['name'];
+			type: RegularFile['type'];
 			path: Path;
 		};
 		type TaggedTab = TaggedRecord<Tab, 'tab'>;
 		type ImmutableTab = ImmutableRecord<TaggedTab>;
 
 		type TabsState = {
-			tabs: Immutable.OrderedMap<App.Tab['id'], ImmutableTab>;
+			tabs: Immutable.OrderedMap<Tab['id'], ImmutableTab>;
 		};
 
 		type TabsImmutableNonRecordKey = TabsKey;

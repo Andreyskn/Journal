@@ -3,10 +3,12 @@ import { get, set } from 'idb-keyval';
 
 import { fileSystem } from './fileSystem';
 import { tabs } from './tabs';
+import { windows } from './windows';
 
 const createAppState = Immutable.Record<App.AppState>({
 	...fileSystem.state,
 	...tabs.state,
+	...windows.state,
 });
 
 const rootReviver: App.StateReviver = (tag, key, value) => {
@@ -19,7 +21,12 @@ const reviveState = (savedState: App.AppState): App.ImmutableAppState => {
 
 		const tag: Maybe<App.RecordTag> = value.get('_tag');
 
-		for (let reviver of [fileSystem.reviver, tabs.reviver, rootReviver]) {
+		for (let reviver of [
+			fileSystem.reviver,
+			tabs.reviver,
+			windows.reviver,
+			rootReviver,
+		]) {
 			const result = reviver(tag, key as any, value);
 			if (result) return result;
 		}

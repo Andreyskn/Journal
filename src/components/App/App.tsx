@@ -9,8 +9,10 @@ import { FileTree } from '../FileTree';
 import { Tabs } from '../Tabs';
 import { Viewer } from '../Viewer';
 import { useAppContextProvider } from '../context';
+import { Taskbar } from '../Taskbar';
+import { WindowManager } from '../Windows/WIndowManager';
 
-const classes = bem('app', ['file-tree', 'tabs', 'viewer'] as const);
+const classes = bem('app', ['file-tree', 'tabs', 'viewer', 'taskbar'] as const);
 
 export const App: React.FC = hot(() => {
 	const { AppContextProvider } = useAppContextProvider();
@@ -27,7 +29,11 @@ export const App: React.FC = hot(() => {
 				<div className={classes.viewerElement()}>
 					<Viewer />
 				</div>
+				<div className={classes.taskbarElement()}>
+					<Taskbar />
+				</div>
 			</div>
+			<WindowManager />
 		</AppContextProvider>
 	);
 });

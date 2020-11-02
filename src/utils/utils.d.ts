@@ -1,5 +1,7 @@
 import { IconName, MaybeElement } from '@blueprintjs/core';
 
+type Side<T extends CSSSide> = Record<T, ViewportRelativeUnits>;
+
 declare global {
 	type Maybe<T> = T | undefined | null;
 
@@ -24,4 +26,18 @@ declare global {
 	type Pixels = number;
 
 	type ViewportRelativeUnits = number;
+
+	type HorizontalCSSSide = keyof Pick<CSSStyleDeclaration, 'left' | 'right'>;
+	type VerticalCSSSide = keyof Pick<CSSStyleDeclaration, 'top' | 'bottom'>;
+	type CSSSide = HorizontalCSSSide | VerticalCSSSide;
+
+	type Left = Side<'left'>;
+	type Right = Side<'right'>;
+	type Top = Side<'top'>;
+	type Bottom = Side<'bottom'>;
+
+	type HorizontalPosition = Right | Left;
+	type VerticalPosition = Top | Bottom;
+	type Position = HorizontalPosition & VerticalPosition;
+	type PartialPosition = Partial<Left & Right & Top & Bottom>;
 }

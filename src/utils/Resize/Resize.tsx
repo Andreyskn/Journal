@@ -3,6 +3,7 @@ import React, {
 	PropsWithChildren,
 	RefObject,
 	useCallback,
+	useEffect,
 	useLayoutEffect,
 	useMemo,
 	useRef,
@@ -12,7 +13,6 @@ import './resize.scss';
 
 import { bem } from '../bem';
 import { toViewportUnits, userSelect } from '../helpers';
-import { PartialPosition } from '../useMove';
 
 const classes = bem('resize', ['handle'] as const);
 
@@ -41,50 +41,62 @@ type Freeform = {
 
 type Mode = Directed | Freeform;
 
+type Size = { width: Pixels; height: Pixels };
+
 export type ResizeProps = PropsWithChildren<
 	Mode & {
-		initialWidth?: number;
-		initialHeight?: number;
+		width?: number;
+		height?: number;
 		minWidth?: number;
 		minHeight?: number;
 		maxWidth?: number;
 		maxHeight?: number;
 		className?: string;
+		onResizeEnd?: (width: Pixels, height: Pixels) => void;
 	}
 >;
-
-const emptyWeakMap = new WeakMap<any>();
 
 // TODO: aspect ratio
 export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 	const {
-		initialWidth,
-		initialHeight,
+		width,
+		height,
 		minHeight = 0,
 		minWidth = 0,
 		maxHeight = 1,
 		maxWidth = 1,
 		children,
 		className,
+		onResizeEnd,
 	} = props;
 
 	const container =
 		(ref as RefObject<HTMLDivElement>) || useRef<HTMLDivElement>(null);
 
-	const handles = useRef<WeakMap<HTMLDivElement, HandleSide>>(emptyWeakMap);
+	const handles = useRef(new WeakMap<HTMLDivElement, HandleSide>());
 	const activeHandle = useRef<HTMLDivElement>();
 	const containerRect = useRef<DOMRect>(null as any);
+	const size = useRef({} as Size);
 
 	useLayoutEffect(() => {
 		containerDOMSize.width = sizeLimits.clamp(
-			initialWidth ?? containerDOMSize.width,
+			width ?? containerDOMSize.width,
 			'x'
 		);
 		containerDOMSize.height = sizeLimits.clamp(
-			initialHeight ?? containerDOMSize.height,
+			height ?? containerDOMSize.height,
 			'y'
 		);
 	}, []);
+
+	useEffect(() => {
+		if (width && width !== size.current.width) {
+			containerDOMSize.width = sizeLimits.clamp(width, 'x');
+		}
+		if (height && height !== size.current.height) {
+			containerDOMSize.height = sizeLimits.clamp(height, 'y');
+		}
+	}, [width, height]);
 
 	const sizeLimits = useMemo(
 		() => ({
@@ -131,6 +143,7 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 				return container.current!.offsetWidth;
 			},
 			set width(width: number) {
+				size.current.width = width;
 				requestAnimationFrame(() => {
 					container.current!.style.width = `${width}px`;
 				});
@@ -139,6 +152,7 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 				return container.current!.offsetHeight;
 			},
 			set height(height: number) {
+				size.current.height = height;
 				requestAnimationFrame(() => {
 					container.current!.style.height = `${height}px`;
 				});
@@ -278,6 +292,7 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 
 	const onRelease = useCallback(() => {
 		userSelect.enable();
+		onResizeEnd?.(size.current.width, size.current.height);
 		document.removeEventListener('mouseup', onRelease);
 		document.removeEventListener('mousemove', onResize);
 	}, []);

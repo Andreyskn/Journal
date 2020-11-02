@@ -17,22 +17,22 @@ declare global {
 		type Directory = BaseFile & {
 			type: 'directory';
 			data: Immutable.OrderedMap<File['name'], File['id']>;
-			parent: App.Directory['id'] | null;
+			parent: Directory['id'] | null;
 		};
-		type TaggedDirectory = App.TaggedRecord<Directory, 'file'>;
-		type ImmutableDirectory = App.ImmutableRecord<TaggedDirectory>;
+		type TaggedDirectory = TaggedRecord<Directory, 'file'>;
+		type ImmutableDirectory = ImmutableRecord<TaggedDirectory>;
 
 		type RegularFile = BaseFile & {
 			type: string;
 			data: FileData['id'];
-			parent: App.Directory['id'];
+			parent: Directory['id'];
 		};
-		type TaggedRegularFile = App.TaggedRecord<RegularFile, 'file'>;
-		type ImmutableRegularFile = App.ImmutableRecord<TaggedRegularFile>;
+		type TaggedRegularFile = TaggedRecord<RegularFile, 'file'>;
+		type ImmutableRegularFile = ImmutableRecord<TaggedRegularFile>;
 
 		type File = RegularFile | Directory;
-		type TaggedFile = App.TaggedRecord<File, 'file'>;
-		type ImmutableFile = App.ImmutableRecord<TaggedFile>;
+		type TaggedFile = TaggedRecord<File, 'file'>;
+		type ImmutableFile = ImmutableRecord<TaggedFile>;
 
 		type FileType = string;
 		type FileExtension = string;
@@ -41,8 +41,8 @@ declare global {
 		type ActiveFile = {
 			ref: Maybe<ImmutableRegularFile>;
 		};
-		type TaggedActiveFile = App.TaggedRecord<ActiveFile, 'active-file'>;
-		type ImmutableActiveFile = App.ImmutableRecord<TaggedActiveFile>;
+		type TaggedActiveFile = TaggedRecord<ActiveFile, 'active-file'>;
+		type ImmutableActiveFile = ImmutableRecord<TaggedActiveFile>;
 
 		type ActiveFileId = Maybe<RegularFile['id']>;
 		type ActiveFilePath = Maybe<RegularFile['path']>;

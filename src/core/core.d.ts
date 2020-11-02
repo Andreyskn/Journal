@@ -30,7 +30,7 @@ declare global {
 	namespace App {
 		type Store = ReduxStore<ImmutableAppState, Actions.AppAction>;
 
-		type AppState = TabsState & FileSystemState;
+		type AppState = TabsState & FileSystemState & WindowsState;
 
 		interface ImmutableAppState
 			extends OmitType<App.ImmutableRecord<AppState>, 'updateIn'> {}
@@ -40,9 +40,10 @@ declare global {
 		type ImmutableNonRecordKey =
 			| AppImmutableNonRecordKey
 			| TabsImmutableNonRecordKey
-			| FileSystemStateImmutableNonRecordKey;
+			| FileSystemStateImmutableNonRecordKey
+			| WindowsImmutableNonRecordKey;
 
-		type RecordTag = 'tab' | 'file' | 'active-file';
+		type RecordTag = 'tab' | 'file' | 'active-file' | 'window';
 
 		type TaggedRecord<O extends AnyObject, T extends RecordTag> = O & {
 			_tag: T;

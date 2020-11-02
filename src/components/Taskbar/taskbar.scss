@@ -1,0 +1,17 @@
+.taskbar {
+	display: flex;
+
+	height: 30px;
+
+	&__popover {
+		position: relative;
+		left: -5px;
+	}
+
+	&__entry {
+		flex: 1 1 60px;
+
+		min-width: 60px;
+		max-width: 150px;
+	}
+}

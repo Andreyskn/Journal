@@ -50,6 +50,12 @@
 		}
 	}
 
+	&__dropdown {
+		.bp3-switch {
+			margin: 0;
+		}
+	}
+
 	&__indicator {
 		top: -5px;
 		left: 0;
