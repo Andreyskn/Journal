@@ -4,7 +4,7 @@ import './taskbar.scss';
 
 import { bem } from '../../utils';
 import { Button, Menu, MenuItem, Popover } from '@blueprintjs/core';
-import { useEnhancedDispatch, useSelector } from '../../core';
+import { useDispatch, useSelector } from '../../core';
 import { windowRegistry } from '../Windows/registry';
 
 export type TaskbarProps = {};
@@ -12,12 +12,20 @@ export type TaskbarProps = {};
 const classes = bem('taskbar', ['popover', 'menu-toggle', 'entry'] as const);
 
 export const Taskbar: React.FC<TaskbarProps> = (props) => {
-	const { windows } = useSelector((state) => ({
+	const { windows, windowOrder } = useSelector((state) => ({
 		windows: state.windows,
+		windowOrder: state.windowOrder,
 	}));
 
-	const windowsArray = useMemo(() => Array.from(windows.values()), [windows]);
-	const dispatch = useEnhancedDispatch();
+	const { dispatch } = useDispatch();
+
+	const { windowsArray, topWindow } = useMemo(() => {
+		return {
+			windowsArray: Array.from(windows.values()),
+			topWindow: windowOrder.last(null),
+		};
+	}, [windows, windowOrder]);
+
 	const menuEntries = useMemo(
 		() =>
 			Array.from(windowRegistry.values())
@@ -26,8 +34,8 @@ export const Taskbar: React.FC<TaskbarProps> = (props) => {
 		[]
 	);
 
-	const onWindowShow = (id: App.Window['id']) => () => {
-		dispatch.windows.bringToFront({ id });
+	const onWindowOpen = (id: App.Window['id']) => () => {
+		dispatch.windows.open({ id });
 	};
 
 	return (
@@ -48,21 +56,21 @@ export const Taskbar: React.FC<TaskbarProps> = (props) => {
 							key={id}
 							icon={icon}
 							text={title}
-							onClick={onWindowShow(id)}
+							onClick={onWindowOpen(id)}
 						/>
 					))}
 				</Menu>
 			</Popover>
 			{windowsArray.map(({ id, status }) => {
 				if (status === 'closed') return null;
+				const isActive = id === topWindow;
 
 				const { title, icon } = windowRegistry.get(id)!;
 
 				const onClick = () => {
-					dispatch.windows.setStatus({
-						id,
-						status: status === 'minimized' ? 'open' : 'minimized',
-					});
+					isActive
+						? dispatch.windows.minimize({ id })
+						: dispatch.windows.bringToFront({ id });
 				};
 
 				return (
@@ -71,7 +79,7 @@ export const Taskbar: React.FC<TaskbarProps> = (props) => {
 						icon={icon}
 						text={title}
 						className={classes.entryElement()}
-						active={status !== 'minimized'}
+						active={isActive}
 						onClick={onClick}
 						alignText='left'
 					/>

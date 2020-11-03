@@ -125,12 +125,12 @@ export type CoreDispatch = EnhancedDispatch<typeof coreHandlers>
 
 let coreDispatch: CoreDispatch;
 
-interface UseEnhancedDispatch {
-	(): EnhancedDispatch<typeof coreHandlers>;
-	<T extends UseDispatchOptions>(options: T): EnhancedDispatch<T['handlers']>;
+interface UseDispatch {
+	(): { dispatch: EnhancedDispatch<typeof coreHandlers> };
+	<T extends UseDispatchOptions>(options: T): { dispatch: EnhancedDispatch<T['handlers']> };
 }
 
-export const useEnhancedDispatch: UseEnhancedDispatch = <
+export const useDispatch: UseDispatch = <
 	T extends UseDispatchOptions
 >(
 	options?: T
@@ -140,13 +140,13 @@ export const useEnhancedDispatch: UseEnhancedDispatch = <
 			store.dispatch,
 			getActionCreators(coreHandlers)
 		) as any;
-		return coreDispatch;
+		return { dispatch: coreDispatch };
 	}
 
 	const { dispatch, handlers } = options;
 
 	return useMemo(
-		() => createEnhancedDispatch(dispatch, getActionCreators(handlers)),
+		() => ({ dispatch: createEnhancedDispatch(dispatch, getActionCreators(handlers)) }),
 		[]
 	) as EnhancedDispatch<T['handlers']> as any;
 };

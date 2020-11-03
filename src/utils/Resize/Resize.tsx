@@ -52,6 +52,8 @@ export type ResizeProps = PropsWithChildren<
 		maxWidth?: number;
 		maxHeight?: number;
 		className?: string;
+		style?: React.CSSProperties;
+		onContainerClick?: (e: React.MouseEvent) => void;
 		onResizeEnd?: (width: Pixels, height: Pixels) => void;
 	}
 >;
@@ -67,6 +69,8 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 		maxWidth = 1,
 		children,
 		className,
+		style,
+		onContainerClick,
 		onResizeEnd,
 	} = props;
 
@@ -145,7 +149,8 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 			set width(width: number) {
 				size.current.width = width;
 				requestAnimationFrame(() => {
-					container.current!.style.width = `${width}px`;
+					if (!container.current) return;
+					container.current.style.width = `${width}px`;
 				});
 			},
 			get height() {
@@ -154,7 +159,8 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 			set height(height: number) {
 				size.current.height = height;
 				requestAnimationFrame(() => {
-					container.current!.style.height = `${height}px`;
+					if (!container.current) return;
+					container.current.style.height = `${height}px`;
 				});
 			},
 		}),
@@ -281,7 +287,6 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 	}, [(props as Freeform).onSetAnchor]);
 
 	const onGrab = useCallback((e: React.MouseEvent) => {
-		e.stopPropagation();
 		containerRect.current = container.current!.getBoundingClientRect();
 		activeHandle.current = e.target as HTMLDivElement;
 		setAnchorPoint();
@@ -298,7 +303,12 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 	}, []);
 
 	return (
-		<div className={classes.resizeBlock(null, className)} ref={container}>
+		<div
+			className={classes.resizeBlock(null, className)}
+			ref={container}
+			style={style}
+			onClick={onContainerClick}
+		>
 			{children}
 			{handleSides.map(
 				(side) =>

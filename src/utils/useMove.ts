@@ -32,8 +32,9 @@ export const useMove = (
 				position.value[position.sideX.name] = x;
 				position.value[position.sideY.name] = y;
 				requestAnimationFrame(() => {
-					containerRef.current!.style[position.sideX.name] = `${x}vw`;
-					containerRef.current!.style[position.sideY.name] = `${y}vh`;
+					if (!containerRef.current) return;
+					containerRef.current.style[position.sideX.name] = `${x}vw`;
+					containerRef.current.style[position.sideY.name] = `${y}vh`;
 				});
 			},
 			init: (newPosition: PartialPosition) => {

@@ -16,10 +16,12 @@ export type WindowProps = {
 	title: string;
 	icon?: IconType;
 	position: Position;
-	onReposition: (position: Position) => void;
+	isMaximized?: boolean;
+	style?: React.CSSProperties;
 	width: NonNullable<ResizeProps['width']>;
 	height: NonNullable<ResizeProps['height']>;
-	isMaximized?: boolean;
+	onContainerClick?: (e: React.MouseEvent) => void;
+	onReposition: (position: Position) => void;
 	onResize: NonNullable<ResizeProps['onResizeEnd']>;
 	onMinimize: () => void;
 	onMaximize: () => void;
@@ -33,7 +35,9 @@ export const Window: React.FC<WindowProps> = ({
 	position,
 	width,
 	height,
+	style,
 	isMaximized,
+	onContainerClick,
 	onReposition,
 	onMinimize,
 	onMaximize,
@@ -61,6 +65,8 @@ export const Window: React.FC<WindowProps> = ({
 			minHeight={120}
 			maxHeight={window.innerHeight - 30}
 			onResizeEnd={onResize}
+			style={style}
+			onContainerClick={onContainerClick}
 		>
 			<div className={classes.headerElement()}>
 				<div className={classes.titleElement()} ref={handlerRef}>

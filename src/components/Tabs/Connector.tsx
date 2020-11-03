@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-import { useSelector, useEnhancedDispatch } from '../../core';
+import { useSelector, useDispatch } from '../../core';
 import { Tabs } from './Tabs';
 import { ErrorBoundary } from '../../utils';
 
@@ -13,7 +13,7 @@ export const TabsConnector: React.FC = () => {
 	}));
 
 	const tabsArray = useMemo(() => Array.from(tabs.values()), [tabs]);
-	const dispatch = useEnhancedDispatch();
+	const { dispatch } = useDispatch();
 
 	return (
 		<ErrorBoundary name='Tabs'>

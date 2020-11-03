@@ -55,7 +55,9 @@ declare global {
 		type StateReviver = (
 			tag: Maybe<RecordTag>,
 			key: Maybe<ImmutableNonRecordKey>,
-			value: Immutable.Collection.Keyed<string, any>
+			value:
+				| Immutable.Collection.Keyed<string, any>
+				| Immutable.Collection.Indexed<any>
 		) => AnyObject | undefined;
 
 		type Updater<T> = (data: T) => T;

@@ -1,12 +1,4 @@
-const setStatus: App.Handler<{
-	id: App.Window['id'];
-	status: App.Window['status'];
-}> = (state, { id, status }) => {
-	return (state as any).updateIn(
-		['windows', id],
-		(window: App.ImmutableWindow) => window.set('status', status)
-	);
-};
+import { isDefaultPositions } from './helpers';
 
 const setRect: App.Handler<{
 	id: App.Window['id'];
@@ -29,18 +21,74 @@ const setRect: App.Handler<{
 const bringToFront: App.Handler<{
 	id: App.Window['id'];
 }> = (state, { id }) => {
-	const { status } = state.windows.get(id)!;
-	const isHidden = status === 'closed' || status === 'minimized';
-
-	return (state as any).updateIn(
-		['windows', id],
-		(window: App.ImmutableWindow) =>
-			window.set('status', isHidden ? 'open' : status)
+	return state.update('windowOrder', (order) =>
+		order.withMutations((windowOrder) => {
+			windowOrder.delete(id).add(id);
+		})
 	);
 };
 
+const open: App.Handler<{
+	id: App.Window['id'];
+}> = (state, { id }) => {
+	const targetWindow = state.windows.get(id)!;
+	const topWindow = state.windowOrder.last(null);
+
+	return state.withMutations((state) => {
+		(state as any).setIn(['windows', id, 'status'], 'open');
+		bringToFront(state, { id });
+
+		if (
+			topWindow &&
+			topWindow !== id &&
+			isDefaultPositions(targetWindow, state.windows.get(topWindow)!)
+		) {
+			setRect(state, {
+				id,
+				position: Object.entries(targetWindow.position).reduce(
+					(result, [side, value]) => {
+						result[side] = value + 4;
+						return result;
+					},
+					{} as AnyObject
+				),
+			});
+		}
+	});
+};
+
+const close: App.Handler<{
+	id: App.Window['id'];
+}> = (state, { id }) => {
+	return state.withMutations((state) => {
+		(state as any).setIn(['windows', id, 'status'], 'closed');
+		state.update('windowOrder', (order) => order.delete(id));
+	});
+};
+
+const minimize: App.Handler<{
+	id: App.Window['id'];
+}> = (state, { id }) => {
+	return state.withMutations((state) => {
+		(state as any).setIn(['windows', id, 'status'], 'minimized');
+		state.update('windowOrder', (order) => order.delete(id));
+	});
+};
+
+const maximize: App.Handler<{
+	id: App.Window['id'];
+}> = (state, { id }) => {
+	return state.withMutations((state) => {
+		(state as any).setIn(['windows', id, 'status'], 'maximized');
+		bringToFront(state, { id });
+	});
+};
+
 export const handlers = {
-	'@windows/setStatus': setStatus,
 	'@windows/setRect': setRect,
+	'@windows/open': open,
+	'@windows/close': close,
+	'@windows/minimize': minimize,
+	'@windows/maximize': maximize,
 	'@windows/bringToFront': bringToFront,
 };

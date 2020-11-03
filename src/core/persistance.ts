@@ -1,4 +1,4 @@
-import Immutable, { isIndexed } from 'immutable';
+import Immutable, { isKeyed } from 'immutable';
 import { get, set } from 'idb-keyval';
 
 import { fileSystem } from './fileSystem';
@@ -17,9 +17,7 @@ const rootReviver: App.StateReviver = (tag, key, value) => {
 
 const reviveState = (savedState: App.AppState): App.ImmutableAppState => {
 	return Immutable.fromJS(savedState, (key, value) => {
-		if (isIndexed(value)) return value.toList();
-
-		const tag: Maybe<App.RecordTag> = value.get('_tag');
+		const tag: Maybe<App.RecordTag> = isKeyed(value) && value.get('_tag');
 
 		for (let reviver of [
 			fileSystem.reviver,

@@ -3,12 +3,13 @@ import { createWindow } from './helpers';
 import { windowRegistry } from '../../components/Windows/registry';
 
 export const state: App.WindowsState = {
-	windows: Immutable.OrderedMap(
+	windows: Immutable.Map(
 		Array.from(windowRegistry.entries()).map(([id, windowModule]) => [
 			id,
 			createWindow(windowModule),
 		])
 	),
+	windowOrder: Immutable.OrderedSet(),
 };
 
 export const reviver: App.StateReviver = (tag, key, value) => {
@@ -19,6 +20,8 @@ export const reviver: App.StateReviver = (tag, key, value) => {
 
 	switch (key) {
 		case 'windows':
-			return value.toOrderedMap();
+			return value.toMap();
+		case 'windowOrder':
+			return value.toOrderedSet();
 	}
 };

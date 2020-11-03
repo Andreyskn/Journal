@@ -1,6 +1,7 @@
 import Immutable from 'immutable';
 
 type WindowsKey = KeyOf<App.WindowsState, 'windows'>;
+type WindowOrderKey = KeyOf<App.WindowsState, 'windowOrder'>;
 
 declare global {
 	namespace Actions {}
@@ -17,7 +18,8 @@ declare global {
 		type ImmutableWindow = ImmutableRecord<TaggedWindow>;
 
 		type WindowsState = {
-			windows: Immutable.OrderedMap<Window['id'], ImmutableWindow>;
+			windows: Immutable.Map<Window['id'], ImmutableWindow>;
+			windowOrder: Immutable.OrderedSet<Window['id']>;
 		};
 
 		type WindowModule = {
@@ -30,6 +32,6 @@ declare global {
 			};
 		};
 
-		type WindowsImmutableNonRecordKey = WindowsKey;
+		type WindowsImmutableNonRecordKey = WindowsKey | WindowOrderKey;
 	}
 }
