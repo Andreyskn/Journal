@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo } from 'react';
+import React, { RefObject, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from '../../core';
 import { Window, WindowProps } from './Window/Window';
 import { windowRegistry } from './registry';
@@ -14,10 +14,12 @@ export const WindowManager: React.FC = () => {
 		windowOrder: state.windowOrder,
 	}));
 
-	const { windowsArray, topWindow } = useMemo(() => {
+	const windowsArray = useMemo(() => Array.from(windows.values()), []);
+
+	const { visibleWindows, topWindow } = useMemo(() => {
 		return {
-			windowsArray: windowOrder
-				.map((windowId) => windows.get(windowId) as App.Window)
+			visibleWindows: windowOrder
+				.map((id) => windows.get(id) as App.Window)
 				.toArray(),
 			topWindow: windowOrder.last(null),
 		};
@@ -25,14 +27,20 @@ export const WindowManager: React.FC = () => {
 
 	const { dispatch } = useDispatch();
 
-	if (!windowsArray.length) return null;
+	const refs = windowsArray.reduce((refs, window) => {
+		refs[window.id] = useRef(null);
+		return refs;
+	}, {} as Record<App.Window['id'], RefObject<HTMLDivElement>>);
+
+	if (!visibleWindows.length) return null;
 
 	return (
 		<div className={classes.windowsBlock()}>
-			{windowsArray.map(
+			{visibleWindows.map(
 				({ id, status, position, width, height }, zIndex) => {
 					const { icon, title, Content } = windowRegistry.get(id)!;
 					const isMaximized = status === 'maximized';
+					const ref = refs[id];
 
 					const onReposition: WindowProps['onReposition'] = (
 						position
@@ -61,6 +69,10 @@ export const WindowManager: React.FC = () => {
 						dispatch.windows.close({ id });
 					};
 
+					const onContainerMouseDown = () => {
+						ref.current!.style.zIndex = '99';
+					};
+
 					const onContainerClick = () => {
 						if (topWindow !== id) {
 							dispatch.windows.bringToFront({ id });
@@ -71,6 +83,7 @@ export const WindowManager: React.FC = () => {
 						<Window
 							style={{ zIndex }}
 							key={id}
+							ref={ref}
 							title={title}
 							icon={icon}
 							width={isMaximized ? window.innerWidth : width}
@@ -83,6 +96,7 @@ export const WindowManager: React.FC = () => {
 							onClose={onClose}
 							onResize={onResize}
 							onContainerClick={onContainerClick}
+							onContainerMouseDown={onContainerMouseDown}
 						>
 							<Content />
 						</Window>

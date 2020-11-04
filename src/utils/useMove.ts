@@ -1,4 +1,5 @@
 import React, {
+	RefObject,
 	useCallback,
 	useEffect,
 	useLayoutEffect,
@@ -16,9 +17,10 @@ type OnMoveEndCallback = (position: Position) => void;
 
 export const useMove = (
 	initialPosition: Position,
-	onMoveEnd: OnMoveEndCallback
+	onMoveEnd: OnMoveEndCallback,
+	ref?: RefObject<HTMLDivElement>
 ) => {
-	const containerRef = useRef<HTMLElement | null>(null);
+	const containerRef = ref || useRef<HTMLElement | null>(null);
 	const handlerRef = useRef<HTMLElement | null>(null);
 	const handler = useRef<HTMLElement | null>(null);
 	const grabPoint = useRef<Record<CSSSide, Pixels>>(null as any);

@@ -98,7 +98,7 @@ type ActionTypeRegexExec = OmitType<RegExpExecArray, 'groups'> & {
 	};
 };
 
-export const createEnhancedDispatch = <T extends ActionCreators<any>>(
+export const createDispatch = <T extends ActionCreators<any>>(
 	dispatch: Actions.Dispatch<any>,
 	actionCreators: T
 ) =>
@@ -136,17 +136,14 @@ export const useDispatch: UseDispatch = <
 	options?: T
 ) => {
 	if (!options) {
-		coreDispatch ||= createEnhancedDispatch(
-			store.dispatch,
-			getActionCreators(coreHandlers)
-		) as any;
+		coreDispatch ||= createDispatch(store.dispatch, getActionCreators(coreHandlers)) as any;
 		return { dispatch: coreDispatch };
 	}
 
 	const { dispatch, handlers } = options;
 
 	return useMemo(
-		() => ({ dispatch: createEnhancedDispatch(dispatch, getActionCreators(handlers)) }),
+		() => ({ dispatch: createDispatch(dispatch, getActionCreators(handlers)) }),
 		[]
 	) as EnhancedDispatch<T['handlers']> as any;
 };

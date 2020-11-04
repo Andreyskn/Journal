@@ -7,11 +7,9 @@ import { Button, Menu, MenuItem, Popover } from '@blueprintjs/core';
 import { useDispatch, useSelector } from '../../core';
 import { windowRegistry } from '../Windows/registry';
 
-export type TaskbarProps = {};
-
 const classes = bem('taskbar', ['popover', 'menu-toggle', 'entry'] as const);
 
-export const Taskbar: React.FC<TaskbarProps> = (props) => {
+export const Taskbar: React.FC = () => {
 	const { windows, windowOrder } = useSelector((state) => ({
 		windows: state.windows,
 		windowOrder: state.windowOrder,
@@ -35,7 +33,9 @@ export const Taskbar: React.FC<TaskbarProps> = (props) => {
 	);
 
 	const onWindowOpen = (id: App.Window['id']) => () => {
-		dispatch.windows.open({ id });
+		if (topWindow !== id) {
+			dispatch.windows.open({ id });
+		}
 	};
 
 	return (

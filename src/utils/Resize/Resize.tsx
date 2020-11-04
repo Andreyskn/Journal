@@ -53,7 +53,9 @@ export type ResizeProps = PropsWithChildren<
 		maxHeight?: number;
 		className?: string;
 		style?: React.CSSProperties;
+		disabled?: boolean;
 		onContainerClick?: (e: React.MouseEvent) => void;
+		onContainerMouseDown?: (e: React.MouseEvent) => void;
 		onResizeEnd?: (width: Pixels, height: Pixels) => void;
 	}
 >;
@@ -70,7 +72,9 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 		children,
 		className,
 		style,
+		disabled,
 		onContainerClick,
+		onContainerMouseDown,
 		onResizeEnd,
 	} = props;
 
@@ -308,21 +312,25 @@ export const Resize = forwardRef<HTMLDivElement, ResizeProps>((props, ref) => {
 			ref={container}
 			style={style}
 			onClick={onContainerClick}
+			onMouseDown={onContainerMouseDown}
 		>
 			{children}
-			{handleSides.map(
-				(side) =>
-					(props.mode === 'freeform' || props.side === side) && (
-						<div
-							key={side}
-							className={classes.handleElement({
-								[side]: true,
-							})}
-							ref={(el) => el && handles.current.set(el, side)}
-							onMouseDown={onGrab}
-						/>
-					)
-			)}
+			{!disabled &&
+				handleSides.map(
+					(side) =>
+						(props.mode === 'freeform' || props.side === side) && (
+							<div
+								key={side}
+								className={classes.handleElement({
+									[side]: true,
+								})}
+								ref={(el) =>
+									el && handles.current.set(el, side)
+								}
+								onMouseDown={onGrab}
+							/>
+						)
+				)}
 		</div>
 	);
 });
