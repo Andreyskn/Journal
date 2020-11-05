@@ -1,6 +1,6 @@
 import Events from 'events';
 
-type Mutations = {
+export type Mutations = {
 	FILE_CREATED: { state: App.ImmutableAppState; file: App.ImmutableFile };
 	FILE_DELETED: { state: App.ImmutableAppState; file: App.ImmutableFile };
 	FILE_UPDATED: { state: App.ImmutableAppState; file: App.ImmutableFile };

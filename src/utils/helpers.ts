@@ -1,6 +1,8 @@
-import { useReducer, useRef } from 'react';
+import { FC, useReducer, useRef } from 'react';
 
 export const noop: AnyFunction = () => {};
+
+export const Null: FC = () => null;
 
 export const except: AnyFunction = (message: string) => () => {
 	throw Error(message);

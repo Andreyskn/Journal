@@ -1,7 +1,7 @@
 import * as helpers from './helpers';
 import { generateId } from '../../utils';
 import { DIRECTORY_ID, UNTITLED } from './constants';
-import { mutations } from '../mutations';
+import { mutations, Mutations } from '../mutations';
 import { PLUGINS_MAP } from '../../plugins';
 
 mutations
@@ -20,18 +20,10 @@ mutations
 		},
 	})
 	.on({
-		type: 'FILE_DELETED',
-		act: ({ state, file }) => {
-			if (file === state.activeFile.ref) {
-				setActiveFile(state, { id: null });
-			}
-		},
-	})
-	.on({
 		type: 'FILE_UPDATED',
-		act: ({ state, file: { id } }) => {
+		act: ({ state, file: { id, isTrashed } }) => {
 			if (id === state.activeFile.ref?.id) {
-				setActiveFile(state, { id });
+				setActiveFile(state, { id: isTrashed ? null : id });
 			}
 		},
 	});
@@ -39,13 +31,21 @@ mutations
 const createFile: App.Handler<{
 	name: App.File['name'];
 	parent: App.RegularFile['parent'];
-}> = (state, { name, parent }) => {
+	symlink?: App.File['id'];
+}> = (state, { name, parent, symlink }) => {
 	return state.withMutations((state) => {
 		let newFile: App.ImmutableFile;
 		const type = helpers.getFileType(name);
 		const path = helpers.getFilePath(state.files, name, parent);
 
-		if (type === 'directory') {
+		if (symlink) {
+			newFile = helpers.createSymlink({
+				data: symlink,
+				name,
+				parent,
+				path,
+			});
+		} else if (type === 'directory') {
 			newFile = helpers.createDirectory({ name, parent, path });
 		} else {
 			const fileData: App.FileData = {
@@ -127,7 +127,8 @@ const updateFile: App.Handler<{
 	id: App.File['id'];
 	newName?: App.File['name'];
 	newParent?: App.File['parent'];
-}> = (state, { id, newName, newParent }) => {
+	isTrashed?: boolean;
+}> = (state, { id, newName, newParent, isTrashed = false }) => {
 	const file: App.ImmutableFile = state.getIn(['files', id]);
 	const name = newName || file.name;
 	const parent = newParent || file.parent;
@@ -136,14 +137,15 @@ const updateFile: App.Handler<{
 		file.set('name', name)
 			.set('parent', parent)
 			.set('path', helpers.getFilePath(state.files, name, parent))
-			.set('lastModifiedAt', Date.now());
+			.set('lastModifiedAt', Date.now())
+			.set('isTrashed', isTrashed);
 	});
 
 	return state.withMutations((state) => {
 		(state as any).setIn(['files', id], updatedFile);
 
 		if (helpers.isDirectory(file)) {
-			file.data.forEach((id) => updateFile(state, { id }));
+			file.data.forEach((id) => updateFile(state, { id, isTrashed }));
 		}
 
 		mutations.dispatch({
@@ -188,6 +190,21 @@ const moveFile: App.Handler<{
 	});
 };
 
+const moveToTrash: App.Handler<{
+	id: App.File['id'];
+}> = (state, { id }) => {
+	const { name } = state.files.get(id)!;
+
+	return state.withMutations((state) => {
+		updateFile(state, { id, isTrashed: true });
+		createFile(state, {
+			name: name,
+			parent: DIRECTORY_ID.trash,
+			symlink: id,
+		});
+	});
+};
+
 const setActiveFile: App.Handler<{
 	id: App.ActiveFileId;
 }> = (state, { id }) => {
@@ -226,6 +243,7 @@ export const handlers = {
 	'@fs/createFile': createFile,
 	'@fs/createUntitledFile': createUntitledFile,
 	'@fs/deleteFile': deleteFile,
+	'@fs/moveToTrash': moveToTrash,
 	'@fs/renameFile': renameFile,
 	'@fs/moveFile': moveFile,
 	'@fs/setActiveFile': setActiveFile,

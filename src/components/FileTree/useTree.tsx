@@ -204,7 +204,10 @@ export const useTree = (
 		const regularFiles = file.data.slice(directories.size);
 
 		directories.forEach((id) => {
-			const { name: label, path, data } = files.get(id) as App.Directory;
+			const { name: label, path, data, isTrashed } = files.get(
+				id
+			) as App.Directory;
+			if (isTrashed) return;
 
 			const node = createFolderNode({
 				editorData,
@@ -225,9 +228,10 @@ export const useTree = (
 		maybeAppendNewItem(parent, editorData);
 
 		regularFiles.forEach((id) => {
-			const { type, name: label, path } = files.get(
+			const { type, name: label, path, isTrashed } = files.get(
 				id
 			) as App.RegularFile;
+			if (isTrashed) return;
 
 			const node = createFileNode({
 				editorData,

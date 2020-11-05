@@ -7,4 +7,9 @@ export const fileSystem = {
 	reviver,
 };
 export * from './constants';
-export { getFilePath, getFilePathById, createFileRecord } from './helpers';
+export {
+	getFilePath,
+	getFilePathById,
+	createFileRecord,
+	isRegularFile,
+} from './helpers';

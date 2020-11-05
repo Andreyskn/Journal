@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 
 import './taskbar.scss';
 
-import { bem } from '../../utils';
+import { bem, Null } from '../../utils';
 import { Button, Menu, MenuItem, Popover } from '@blueprintjs/core';
 import { useDispatch, useSelector } from '../../core';
 import { windowRegistry } from '../Windows/registry';
@@ -51,14 +51,19 @@ export const Taskbar: React.FC = () => {
 					className={classes.menuToggleElement()}
 				/>
 				<Menu>
-					{menuEntries.map(({ id, icon, title }) => (
-						<MenuItem
-							key={id}
-							icon={icon}
-							text={title}
-							onClick={onWindowOpen(id)}
-						/>
-					))}
+					{menuEntries.map(({ id, icon, title, menuEntry }) => {
+						const Label = menuEntry!.Label || Null;
+
+						return (
+							<MenuItem
+								key={id}
+								icon={icon}
+								text={title}
+								onClick={onWindowOpen(id)}
+								labelElement={<Label />}
+							/>
+						);
+					})}
 				</Menu>
 			</Popover>
 			{windowsArray.map(({ id, status }) => {

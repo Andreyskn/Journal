@@ -6,6 +6,7 @@ type BaseFile = {
 	name: string;
 	lastModifiedAt: Timestamp;
 	path: Path;
+	isTrashed: boolean;
 };
 
 declare global {
@@ -30,7 +31,15 @@ declare global {
 		type TaggedRegularFile = TaggedRecord<RegularFile, 'file'>;
 		type ImmutableRegularFile = ImmutableRecord<TaggedRegularFile>;
 
-		type File = RegularFile | Directory;
+		type Symlink = BaseFile & {
+			type: 'symlink';
+			data: File['id'];
+			parent: Directory['id'];
+		};
+		type TaggedSymlink = TaggedRecord<Symlink, 'file'>;
+		type ImmutableSymlink = ImmutableRecord<TaggedSymlink>;
+
+		type File = RegularFile | Directory | Symlink;
 		type TaggedFile = TaggedRecord<File, 'file'>;
 		type ImmutableFile = ImmutableRecord<TaggedFile>;
 

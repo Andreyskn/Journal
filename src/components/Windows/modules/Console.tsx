@@ -10,7 +10,7 @@ const windowModule: App.WindowModule = {
 	title: 'Console',
 	Content: Console,
 	menuEntry: {
-		order: 1,
+		order: 2,
 	},
 };
 

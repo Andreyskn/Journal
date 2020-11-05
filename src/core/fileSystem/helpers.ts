@@ -11,6 +11,7 @@ export const createFileRecord = Immutable.Record<App.TaggedFile>({
 	path: '',
 	parent: null,
 	type: 'directory',
+	isTrashed: false,
 	data: Immutable.OrderedMap(),
 });
 
@@ -41,6 +42,23 @@ export const createFile = ({
 }: Pick<App.RegularFile, 'type' | 'name' | 'path' | 'data' | 'parent'>) => {
 	return createFileRecord({
 		type,
+		name,
+		path,
+		parent,
+		data,
+		id: generateId(),
+		lastModifiedAt: Date.now(),
+	});
+};
+
+export const createSymlink = ({
+	name,
+	path,
+	parent,
+	data,
+}: Pick<App.RegularFile, 'name' | 'path' | 'data' | 'parent'>) => {
+	return createFileRecord({
+		type: 'symlink',
 		name,
 		path,
 		parent,
@@ -86,11 +104,21 @@ export const getFileType = (name: string): App.File['type'] => {
 
 export const isDirectory = (
 	file: App.ImmutableFile
-): file is App.ImmutableDirectory => file.type === 'directory';
+): file is App.ImmutableDirectory => {
+	return file.type === 'directory';
+};
 
 export const isRegularFile = (
 	file: App.ImmutableFile
-): file is App.ImmutableRegularFile => file.type !== 'directory';
+): file is App.ImmutableRegularFile => {
+	return file.type !== 'directory' && file.type !== 'symlink';
+};
+
+export const isSymlink = (
+	file: App.ImmutableFile
+): file is App.ImmutableSymlink => {
+	return file.type === 'symlink';
+};
 
 export const getFilePath = (
 	files: App.FileSystemState['files'],

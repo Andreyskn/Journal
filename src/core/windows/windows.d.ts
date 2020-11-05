@@ -29,6 +29,7 @@ declare global {
 			Content: React.FC;
 			menuEntry?: {
 				order: number;
+				Label?: React.FC;
 			};
 		};
 

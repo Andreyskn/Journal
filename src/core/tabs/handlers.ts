@@ -1,4 +1,5 @@
 import * as helpers from './helpers';
+import * as fs from '../fileSystem';
 import { mutations } from '../mutations';
 
 mutations
@@ -11,13 +12,9 @@ mutations
 	.on({
 		type: 'FILE_UPDATED',
 		act: ({ state, file }) => {
-			updateTab(state, { file });
-		},
-	})
-	.on({
-		type: 'FILE_DELETED',
-		act: ({ state, file }) => {
-			closeTab(state, { id: file.id });
+			file.isTrashed
+				? closeTab(state, { id: file.id })
+				: updateTab(state, { file });
 		},
 	})
 	.on({
@@ -31,7 +28,7 @@ const createTab: App.Handler<{ file: App.ImmutableFile }> = (
 	state,
 	{ file }
 ) => {
-	if (file.type === 'directory' || state.tabs.get(file.id)) return state;
+	if (!fs.isRegularFile(file) || state.tabs.get(file.id)) return state;
 
 	const { id, name, type, path } = file as App.RegularFile;
 

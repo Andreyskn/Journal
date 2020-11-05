@@ -1,4 +1,7 @@
 import React, { RefObject, useMemo, useRef } from 'react';
+
+import './window-manager.scss';
+
 import { useDispatch, useSelector } from '../../core';
 import { Window, WindowProps } from './Window/Window';
 import { windowRegistry } from './registry';
@@ -42,6 +45,7 @@ export const WindowManager: React.FC = () => {
 					const isMaximized = status === 'maximized';
 					const ref = refs[id];
 
+					// TODO: save rect only on minimize/maximize/close (avoid excessive store writes)
 					const onReposition: WindowProps['onReposition'] = (
 						position
 					) => {
@@ -70,10 +74,11 @@ export const WindowManager: React.FC = () => {
 					};
 
 					const onContainerMouseDown = () => {
-						ref.current!.style.zIndex = '99';
+						ref.current!.classList.add('top-window');
 					};
 
 					const onContainerClick = () => {
+						ref.current!.classList.remove('top-window');
 						if (topWindow !== id) {
 							dispatch.windows.bringToFront({ id });
 						}

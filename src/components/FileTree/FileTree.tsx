@@ -119,7 +119,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 			});
 		};
 
-		const onDelete = () => dispatch.fs.deleteFile({ id: node.id });
+		const onDelete = () => dispatch.fs.moveToTrash({ id: node.id });
 
 		const onMove = (target: App.Directory['id']) => () => {
 			new Promise<boolean>((resolve) => {
