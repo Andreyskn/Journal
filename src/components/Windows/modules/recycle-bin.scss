@@ -1,0 +1,58 @@
+.recycle {
+	display: flex;
+	flex-direction: column;
+
+	height: 100%;
+
+	&__body {
+		overflow: auto;
+
+		flex-grow: 1;
+	}
+
+	&__footer {
+		display: flex;
+
+		padding: 5px 10px;
+
+		justify-content: flex-end;
+	}
+}
+
+.recycle-item {
+	display: flex;
+
+	padding: 5px 10px;
+
+	align-items: center;
+
+	&__icon {
+		margin-right: 10px;
+	}
+
+	&__info {
+		overflow: hidden;
+		flex: 1;
+
+		margin-right: 10px;
+
+		white-space: nowrap;
+		text-overflow: ellipsis;
+
+		&--secondary {
+			font-size: 13px;
+		}
+
+		> span {
+			margin-right: 5px;
+
+			opacity: 0.5;
+
+			font-size: 12px;
+		}
+	}
+
+	&__controls {
+		flex-shrink: 0;
+	}
+}

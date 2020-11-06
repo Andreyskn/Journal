@@ -85,3 +85,7 @@ export const toViewportUnits = (
 		(value / (axis === 'x' ? window.innerWidth : window.innerHeight)) * 100
 	);
 };
+
+export const pluralize = (singular: string, count: number) => {
+	return count === 1 ? singular : `${singular}s`;
+};

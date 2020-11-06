@@ -6,9 +6,9 @@ export const createWindow = Immutable.Record<App.TaggedWindow>({
 	_tag: 'window',
 	id: '',
 	position: defaultPosition,
-	width: 400,
+	width: 600,
 	height: 300,
-	status: 'closed',
+	status: process.env.NODE_ENV === 'development' ? 'minimized' : 'closed',
 });
 
 export const isDefaultPositions = (w1: App.Window, w2: App.Window) => {

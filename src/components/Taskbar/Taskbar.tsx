@@ -75,7 +75,7 @@ export const Taskbar: React.FC = () => {
 				const onClick = () => {
 					isActive
 						? dispatch.windows.minimize({ id })
-						: dispatch.windows.bringToFront({ id });
+						: dispatch.windows.open({ id });
 				};
 
 				return (

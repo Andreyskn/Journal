@@ -108,16 +108,16 @@ export const isDirectory = (
 	return file.type === 'directory';
 };
 
-export const isRegularFile = (
-	file: App.ImmutableFile
-): file is App.ImmutableRegularFile => {
-	return file.type !== 'directory' && file.type !== 'symlink';
-};
-
 export const isSymlink = (
 	file: App.ImmutableFile
 ): file is App.ImmutableSymlink => {
 	return file.type === 'symlink';
+};
+
+export const isRegularFile = (
+	file: App.ImmutableFile
+): file is App.ImmutableRegularFile => {
+	return !isDirectory(file) && !isSymlink(file);
 };
 
 export const getFilePath = (
@@ -142,4 +142,12 @@ export const getFilePathById = (
 ) => {
 	const { name, parent } = files.get(fileId)!;
 	return getFilePath(files, name, parent);
+};
+
+export const trashFileName = (name: App.File['name'], id: App.File['id']) => {
+	return `${name}__TRASHED__${id}__`;
+};
+
+export const sanitizeFileName = (name: string) => {
+	return name.replace(/__TRASHED__[^__]+__/g, '');
 };

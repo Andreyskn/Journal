@@ -98,28 +98,38 @@ const createUntitledFile: App.Handler<{ type: App.RegularFile['type'] }> = (
 const deleteFile: App.Handler<{
 	id: App.File['id'];
 }> = (state, { id }) => {
-	const targetFile = state.files.get(id)!;
+	const target = state.files.get(id);
+
+	if (!target) return state;
 
 	return state.withMutations((state) => {
-		if (helpers.isDirectory(targetFile)) {
-			targetFile.data.forEach((id) => deleteFile(state, { id }));
-		} else {
+		if (helpers.isDirectory(target)) {
+			target.data.forEach((id) => deleteFile(state, { id }));
+		} else if (helpers.isRegularFile(target)) {
 			state.update('data', (data) =>
-				data.delete((targetFile as App.RegularFile).data)
+				data.delete((target as App.RegularFile).data)
 			);
 		}
 
 		state.updateIn(
-			['files', targetFile.parent, 'data'],
-			(data: App.Directory['data']) => data.delete(targetFile.name)
+			['files', target.parent, 'data'],
+			(data: App.Directory['data']) => data.delete(target.name)
 		);
 
 		state.update('files', (files) => files.delete(id));
 
 		mutations.dispatch({
 			type: 'FILE_DELETED',
-			payload: { state, file: targetFile },
+			payload: { state, file: target },
 		});
+	});
+};
+
+const deleteMultipleFiles: App.Handler<{
+	ids: App.File['id'][];
+}> = (state, { ids }) => {
+	return state.withMutations((state) => {
+		ids.forEach((id) => deleteFile(state, { id }));
 	});
 };
 
@@ -128,7 +138,7 @@ const updateFile: App.Handler<{
 	newName?: App.File['name'];
 	newParent?: App.File['parent'];
 	isTrashed?: boolean;
-}> = (state, { id, newName, newParent, isTrashed = false }) => {
+}> = (state, { id, newName, newParent, isTrashed }) => {
 	const file: App.ImmutableFile = state.getIn(['files', id]);
 	const name = newName || file.name;
 	const parent = newParent || file.parent;
@@ -138,14 +148,14 @@ const updateFile: App.Handler<{
 			.set('parent', parent)
 			.set('path', helpers.getFilePath(state.files, name, parent))
 			.set('lastModifiedAt', Date.now())
-			.set('isTrashed', isTrashed);
+			.set('isTrashed', isTrashed ?? file.isTrashed);
 	});
 
 	return state.withMutations((state) => {
 		(state as any).setIn(['files', id], updatedFile);
 
 		if (helpers.isDirectory(file)) {
-			file.data.forEach((id) => updateFile(state, { id, isTrashed }));
+			file.data.forEach((id) => updateFile(state, { id }));
 		}
 
 		mutations.dispatch({
@@ -166,7 +176,8 @@ const moveFile: App.Handler<{
 	id: App.File['id'];
 	newName?: string;
 	newParent?: App.File['parent'];
-}> = (state, { id, newName, newParent }) => {
+	isTrashed?: boolean;
+}> = (state, { id, newName, newParent, isTrashed }) => {
 	const file = state.files.get(id)!;
 
 	return state.withMutations((state) => {
@@ -175,7 +186,7 @@ const moveFile: App.Handler<{
 			(data: App.Directory['data']) => data.delete(file.name)
 		);
 
-		updateFile(state, { id, newName, newParent });
+		updateFile(state, { id, newName, newParent, isTrashed });
 
 		const updatedFile = state.files.get(id)!;
 		const { name, parent } = updatedFile;
@@ -194,13 +205,36 @@ const moveToTrash: App.Handler<{
 	id: App.File['id'];
 }> = (state, { id }) => {
 	const { name } = state.files.get(id)!;
+	const trashName = helpers.trashFileName(name, id);
 
 	return state.withMutations((state) => {
-		updateFile(state, { id, isTrashed: true });
+		moveFile(state, {
+			id,
+			newName: trashName,
+			isTrashed: true,
+		});
 		createFile(state, {
-			name: name,
+			name: trashName,
 			parent: DIRECTORY_ID.trash,
 			symlink: id,
+		});
+	});
+};
+
+const restoreFile: App.Handler<{
+	id: App.File['id'];
+}> = (state, { id }) => {
+	const target = state.files.get(id);
+	// TODO: remove checks like this if possible
+	if (!target) return state;
+
+	const sanitizedName = helpers.sanitizeFileName(target.name);
+
+	return state.withMutations((state) => {
+		moveFile(state, {
+			id,
+			newName: sanitizedName,
+			isTrashed: false,
 		});
 	});
 };
@@ -243,7 +277,9 @@ export const handlers = {
 	'@fs/createFile': createFile,
 	'@fs/createUntitledFile': createUntitledFile,
 	'@fs/deleteFile': deleteFile,
+	'@fs/deleteMultipleFiles': deleteMultipleFiles,
 	'@fs/moveToTrash': moveToTrash,
+	'@fs/restoreFile': restoreFile,
 	'@fs/renameFile': renameFile,
 	'@fs/moveFile': moveFile,
 	'@fs/setActiveFile': setActiveFile,

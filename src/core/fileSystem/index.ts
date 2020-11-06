@@ -12,4 +12,5 @@ export {
 	getFilePathById,
 	createFileRecord,
 	isRegularFile,
+	sanitizeFileName,
 } from './helpers';
