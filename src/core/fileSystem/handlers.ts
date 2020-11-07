@@ -1,7 +1,7 @@
 import * as helpers from './helpers';
 import { generateId } from '../../utils';
-import { DIRECTORY_ID, UNTITLED } from './constants';
-import { mutations, Mutations } from '../mutations';
+import { DIRECTORY_ID, SEP, UNTITLED } from './constants';
+import { mutations } from '../mutations';
 import { PLUGINS_MAP } from '../../plugins';
 
 mutations
@@ -97,14 +97,17 @@ const createUntitledFile: App.Handler<{ type: App.RegularFile['type'] }> = (
 
 const deleteFile: App.Handler<{
 	id: App.File['id'];
-}> = (state, { id }) => {
-	const target = state.files.get(id);
+	isRecursiveCall?: boolean;
+}> = (state, { id, isRecursiveCall }) => {
+	const target = state.files.get(id)!;
 
-	if (!target) return state;
+	if (isRecursiveCall && target.isTrashed) return state;
 
 	return state.withMutations((state) => {
 		if (helpers.isDirectory(target)) {
-			target.data.forEach((id) => deleteFile(state, { id }));
+			target.data.forEach((id) =>
+				deleteFile(state, { id, isRecursiveCall: true })
+			);
 		} else if (helpers.isRegularFile(target)) {
 			state.update('data', (data) =>
 				data.delete((target as App.RegularFile).data)
@@ -183,7 +186,7 @@ const moveFile: App.Handler<{
 	return state.withMutations((state) => {
 		(state as any).updateIn(
 			['files', file.parent, 'data'],
-			(data: App.Directory['data']) => data.delete(file.name)
+			(data: App.Directory['data']) => data?.delete(file.name)
 		);
 
 		updateFile(state, { id, newName, newParent, isTrashed });
@@ -224,16 +227,37 @@ const moveToTrash: App.Handler<{
 const restoreFile: App.Handler<{
 	id: App.File['id'];
 }> = (state, { id }) => {
-	const target = state.files.get(id);
-	// TODO: remove checks like this if possible
-	if (!target) return state;
-
+	const target = state.files.get(id)!;
 	const sanitizedName = helpers.sanitizeFileName(target.name);
 
 	return state.withMutations((state) => {
+		const ancestorDirectories = helpers
+			.sanitizeFileName(target.path)
+			.split(SEP)
+			.slice(2, -1); // ['', 'main', ..., fileName]
+
+		// restore whole file path if some directories were deleted
+		const parentId = ancestorDirectories.reduce((parentId, targetName) => {
+			const parent = state.files.get(parentId) as App.ImmutableDirectory;
+			let targetId = parent.data.get(targetName);
+
+			if (!targetId) {
+				mutations.once({
+					type: 'FILE_CREATED',
+					act: ({ file }) => {
+						targetId = file.id;
+					},
+				});
+				createFile(state, { name: targetName, parent: parentId });
+			}
+
+			return targetId!;
+		}, DIRECTORY_ID.main);
+
 		moveFile(state, {
 			id,
 			newName: sanitizedName,
+			newParent: parentId,
 			isTrashed: false,
 		});
 	});

@@ -12,7 +12,7 @@ mutations
 	.on({
 		type: 'FILE_UPDATED',
 		act: ({ state, file }) => {
-			file.isTrashed
+			fs.isTrashed(file)
 				? closeTab(state, { id: file.id })
 				: updateTab(state, { file });
 		},

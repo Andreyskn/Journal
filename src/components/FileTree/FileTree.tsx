@@ -22,7 +22,13 @@ import {
 } from './useTree';
 import { classes as fileTreeClasses, NodeEditorData } from './common';
 import { NodeEditorProps } from './NodeEditor';
-import { DIRECTORY_ID, getFilePath, PATHS, SEP } from '../../core/fileSystem';
+import {
+	DIRECTORY_ID,
+	getFilePath,
+	getMainRelativePath,
+	PATHS,
+	SEP,
+} from '../../core/fileSystem';
 import { useAppContext } from '../context';
 
 const explorerClasses = bem('file-explorer', [
@@ -163,10 +169,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 			.map((folderNode) => {
 				const label = folderNode.label || 'Root';
 				const path =
-					folderNode.nodeData.path.replace(
-						`${SEP}${DIRECTORY_ID.main}`,
-						''
-					) || SEP;
+					getMainRelativePath(folderNode.nodeData.path) || SEP;
 				return { label, path, id: folderNode.id };
 			});
 

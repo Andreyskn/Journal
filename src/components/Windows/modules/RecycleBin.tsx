@@ -4,7 +4,12 @@ import './recycle-bin.scss';
 
 import { Button, ButtonGroup, Card, Icon } from '@blueprintjs/core';
 import { useDispatch, useSelector } from '../../../core';
-import { DIRECTORY_ID, sanitizeFileName, SEP } from '../../../core/fileSystem';
+import {
+	DIRECTORY_ID,
+	getMainRelativePath,
+	sanitizeFileName,
+	SEP,
+} from '../../../core/fileSystem';
 import { bem, pluralize } from '../../../utils';
 import { PLUGINS_MAP } from '../../../plugins';
 
@@ -20,7 +25,7 @@ const months = [
 	'Jun',
 	'Jul',
 	'Aug',
-	'Sept',
+	'Sep',
 	'Oct',
 	'Nov',
 	'Dec',
@@ -124,7 +129,7 @@ const RecycleBin: React.FC = () => {
 								})}
 							>
 								<span>path:</span>
-								{path.replace(`${SEP}${DIRECTORY_ID.main}`, '')}
+								{getMainRelativePath(path)}
 							</div>
 							<div
 								className={itemClasses.infoElement({

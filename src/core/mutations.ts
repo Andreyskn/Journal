@@ -1,6 +1,6 @@
 import Events from 'events';
 
-export type Mutations = {
+type Mutations = {
 	FILE_CREATED: { state: App.ImmutableAppState; file: App.ImmutableFile };
 	FILE_DELETED: { state: App.ImmutableAppState; file: App.ImmutableFile };
 	FILE_UPDATED: { state: App.ImmutableAppState; file: App.ImmutableFile };
@@ -22,6 +22,7 @@ type Listener = {
 type EventEmitter = {
 	dispatch: (event: Event) => void;
 	on: (listener: Listener) => EventEmitter;
+	once: (listener: Listener) => EventEmitter;
 };
 
 const eventEmitter = new Events.EventEmitter();
@@ -32,6 +33,10 @@ export const mutations: EventEmitter = {
 	},
 	on: ({ type, act }) => {
 		eventEmitter.on(type, act);
+		return mutations;
+	},
+	once: ({ type, act }) => {
+		eventEmitter.once(type, act);
 		return mutations;
 	},
 };

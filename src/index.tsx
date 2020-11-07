@@ -10,14 +10,16 @@ import { FocusStyleManager, Toaster, Intent } from '@blueprintjs/core';
 import { initStore } from './core';
 import { App } from './components/App';
 
-const onClear = () => {
-	clear().then(() => document.location.reload());
-};
-
 if (process.env.NODE_ENV === 'development') {
+	const onClear = () => {
+		clear().then(() => document.location.reload());
+	};
+
+	const toast = Toaster.create();
+
 	window.onerror = (message) => {
 		setTimeout(() => {
-			Toaster.create().show({
+			toast.show({
 				message,
 				icon: 'error',
 				intent: Intent.DANGER,

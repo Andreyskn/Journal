@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
 import { generateId } from '../../utils';
 import { TYPE_BY_EXTENSION } from '../../plugins';
-import { SEP } from './constants';
+import { DIRECTORY_ID, SEP } from './constants';
 
 export const createFileRecord = Immutable.Record<App.TaggedFile>({
 	_tag: 'file',
@@ -148,6 +148,16 @@ export const trashFileName = (name: App.File['name'], id: App.File['id']) => {
 	return `${name}__TRASHED__${id}__`;
 };
 
+const TRASHED_RE = /__TRASHED__[^__]+__/g;
+
 export const sanitizeFileName = (name: string) => {
-	return name.replace(/__TRASHED__[^__]+__/g, '');
+	return name.replace(TRASHED_RE, '');
+};
+
+export const isTrashed = (file: App.ImmutableFile) => {
+	return file.isTrashed || TRASHED_RE.test(file.path);
+};
+
+export const getMainRelativePath = (path: App.File['path']) => {
+	return path.replace(`${SEP}${DIRECTORY_ID.main}`, '');
 };

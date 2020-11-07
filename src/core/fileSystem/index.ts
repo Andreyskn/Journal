@@ -13,4 +13,6 @@ export {
 	createFileRecord,
 	isRegularFile,
 	sanitizeFileName,
+	getMainRelativePath,
+	isTrashed,
 } from './helpers';
