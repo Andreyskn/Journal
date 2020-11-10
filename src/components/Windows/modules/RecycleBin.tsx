@@ -7,11 +7,12 @@ import { useDispatch, useSelector } from '../../../core';
 import {
 	DIRECTORY_ID,
 	getMainRelativePath,
+	isDirectory,
 	sanitizeFileName,
-	SEP,
 } from '../../../core/fileSystem';
 import { bem, pluralize } from '../../../utils';
 import { PLUGINS_MAP } from '../../../plugins';
+import { useAppContext } from '../../context';
 
 const containerClasses = bem('recycle', ['body', 'footer'] as const);
 const itemClasses = bem('recycle-item', ['icon', 'info', 'controls'] as const);
@@ -44,8 +45,10 @@ const getDate = (timestamp: Timestamp) => {
 
 type TrashItem = {
 	symlinkId: App.Symlink['id'];
-	targetId: App.File['id'];
-} & Pick<App.File, 'name' | 'type' | 'path' | 'lastModifiedAt'>;
+	target: App.ImmutableFile;
+	sanitizedName: App.File['name'];
+	sanitizedPath: App.File['path'];
+};
 
 const RecycleBin: React.FC = () => {
 	const { trash, files } = useSelector((state) => ({
@@ -53,49 +56,77 @@ const RecycleBin: React.FC = () => {
 		files: state.files,
 	}));
 	const { dispatch } = useDispatch();
+	const { showAlert } = useAppContext();
 
 	const trashArray = useMemo(() => {
 		return Array.from(trash.values())
 			.map(
 				(symlinkId): TrashItem => {
-					const { id, name, type, path, lastModifiedAt } = files.get(
+					const target = files.get(
 						(files.get(symlinkId) as App.Symlink).data
 					)!;
 
 					return {
 						symlinkId,
-						targetId: id,
-						name: sanitizeFileName(name),
-						path: sanitizeFileName(path),
-						type,
-						lastModifiedAt,
+						target: target,
+						sanitizedName: sanitizeFileName(target.name),
+						sanitizedPath: sanitizeFileName(target.path),
 					};
 				}
 			)
-			.sort((a, b) => b.lastModifiedAt - a.lastModifiedAt);
+			.sort((a, b) => b.target.lastModifiedAt - a.target.lastModifiedAt);
 	}, [trash]);
 
 	const onDelete = (
 		symlinkId: App.Symlink['id'],
 		targetId: App.File['id']
 	) => () => {
+		// TODO: show confirmation dialog
 		dispatch.fs.deleteMultipleFiles({ ids: [symlinkId, targetId] });
 	};
 
 	const onRestore = (
 		symlinkId: App.Symlink['id'],
-		targetId: App.File['id']
+		target: App.ImmutableFile,
+		sanitizedName: App.File['name']
 	) => () => {
-		// TODO: single dispatch
-		dispatch.fs.deleteFile({ id: symlinkId });
-		dispatch.fs.restoreFile({ id: targetId });
+		// TODO: same code is used in FileTree, consider abstracting out
+		new Promise<boolean>((resolve) => {
+			const targetData = (files.get(target.parent!) as App.Directory)
+				.data;
+			const hasNameCollision = targetData.has(sanitizedName);
+
+			if (!hasNameCollision) return resolve(true);
+
+			showAlert({
+				icon: 'warning-sign',
+				confirmButtonText: 'Replace',
+				cancelButtonText: 'Cancel',
+				intent: 'warning',
+				content: (
+					<p>
+						A {isDirectory(target) ? 'folder' : 'file'} with the
+						name <b>{sanitizedName}</b> already exists in the
+						destination folder. Do you want to replace it?
+					</p>
+				),
+				onConfirm: () => resolve(true),
+				onCancel: () => resolve(false),
+			});
+		}).then((confirm) => {
+			if (!confirm) return;
+			// TODO: single dispatch
+			dispatch.fs.deleteFile({ id: symlinkId });
+			dispatch.fs.restoreFile({ id: target.id });
+		});
 	};
 
 	const onClear = () => {
+		// TODO: show confirmation dialog
 		dispatch.fs.deleteMultipleFiles({
-			ids: trashArray.flatMap(({ symlinkId, targetId }) => [
+			ids: trashArray.flatMap(({ symlinkId, target }) => [
 				symlinkId,
-				targetId,
+				target.id,
 			]),
 		});
 	};
@@ -104,24 +135,20 @@ const RecycleBin: React.FC = () => {
 		<div className={containerClasses.recycleBlock()}>
 			<div className={containerClasses.bodyElement()}>
 				{trashArray.map(
-					({
-						symlinkId,
-						targetId,
-						name,
-						type,
-						path,
-						lastModifiedAt,
-					}) => (
+					({ symlinkId, target, sanitizedName, sanitizedPath }) => (
 						<Card
 							className={itemClasses.recycleItemBlock()}
-							key={targetId}
+							key={symlinkId}
 						>
 							<Icon
 								className={itemClasses.iconElement()}
-								icon={PLUGINS_MAP[type]?.icon || 'folder-close'}
+								icon={
+									PLUGINS_MAP[target.type]?.icon ||
+									'folder-close'
+								}
 							/>
 							<div className={itemClasses.infoElement()}>
-								{name}
+								{sanitizedName}
 							</div>
 							<div
 								className={itemClasses.infoElement({
@@ -129,7 +156,7 @@ const RecycleBin: React.FC = () => {
 								})}
 							>
 								<span>path:</span>
-								{getMainRelativePath(path)}
+								{getMainRelativePath(sanitizedPath)}
 							</div>
 							<div
 								className={itemClasses.infoElement({
@@ -137,19 +164,23 @@ const RecycleBin: React.FC = () => {
 								})}
 							>
 								<span>deleted:</span>
-								{getDate(lastModifiedAt)}
+								{getDate(target.lastModifiedAt)}
 							</div>
 							<ButtonGroup
 								className={itemClasses.controlsElement()}
 							>
 								<Button
-									onClick={onRestore(symlinkId, targetId)}
+									onClick={onRestore(
+										symlinkId,
+										target,
+										sanitizedName
+									)}
 									icon='undo'
 									title='Restore'
 								/>
 								<Button
 									intent='danger'
-									onClick={onDelete(symlinkId, targetId)}
+									onClick={onDelete(symlinkId, target.id)}
 									icon='delete'
 									title='Delete'
 								/>

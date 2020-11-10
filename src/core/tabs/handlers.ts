@@ -18,6 +18,12 @@ mutations
 		},
 	})
 	.on({
+		type: 'FILE_DELETED',
+		act: ({ state, file }) => {
+			closeTab(state, { id: file.id });
+		},
+	})
+	.on({
 		type: 'FILE_SELECTED',
 		act: ({ state, file }) => {
 			createTab(state, { file });

@@ -159,5 +159,5 @@ export const isTrashed = (file: App.ImmutableFile) => {
 };
 
 export const getMainRelativePath = (path: App.File['path']) => {
-	return path.replace(`${SEP}${DIRECTORY_ID.main}`, '');
+	return path.replace(`${SEP}${DIRECTORY_ID.main}`, '') || SEP;
 };

@@ -20,6 +20,14 @@ mutations
 		},
 	})
 	.on({
+		type: 'FILE_DELETED',
+		act: ({ state, file: { id } }) => {
+			if (id === state.activeFile.ref?.id) {
+				setActiveFile(state, { id: null });
+			}
+		},
+	})
+	.on({
 		type: 'FILE_UPDATED',
 		act: ({ state, file: { id, isTrashed } }) => {
 			if (id === state.activeFile.ref?.id) {
@@ -234,7 +242,7 @@ const restoreFile: App.Handler<{
 		const ancestorDirectories = helpers
 			.sanitizeFileName(target.path)
 			.split(SEP)
-			.slice(2, -1); // ['', 'main', ..., fileName]
+			.slice(2, -1); // ['', 'main', ..., target.name]
 
 		// restore whole file path if some directories were deleted
 		const parentId = ancestorDirectories.reduce((parentId, targetName) => {

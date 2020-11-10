@@ -27,7 +27,6 @@ import {
 	getFilePath,
 	getMainRelativePath,
 	PATHS,
-	SEP,
 } from '../../core/fileSystem';
 import { useAppContext } from '../context';
 
@@ -168,8 +167,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 			.sort((a, b) => a.nodeData.path.localeCompare(b.nodeData.path))
 			.map((folderNode) => {
 				const label = folderNode.label || 'Root';
-				const path =
-					getMainRelativePath(folderNode.nodeData.path) || SEP;
+				const path = getMainRelativePath(folderNode.nodeData.path);
 				return { label, path, id: folderNode.id };
 			});
 
