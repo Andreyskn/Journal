@@ -1,5 +1,4 @@
-import * as helpers from './helpers';
-import { generateId } from '../../utils';
+import * as fs from './helpers';
 import { DIRECTORY_ID, SEP, UNTITLED } from './constants';
 import { mutations } from '../mutations';
 import { PLUGINS_MAP } from '../../plugins';
@@ -14,7 +13,7 @@ mutations
 	.on({
 		type: 'FILE_CREATED',
 		act: ({ state, file }) => {
-			if (helpers.isRegularFile(file)) {
+			if (fs.isRegularFile(file)) {
 				setActiveFile(state, { id: file.id });
 			}
 		},
@@ -36,44 +35,95 @@ mutations
 		},
 	});
 
-const createFile: App.Handler<{
-	name: App.File['name'];
-	parent: App.RegularFile['parent'];
-	symlink?: App.File['id'];
-}> = (state, { name, parent, symlink }) => {
-	return state.withMutations((state) => {
-		let newFile: App.ImmutableFile;
-		const type = helpers.getFileType(name);
-		const path = helpers.getFilePath(state.files, name, parent);
-
-		if (symlink) {
-			newFile = helpers.createSymlink({
-				data: symlink,
-				name,
-				parent,
-				path,
-			});
-		} else if (type === 'directory') {
-			newFile = helpers.createDirectory({ name, parent, path });
-		} else {
-			const fileData: App.FileData = {
-				id: generateId(),
-				state: null,
-			};
-
-			newFile = helpers.createFile({
-				name,
-				path,
-				type,
-				parent,
-				data: fileData.id,
-			});
-
-			state.update('data', (data) => data.set(fileData.id, fileData));
+interface CreateFile {
+	(
+		state: App.ImmutableAppState,
+		payload: {
+			name: App.Directory['name'];
+			type: App.Directory['type'];
+			parent: App.Directory['parent'];
 		}
+	): App.ImmutableAppState;
+	(
+		state: App.ImmutableAppState,
+		payload: {
+			name: App.Symlink['name'];
+			type: App.Symlink['type'];
+			parent: App.Symlink['parent'];
+			data: App.Symlink['data'];
+		}
+	): App.ImmutableAppState;
+	(
+		state: App.ImmutableAppState,
+		payload: {
+			name: App.RegularFile['name'];
+			type: App.RegularFile['type'];
+			parent: App.RegularFile['parent'];
+			data?: App.FileData;
+		}
+	): App.ImmutableAppState;
+	(
+		state: App.ImmutableAppState,
+		payload: {
+			name: App.File['name'];
+			type: App.File['type'];
+			parent: App.File['parent'];
+			data?: App.Symlink['data'] | App.FileData;
+		}
+	): App.ImmutableAppState;
+}
+
+const createFile: CreateFile = (
+	state: App.ImmutableAppState,
+	{
+		name,
+		type,
+		parent,
+		data,
+	}: {
+		name: App.File['name'];
+		type: App.File['type'];
+		parent: App.File['parent'];
+		data?: App.Symlink['data'] | App.FileData;
+	}
+) => {
+	return state.withMutations((state) => {
+		const path = fs.getFilePath(state.files, name, parent);
+
+		const newFile = ((): App.ImmutableFile => {
+			switch (type) {
+				case 'directory': {
+					return fs.createDirectory({ name, parent, path });
+				}
+				case 'symlink': {
+					return fs.createSymlink({
+						data: data as App.Symlink['data'],
+						name,
+						parent,
+						path,
+					});
+				}
+				default: {
+					const fileData =
+						(data as Maybe<App.FileData>) || fs.createFileData();
+
+					state.update('data', (data) =>
+						data.set(fileData.id, fileData)
+					);
+
+					return fs.createFile({
+						name,
+						path,
+						type: type as App.RegularFile['type'],
+						parent,
+						data: fileData.id,
+					});
+				}
+			}
+		})();
 
 		state.update('files', (files) => files.set(newFile.id, newFile));
-		helpers.setDirectoryData(state, parent, newFile);
+		fs.setDirectoryData(state, parent, newFile);
 
 		mutations.dispatch({
 			type: 'FILE_CREATED',
@@ -100,7 +150,7 @@ const createUntitledFile: App.Handler<{ type: App.RegularFile['type'] }> = (
 		name = `${UNTITLED}_${i}${extension}`;
 	}
 
-	return createFile(state, { name, parent: DIRECTORY_ID.main });
+	return createFile(state, { name, type, parent: DIRECTORY_ID.main });
 };
 
 const deleteFile: App.Handler<{
@@ -112,11 +162,11 @@ const deleteFile: App.Handler<{
 	if (isRecursiveCall && target.isTrashed) return state;
 
 	return state.withMutations((state) => {
-		if (helpers.isDirectory(target)) {
+		if (fs.isDirectory(target)) {
 			target.data.forEach((id) =>
 				deleteFile(state, { id, isRecursiveCall: true })
 			);
-		} else if (helpers.isRegularFile(target)) {
+		} else if (fs.isRegularFile(target)) {
 			state.update('data', (data) =>
 				data.delete((target as App.RegularFile).data)
 			);
@@ -157,7 +207,7 @@ const updateFile: App.Handler<{
 	const updatedFile = file.withMutations((file) => {
 		file.set('name', name)
 			.set('parent', parent)
-			.set('path', helpers.getFilePath(state.files, name, parent))
+			.set('path', fs.getFilePath(state.files, name, parent))
 			.set('lastModifiedAt', Date.now())
 			.set('isTrashed', isTrashed ?? file.isTrashed);
 	});
@@ -165,7 +215,7 @@ const updateFile: App.Handler<{
 	return state.withMutations((state) => {
 		(state as any).setIn(['files', id], updatedFile);
 
-		if (helpers.isDirectory(file)) {
+		if (fs.isDirectory(file)) {
 			file.data.forEach((id) => updateFile(state, { id }));
 		}
 
@@ -204,11 +254,11 @@ const moveFile: App.Handler<{
 
 		// Replace file in case of name collision
 		const fileToReplace = (state.files.get(
-			parent!
+			parent
 		) as App.ImmutableDirectory).data.get(name);
 		if (fileToReplace) deleteFile(state, { id: fileToReplace });
 
-		helpers.setDirectoryData(state, parent, updatedFile);
+		fs.setDirectoryData(state, parent, updatedFile);
 	});
 };
 
@@ -216,7 +266,7 @@ const moveToTrash: App.Handler<{
 	id: App.File['id'];
 }> = (state, { id }) => {
 	const { name } = state.files.get(id)!;
-	const trashName = helpers.trashFileName(name, id);
+	const trashName = fs.trashFileName(name, id);
 
 	return state.withMutations((state) => {
 		moveFile(state, {
@@ -226,8 +276,9 @@ const moveToTrash: App.Handler<{
 		});
 		createFile(state, {
 			name: trashName,
+			type: 'symlink',
 			parent: DIRECTORY_ID.trash,
-			symlink: id,
+			data: id,
 		});
 	});
 };
@@ -236,10 +287,10 @@ const restoreFile: App.Handler<{
 	id: App.File['id'];
 }> = (state, { id }) => {
 	const target = state.files.get(id)!;
-	const sanitizedName = helpers.sanitizeFileName(target.name);
+	const sanitizedName = fs.sanitizeFileName(target.name);
 
 	return state.withMutations((state) => {
-		const ancestorDirectories = helpers
+		const ancestorDirectories = fs
 			.sanitizeFileName(target.path)
 			.split(SEP)
 			.slice(2, -1); // ['', 'main', ..., target.name]
@@ -256,7 +307,11 @@ const restoreFile: App.Handler<{
 						targetId = file.id;
 					},
 				});
-				createFile(state, { name: targetName, parent: parentId });
+				createFile(state, {
+					name: targetName,
+					parent: parentId,
+					type: 'directory',
+				});
 			}
 
 			return targetId!;
@@ -275,7 +330,7 @@ const setActiveFile: App.Handler<{
 	id: App.ActiveFileId;
 }> = (state, { id }) => {
 	if (!id) {
-		return state.set('activeFile', helpers.createActiveFile());
+		return state.set('activeFile', fs.createActiveFile());
 	}
 
 	return state.withMutations((state) => {
@@ -283,7 +338,7 @@ const setActiveFile: App.Handler<{
 
 		state.set(
 			'activeFile',
-			helpers.createActiveFile({
+			fs.createActiveFile({
 				ref: file,
 			})
 		);

@@ -1,6 +1,12 @@
 import { handlers } from './handlers';
 
 declare global {
+	namespace Plugin {
+		interface Registry {
+			TaskList: SetPlugin<'task-list', '.t'>;
+		}
+	}
+
 	namespace TaskList {
 		type Dispatch = Plugin.Dispatch<typeof handlers>;
 

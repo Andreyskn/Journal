@@ -1,6 +1,12 @@
 import { handlers } from './handlers';
 
 declare global {
+	namespace Plugin {
+		interface Registry {
+			Questions: SetPlugin<'questions', '.qa'>;
+		}
+	}
+
 	namespace Questions {
 		type Dispatch = Plugin.Dispatch<typeof handlers>;
 

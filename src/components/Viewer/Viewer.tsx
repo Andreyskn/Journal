@@ -107,10 +107,9 @@ const connectPlugin = ({ render, initState, handlers }: Plugin.LazyModule) => {
 
 		const onExport = () => {
 			// TODO: use browser.downloads
-			const text = `[${file.name}]::\n\n${PLUGINS_MAP[file.type].show(
-				state
-			)}`;
-			const url = URL.createObjectURL(new Blob([text]));
+			const url = URL.createObjectURL(
+				new Blob([PLUGINS_MAP[file.type].show(state)])
+			);
 			const a = document.createElement('a');
 			a.style.display = 'none';
 			a.href = url;
@@ -145,7 +144,7 @@ const pluginComponents = Object.fromEntries(
 	])
 ) as Readonly<
 	Record<
-		Plugin.Configuration['type'],
+		App.FileType,
 		React.LazyExoticComponent<ReturnType<typeof connectPlugin>['default']>
 	>
 >;

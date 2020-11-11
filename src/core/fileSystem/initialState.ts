@@ -1,6 +1,6 @@
 import Immutable from 'immutable';
 import { createActiveFile, createDirectory, createFileRecord } from './helpers';
-import { DIRECTORY_ID, ROOT_NAME, PATHS } from './constants';
+import { DIRECTORY_ID, PATHS } from './constants';
 
 const main = createDirectory({
 	id: DIRECTORY_ID.main,
@@ -25,7 +25,8 @@ const favorites = createDirectory({
 
 const root = createDirectory({
 	id: DIRECTORY_ID.root,
-	name: ROOT_NAME,
+	name: '',
+	parent: DIRECTORY_ID.root,
 	data: Immutable.OrderedMap([
 		[main.name, main.id],
 		[trash.name, trash.id],

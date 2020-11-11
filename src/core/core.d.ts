@@ -9,14 +9,14 @@ declare global {
 
 		type AppAction = TabsAction | FileSystemAction | PersistanceAction;
 
-		type Dispatch<A extends AnyAction = AppAction> =
+		type BaseDispatch<A extends AnyAction = AppAction> =
 			| ReduxDispatch<A>
 			| ReactDispatch<A>;
 
 		type Dispatcher<
 			T extends any[] = undefined[],
 			A extends AnyAction = AppAction
-		> = (deps: { dispatch: Dispatch<A> }) => (...args: T) => void;
+		> = (deps: { dispatch: BaseDispatch<A> }) => (...args: T) => void;
 
 		type DispatcherMap<T extends Record<string, Dispatcher<any[], any>>> = {
 			[K in keyof T]: ReturnType<T[K]>;

@@ -5,6 +5,7 @@ type BaseFile = {
 	id: string;
 	name: string;
 	lastModifiedAt: Timestamp;
+	parent: string;
 	path: Path;
 	isTrashed: boolean;
 };
@@ -18,15 +19,13 @@ declare global {
 		type Directory = BaseFile & {
 			type: 'directory';
 			data: Immutable.OrderedMap<File['name'], File['id']>;
-			parent: Directory['id'] | null;
 		};
 		type TaggedDirectory = TaggedRecord<Directory, 'file'>;
 		type ImmutableDirectory = ImmutableRecord<TaggedDirectory>;
 
 		type RegularFile = BaseFile & {
-			type: string;
+			type: FileType;
 			data: FileData['id'];
-			parent: Directory['id'];
 		};
 		type TaggedRegularFile = TaggedRecord<RegularFile, 'file'>;
 		type ImmutableRegularFile = ImmutableRecord<TaggedRegularFile>;
@@ -34,7 +33,6 @@ declare global {
 		type Symlink = BaseFile & {
 			type: 'symlink';
 			data: File['id'];
-			parent: Directory['id'];
 		};
 		type TaggedSymlink = TaggedRecord<Symlink, 'file'>;
 		type ImmutableSymlink = ImmutableRecord<TaggedSymlink>;
@@ -43,8 +41,8 @@ declare global {
 		type TaggedFile = TaggedRecord<File, 'file'>;
 		type ImmutableFile = ImmutableRecord<TaggedFile>;
 
-		type FileType = string;
-		type FileExtension = string;
+		type FileType = Plugin.Type;
+		type FileExtension = Plugin.Extension;
 		type FileData = { id: string; state: unknown };
 
 		type ActiveFile = {

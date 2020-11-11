@@ -57,10 +57,10 @@ export const initPersistance = (store: App.Store) => {
 		});
 };
 
-const hydrateStore: App.Handler<{ savedState?: App.AppState }> = (
+const hydrateStore: App.Handler<{ savedState: App.AppState }> = (
 	state,
 	{ savedState }
-) => (savedState ? reviveState(savedState) : state);
+) => reviveState(savedState);
 
 export const persistanceHandlers = {
 	'@persistance/hydrateStore': hydrateStore,

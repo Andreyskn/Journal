@@ -47,7 +47,7 @@ export const useSelector = <T extends any>(
 type ActionHandlers = Record<string, App.Handler<any, any>>;
 
 type ActionCreator<T> = (
-	dispatch: Actions.Dispatch<any>
+	dispatch: Actions.BaseDispatch<any>
 ) => (payload: T) => void;
 
 type ActionCreators<T extends ActionHandlers> = {
@@ -60,7 +60,7 @@ type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
 	? I
 	: never;
 
-type EnhancedDispatch<T extends ActionHandlers> = UnionToIntersection<{
+type Dispatch<T extends ActionHandlers> = UnionToIntersection<{
 	[Key in keyof T as 0]: Key extends `@${infer Category}/${infer Name}`
 		? { [C in Category]: { [N in Name]: ReturnType<ActionCreators<T>[Key]> } }
 		: { [K in Key]: ReturnType<ActionCreators<T>[Key]>}
@@ -99,7 +99,7 @@ type ActionTypeRegexExec = OmitType<RegExpExecArray, 'groups'> & {
 };
 
 export const createDispatch = <T extends ActionCreators<any>>(
-	dispatch: Actions.Dispatch<any>,
+	dispatch: Actions.BaseDispatch<any>,
 	actionCreators: T
 ) =>
 	(Object.keys(actionCreators) as (keyof T)[]).reduce((result, type) => {
@@ -114,20 +114,21 @@ export const createDispatch = <T extends ActionCreators<any>>(
 		}
 
 		return result;
-	}, {} as AnyObject) as EnhancedDispatch<T>;
+	}, {} as AnyObject) as Dispatch<T>;
 
 type UseDispatchOptions = {
-	dispatch: Actions.Dispatch<any>;
+	dispatch: Actions.BaseDispatch<any>;
 	handlers: ActionHandlers;
 };
 
-export type CoreDispatch = EnhancedDispatch<typeof coreHandlers>
+// TODO: global type
+export type CoreDispatch = Dispatch<typeof coreHandlers>
 
 let coreDispatch: CoreDispatch;
 
 interface UseDispatch {
-	(): { dispatch: EnhancedDispatch<typeof coreHandlers> };
-	<T extends UseDispatchOptions>(options: T): { dispatch: EnhancedDispatch<T['handlers']> };
+	(): { dispatch: CoreDispatch };
+	<T extends UseDispatchOptions>(options: T): { dispatch: Dispatch<T['handlers']> };
 }
 
 export const useDispatch: UseDispatch = <
@@ -145,5 +146,5 @@ export const useDispatch: UseDispatch = <
 	return useMemo(
 		() => ({ dispatch: createDispatch(dispatch, getActionCreators(handlers)) }),
 		[]
-	) as EnhancedDispatch<T['handlers']> as any;
+	) as Dispatch<T['handlers']> as any;
 };

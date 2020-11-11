@@ -2,7 +2,17 @@ import { ReactNode } from 'react';
 
 declare global {
 	namespace Plugin {
-		type Initializer<S> = (prevState: Maybe<S>) => S;
+		interface Registry {}
+
+		type SetPlugin<T, E> = {
+			type: T;
+			extension: E;
+		};
+
+		type Type = Registry[keyof Registry]['type'];
+		type Extension = Registry[keyof Registry]['extension'];
+
+		type Initializer<S> = (prevState: Maybe<S | string>) => S;
 
 		type Render<S, D extends Dispatch<any>> = (
 			state: S,
@@ -20,10 +30,10 @@ declare global {
 			render: Render<any, any>;
 		};
 
-		type Configuration = Readonly<{
+		type Configuration<T extends keyof Registry> = Readonly<{
 			order: number;
-			type: string;
-			extension: string;
+			type: Registry[T]['type'];
+			extension: Registry[T]['extension'];
 			icon: IconType;
 			label: string;
 			getLazyModule: () => Promise<LazyModule>;

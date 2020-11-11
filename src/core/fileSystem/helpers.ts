@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
 import { generateId } from '../../utils';
 import { TYPE_BY_EXTENSION } from '../../plugins';
-import { DIRECTORY_ID, SEP } from './constants';
+import { DIRECTORY_ID, PATHS, SEP } from './constants';
 
 export const createFileRecord = Immutable.Record<App.TaggedFile>({
 	_tag: 'file',
@@ -9,7 +9,7 @@ export const createFileRecord = Immutable.Record<App.TaggedFile>({
 	lastModifiedAt: 0,
 	name: '',
 	path: '',
-	parent: null,
+	parent: DIRECTORY_ID.main,
 	type: 'directory',
 	isTrashed: false,
 	data: Immutable.OrderedMap(),
@@ -18,11 +18,11 @@ export const createFileRecord = Immutable.Record<App.TaggedFile>({
 export const createDirectory = ({
 	name,
 	path,
-	parent = null,
+	parent,
 	data = Immutable.OrderedMap(),
 	id = generateId(),
-}: Pick<App.Directory, 'name' | 'path'> &
-	Partial<Pick<App.Directory, 'parent' | 'data' | 'id'>>) => {
+}: Pick<App.Directory, 'name' | 'path' | 'parent'> &
+	Partial<Pick<App.Directory, 'data' | 'id'>>) => {
 	return createFileRecord({
 		id,
 		name,
@@ -73,8 +73,6 @@ export const setDirectoryData = (
 	directoryId: App.File['parent'],
 	fileToAdd: App.ImmutableFile
 ) => {
-	if (!directoryId) return;
-
 	(state as any).updateIn(
 		['files', directoryId, 'data'],
 		(data: App.Directory['data']) =>
@@ -95,6 +93,11 @@ export const setDirectoryData = (
 export const createActiveFile = Immutable.Record<App.TaggedActiveFile>({
 	_tag: 'active-file',
 	ref: null,
+});
+
+export const createFileData = (state: any = null): App.FileData => ({
+	id: generateId(),
+	state,
 });
 
 export const getFileType = (name: string): App.File['type'] => {
@@ -126,22 +129,14 @@ export const getFilePath = (
 	parentId: App.File['parent']
 ) => {
 	const path = [fileName];
-	let parent = parentId && files.get(parentId);
+	let parent = files.get(parentId)!;
 
-	while (parent) {
+	while (parent.id !== DIRECTORY_ID.root) {
 		path.push(parent.name);
-		parent = parent.parent && files.get(parent.parent);
+		parent = files.get(parent.parent)!;
 	}
 
-	return path.reverse().join(SEP);
-};
-
-export const getFilePathById = (
-	files: App.FileSystemState['files'],
-	fileId: App.File['id']
-) => {
-	const { name, parent } = files.get(fileId)!;
-	return getFilePath(files, name, parent);
+	return SEP + path.reverse().join(SEP);
 };
 
 export const trashFileName = (name: App.File['name'], id: App.File['id']) => {
@@ -159,5 +154,5 @@ export const isTrashed = (file: App.ImmutableFile) => {
 };
 
 export const getMainRelativePath = (path: App.File['path']) => {
-	return path.replace(`${SEP}${DIRECTORY_ID.main}`, '') || SEP;
+	return path.replace(PATHS.main, '') || SEP;
 };

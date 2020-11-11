@@ -4,7 +4,7 @@ const show: Plugin.Show<Questions.State> = (state) => {
 		.join('\n\n');
 };
 
-export const config: Plugin.Configuration = {
+export const config: Plugin.Configuration<'Questions'> = {
 	order: 3,
 	type: 'questions',
 	extension: '.qa',

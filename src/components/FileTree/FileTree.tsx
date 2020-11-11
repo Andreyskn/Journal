@@ -22,12 +22,7 @@ import {
 } from './useTree';
 import { classes as fileTreeClasses, NodeEditorData } from './common';
 import { NodeEditorProps } from './NodeEditor';
-import {
-	DIRECTORY_ID,
-	getFilePath,
-	getMainRelativePath,
-	PATHS,
-} from '../../core/fileSystem';
+import { DIRECTORY_ID, fs, PATHS } from '../../core/fileSystem';
 import { useAppContext } from '../context';
 
 const explorerClasses = bem('file-explorer', [
@@ -167,7 +162,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 			.sort((a, b) => a.nodeData.path.localeCompare(b.nodeData.path))
 			.map((folderNode) => {
 				const label = folderNode.label || 'Root';
-				const path = getMainRelativePath(folderNode.nodeData.path);
+				const path = fs.getMainRelativePath(folderNode.nodeData.path);
 				return { label, path, id: folderNode.id };
 			});
 
@@ -205,20 +200,20 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	};
 
 	const onAddItem = (
-		type: NodeEditorProps['type']
+		nodeType: NodeEditorProps['type']
 	): IButtonProps['onClick'] => () => {
 		const cwd = getCurrentDirectory();
 		const onDismiss = () => setNodeEditorData(null);
-		const onConfirm: NodeEditorProps['onConfirm'] = (name) => {
-			if (type === 'folder') {
-				setSelection({ path: getFilePath(files, name, cwd) });
+		const onConfirm: NodeEditorProps['onConfirm'] = (name, fileType) => {
+			if ((nodeType as NodeEditorProps['type']) === 'folder') {
+				setSelection({ path: fs.getFilePath(files, name, cwd) });
 			}
-			dispatch.fs.createFile({ name, parent: cwd });
+			dispatch.fs.createFile({ name, parent: cwd, type: fileType });
 			onDismiss();
 		};
 		setNodeEditorData({
 			mode: 'create',
-			type,
+			type: nodeType,
 			cwd,
 			onConfirm,
 			onDismiss,

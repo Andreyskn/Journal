@@ -6,6 +6,7 @@ import { bem } from '../../../utils';
 import { Classes, EditableText, Popover, Position } from '@blueprintjs/core';
 import { useValidation } from './useValidation';
 import { useAutocomplete } from './useAutocomplete';
+import { TYPE_BY_EXTENSION } from '../../../plugins';
 
 type CreateMode = { mode: 'create' };
 type RenameMode = { mode: 'rename'; name: string };
@@ -15,7 +16,7 @@ export type NodeEditorProps = Pick<App.FileSystemState, 'files'> &
 	NodeEditorMode & {
 		type: 'file' | 'folder';
 		cwd: App.Directory['id'];
-		onConfirm: (name: string) => void;
+		onConfirm: (name: string, type: App.File['type']) => void;
 		onDismiss: () => void;
 	};
 
@@ -53,7 +54,10 @@ export const NodeEditor: React.FC<NodeEditorProps> = (props) => {
 		if (!validationResult.isValid) return;
 
 		const { name, extension } = validationResult;
-		onConfirm(name + extension);
+		onConfirm(
+			name + extension,
+			extension ? TYPE_BY_EXTENSION[extension] : 'directory'
+		);
 	};
 
 	const onChange = (value: string) => {

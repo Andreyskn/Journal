@@ -7,4 +7,7 @@ export const fileSystem = {
 	reviver,
 };
 export * from './constants';
-export * from './helpers';
+
+// TODO: export * as fs from './helpers';
+import * as fs from './helpers';
+export { fs };

@@ -6,16 +6,18 @@ import { bem, Null } from '../../utils';
 import { Button, Menu, MenuItem, Popover } from '@blueprintjs/core';
 import { useDispatch, useSelector } from '../../core';
 import { windowRegistry } from '../Windows/registry';
+import { useUpload } from './useUpload';
 
 const classes = bem('taskbar', ['popover', 'menu-toggle', 'entry'] as const);
 
 export const Taskbar: React.FC = () => {
-	const { windows, windowOrder } = useSelector((state) => ({
+	const { windows, windowOrder, files } = useSelector((state) => ({
 		windows: state.windows,
 		windowOrder: state.windowOrder,
+		files: state.files,
 	}));
-
 	const { dispatch } = useDispatch();
+	const { fileInput, onUpload } = useUpload(files, dispatch);
 
 	const { windowsArray, topWindow } = useMemo(() => {
 		return {
@@ -40,6 +42,7 @@ export const Taskbar: React.FC = () => {
 
 	return (
 		<div className={classes.taskbarBlock()}>
+			{fileInput}
 			<Popover
 				position='top-left'
 				minimal
@@ -64,6 +67,11 @@ export const Taskbar: React.FC = () => {
 							/>
 						);
 					})}
+					<MenuItem
+						icon='upload'
+						text='Upload File'
+						onClick={onUpload}
+					/>
 				</Menu>
 			</Popover>
 			{windowsArray.map(({ id, status }) => {

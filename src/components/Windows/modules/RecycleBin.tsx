@@ -4,12 +4,7 @@ import './recycle-bin.scss';
 
 import { Button, ButtonGroup, Card, Icon } from '@blueprintjs/core';
 import { useDispatch, useSelector } from '../../../core';
-import {
-	DIRECTORY_ID,
-	getMainRelativePath,
-	isDirectory,
-	sanitizeFileName,
-} from '../../../core/fileSystem';
+import { DIRECTORY_ID, fs } from '../../../core/fileSystem';
 import { bem, pluralize } from '../../../utils';
 import { PLUGINS_MAP } from '../../../plugins';
 import { useAppContext } from '../../context';
@@ -69,8 +64,8 @@ const RecycleBin: React.FC = () => {
 					return {
 						symlinkId,
 						target: target,
-						sanitizedName: sanitizeFileName(target.name),
-						sanitizedPath: sanitizeFileName(target.path),
+						sanitizedName: fs.sanitizeFileName(target.name),
+						sanitizedPath: fs.sanitizeFileName(target.path),
 					};
 				}
 			)
@@ -92,8 +87,7 @@ const RecycleBin: React.FC = () => {
 	) => () => {
 		// TODO: same code is used in FileTree, consider abstracting out
 		new Promise<boolean>((resolve) => {
-			const targetData = (files.get(target.parent!) as App.Directory)
-				.data;
+			const targetData = (files.get(target.parent) as App.Directory).data;
 			const hasNameCollision = targetData.has(sanitizedName);
 
 			if (!hasNameCollision) return resolve(true);
@@ -105,7 +99,7 @@ const RecycleBin: React.FC = () => {
 				intent: 'warning',
 				content: (
 					<p>
-						A {isDirectory(target) ? 'folder' : 'file'} with the
+						A {fs.isDirectory(target) ? 'folder' : 'file'} with the
 						name <b>{sanitizedName}</b> already exists in the
 						destination folder. Do you want to replace it?
 					</p>
@@ -143,8 +137,9 @@ const RecycleBin: React.FC = () => {
 							<Icon
 								className={itemClasses.iconElement()}
 								icon={
-									PLUGINS_MAP[target.type]?.icon ||
-									'folder-close'
+									PLUGINS_MAP[
+										target.type as App.RegularFile['type']
+									]?.icon || 'folder-close'
 								}
 							/>
 							<div className={itemClasses.infoElement()}>
@@ -156,7 +151,7 @@ const RecycleBin: React.FC = () => {
 								})}
 							>
 								<span>path:</span>
-								{getMainRelativePath(sanitizedPath)}
+								{fs.getMainRelativePath(sanitizedPath)}
 							</div>
 							<div
 								className={itemClasses.infoElement({

@@ -6,7 +6,7 @@ const show: Plugin.Show<TaskList.State> = (state) => {
 		.join('\n');
 };
 
-export const config: Plugin.Configuration = {
+export const config: Plugin.Configuration<'TaskList'> = {
 	order: 1,
 	type: 'task-list',
 	extension: '.t',

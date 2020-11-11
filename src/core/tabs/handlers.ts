@@ -1,5 +1,5 @@
 import * as helpers from './helpers';
-import * as fs from '../fileSystem';
+import { fs } from '../fileSystem';
 import { mutations } from '../mutations';
 
 mutations
