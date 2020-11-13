@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 
 import { useSelector, useDispatch } from '../../core';
 import { Tabs } from './Tabs';
 import { ErrorBoundary } from '../../utils';
 
-const WrappedTabs = React.memo(Tabs);
+const WrappedTabs = memo(Tabs);
 
 export const TabsConnector: React.FC = () => {
 	const { tabs, activeTabId } = useSelector((state) => ({

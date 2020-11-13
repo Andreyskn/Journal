@@ -1,4 +1,3 @@
-import React from 'react';
 import './tabs.scss';
 import { bem } from '../../utils';
 import { Alignment, Button, Menu, MenuItem, Popover } from '@blueprintjs/core';

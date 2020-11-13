@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 
 import './viewer.scss';
 
@@ -140,7 +140,7 @@ const connectPlugin = ({ render, initState, handlers }: Plugin.LazyModule) => {
 const pluginComponents = Object.fromEntries(
 	PLUGINS.map((p) => [
 		p.type,
-		React.lazy(() => p.getLazyModule().then(connectPlugin)),
+		lazy(() => p.getLazyModule().then(connectPlugin)),
 	])
 ) as Readonly<
 	Record<
@@ -163,13 +163,13 @@ export const Viewer: React.FC = () => {
 
 	return (
 		<ErrorBoundary name={`${PLUGINS_MAP[activeFile.type].label}`}>
-			<React.Suspense fallback={null}>
+			<Suspense fallback={null}>
 				<Plugin
 					file={activeFile}
 					data={activeDocument}
 					key={activeDocument.id}
 				/>
-			</React.Suspense>
+			</Suspense>
 		</ErrorBoundary>
 	);
 };

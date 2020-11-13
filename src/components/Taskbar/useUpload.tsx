@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { CoreDispatch } from '../../core';
 import { DIRECTORY_ID, fs } from '../../core/fileSystem';
 import { EXTENSIONS, TYPE_BY_EXTENSION } from '../../plugins';
@@ -46,6 +46,7 @@ export const useUpload = (
 			if (uploadDirectory.data.has(fullName)) continue;
 
 			file.text().then((text) => {
+				// TODO: single dispatch to create multiple files
 				dispatch.fs.createFile({
 					name: fullName,
 					type: TYPE_BY_EXTENSION[extension],

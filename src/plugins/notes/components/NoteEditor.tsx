@@ -1,4 +1,3 @@
-import React from 'react';
 import { Classes, TextArea, ITextAreaProps } from '@blueprintjs/core';
 import ReactMarkdown from 'react-markdown';
 

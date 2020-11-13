@@ -1,4 +1,3 @@
-import React from 'react';
 import { clear } from 'idb-keyval';
 import { Button } from '@blueprintjs/core';
 

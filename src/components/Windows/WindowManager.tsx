@@ -1,4 +1,4 @@
-import React, { RefObject, useMemo, useRef } from 'react';
+import { RefObject, useMemo, useRef } from 'react';
 
 import './window-manager.scss';
 

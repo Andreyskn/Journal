@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { ITreeProps, ITreeNode } from '@blueprintjs/core';
 import { FileTreeProps } from './FileTree';
 import { NodeEditor } from './NodeEditor';

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { EXTENSIONS } from '../../../plugins';
 
 import { bem } from '../../../utils';

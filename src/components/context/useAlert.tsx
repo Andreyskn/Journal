@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Alert as AlertImpl, Classes, IAlertProps } from '@blueprintjs/core';
 
 type AlertData = Pick<

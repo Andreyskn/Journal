@@ -1,9 +1,4 @@
-import React, {
-	forwardRef,
-	PropsWithChildren,
-	RefObject,
-	useEffect,
-} from 'react';
+import { forwardRef, PropsWithChildren, RefObject, useEffect } from 'react';
 import { Classes, Button, ButtonGroup, Icon } from '@blueprintjs/core';
 import './window.scss';
 

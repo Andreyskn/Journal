@@ -1,10 +1,9 @@
-import React from 'react';
-
+import { memo } from 'react';
 import { useSelector, useDispatch } from '../../core';
 import { ErrorBoundary } from '../../utils';
 import { FileTree } from './FileTree';
 
-const WrappedFileTree = React.memo(FileTree);
+const WrappedFileTree = memo(FileTree);
 
 export const FileTreeConnector: React.FC = () => {
 	const { files, activeFilePath } = useSelector((state) => ({

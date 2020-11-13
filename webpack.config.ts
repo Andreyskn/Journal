@@ -30,7 +30,17 @@ const configure: ConfigurationFactory = (env) => {
 			rules: [
 				{
 					test: /\.tsx?$/,
-					use: ['react-hot-loader/webpack', 'ts-loader'],
+					use: [
+						'react-hot-loader/webpack',
+						{
+							loader: 'ts-loader',
+							options: {
+								configFile: isDev
+									? 'tsconfig.dev.json'
+									: 'tsconfig.json',
+							},
+						},
+					],
 					exclude: /node_modules/,
 				},
 				{

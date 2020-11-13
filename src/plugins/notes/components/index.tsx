@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button, ButtonGroup } from '@blueprintjs/core';
 import { NoteEditor } from './NoteEditor';
 

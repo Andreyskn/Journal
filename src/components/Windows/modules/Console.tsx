@@ -1,5 +1,3 @@
-import React from 'react';
-
 const Console: React.FC = () => {
 	return <div>Not implemented</div>;
 };

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import './questionary.scss';
 
 import { bem } from '../../../utils';

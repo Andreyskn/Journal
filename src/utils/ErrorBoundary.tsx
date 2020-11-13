@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react';
 import { Callout } from '@blueprintjs/core';
 import { bem } from './bem';
 
@@ -12,10 +12,7 @@ type BoundaryState = {
 	error: Error | null;
 };
 
-export class ErrorBoundary extends React.Component<
-	BoundaryProps,
-	BoundaryState
-> {
+export class ErrorBoundary extends Component<BoundaryProps, BoundaryState> {
 	state: BoundaryState = { error: null };
 
 	static getDerivedStateFromError(error: Error) {

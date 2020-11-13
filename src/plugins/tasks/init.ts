@@ -16,7 +16,7 @@ const init: Plugin.Initializer<TaskList.State> = (state) => {
 			}
 		});
 
-		return rawTasks.reduce((state, text) => {
+		return rawTasks.reduceRight((state, text) => {
 			return handlersImpl.addTask(state, { text });
 		}, defaultState);
 	}

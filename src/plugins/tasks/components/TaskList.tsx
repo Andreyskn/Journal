@@ -1,4 +1,3 @@
-import React from 'react';
 import './task-list.scss';
 import { bem } from '../../../utils';
 import { TaskItem } from './TaskItem';

@@ -1,5 +1,5 @@
+import { useRef, useState } from 'react';
 import { Button, Dialog, Classes } from '@blueprintjs/core';
-import React, { useRef, useState } from 'react';
 import { Questionary } from './Questionary';
 
 const ToolbarContent: React.FC<{ dispatch: Questions.Dispatch }> = ({

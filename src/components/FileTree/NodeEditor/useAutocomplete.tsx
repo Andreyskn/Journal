@@ -1,8 +1,9 @@
-import React, {
+import {
 	useState,
 	useImperativeHandle,
 	useRef,
 	useLayoutEffect,
+	forwardRef,
 } from 'react';
 
 import { Menu, MenuItem, IPopoverProps } from '@blueprintjs/core';
@@ -89,43 +90,43 @@ type AutocompleteRef = {
 	focusPrev: () => void;
 };
 
-export const Autocomplete = React.forwardRef<
-	AutocompleteRef,
-	AutocompleteProps
->(({ items, onSelect }, ref) => {
-	const [focus, setFocus] = useState(0);
+export const Autocomplete = forwardRef<AutocompleteRef, AutocompleteProps>(
+	({ items, onSelect }, ref) => {
+		const [focus, setFocus] = useState(0);
 
-	useLayoutEffect(() => {
-		if (focus >= items.length) {
-			setFocus(0);
-		}
-	}, [items]);
+		useLayoutEffect(() => {
+			if (focus >= items.length) {
+				setFocus(0);
+			}
+		}, [items]);
 
-	useImperativeHandle(ref, () => ({
-		get value() {
-			return items[focus];
-		},
-		focusNext: () => setFocus((focus + 1) % items.length),
-		focusPrev: () => setFocus((focus + items.length - 1) % items.length),
-	}));
+		useImperativeHandle(ref, () => ({
+			get value() {
+				return items[focus];
+			},
+			focusNext: () => setFocus((focus + 1) % items.length),
+			focusPrev: () =>
+				setFocus((focus + items.length - 1) % items.length),
+		}));
 
-	return (
-		<Menu className={classes.autocompletePopoverBlock()}>
-			{items.map((item, index) => (
-				<MenuItem
-					key={item}
-					text={
-						<div className={classes.itemElement()}>
-							{item}{' '}
-							<span>
-								{PLUGINS_MAP[TYPE_BY_EXTENSION[item]].label}
-							</span>
-						</div>
-					}
-					onClick={() => onSelect(item)}
-					active={index === focus}
-				/>
-			))}
-		</Menu>
-	);
-});
+		return (
+			<Menu className={classes.autocompletePopoverBlock()}>
+				{items.map((item, index) => (
+					<MenuItem
+						key={item}
+						text={
+							<div className={classes.itemElement()}>
+								{item}{' '}
+								<span>
+									{PLUGINS_MAP[TYPE_BY_EXTENSION[item]].label}
+								</span>
+							</div>
+						}
+						onClick={() => onSelect(item)}
+						active={index === focus}
+					/>
+				))}
+			</Menu>
+		);
+	}
+);
