@@ -22,7 +22,7 @@ export const WindowManager: React.FC = () => {
 	const { visibleWindows, topWindow } = useMemo(() => {
 		return {
 			visibleWindows: windowOrder
-				.map((id) => windows.get(id) as App.Window)
+				.map((id) => windows.get(id) as Store.Window)
 				.toArray(),
 			topWindow: windowOrder.last(null),
 		};
@@ -33,7 +33,7 @@ export const WindowManager: React.FC = () => {
 	const refs = windowsArray.reduce((refs, window) => {
 		refs[window.id] = useRef(null);
 		return refs;
-	}, {} as Record<App.Window['id'], RefObject<HTMLDivElement>>);
+	}, {} as Record<Store.Window['id'], RefObject<HTMLDivElement>>);
 
 	if (!visibleWindows.length) return null;
 

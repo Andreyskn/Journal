@@ -40,4 +40,14 @@ declare global {
 	type VerticalPosition = Top | Bottom;
 	type Position = HorizontalPosition & VerticalPosition;
 	type PartialPosition = Partial<Left & Right & Top & Bottom>;
+
+	type UnionToIntersection<U> = (
+		U extends any ? (k: U) => void : never
+	) extends (k: infer I) => void
+		? I
+		: never;
+
+	type TaggedObject<O extends AnyObject, T extends string> = O & {
+		__tag: T;
+	};
 }

@@ -1,6 +1,6 @@
 import { hot } from 'react-hot-loader/root';
 
-import './app.scss';
+import './main.scss';
 
 import { Classes } from '@blueprintjs/core';
 import { bem } from '../../utils';
@@ -13,7 +13,7 @@ import { WindowManager } from '../Windows/WIndowManager';
 
 const classes = bem('app', ['file-tree', 'tabs', 'viewer', 'taskbar'] as const);
 
-export const App: React.FC = hot(() => {
+export const Main: React.FC = hot(() => {
 	const { AppContextProvider } = useAppContextProvider();
 
 	return (

@@ -9,10 +9,10 @@ import {
 } from './persistance';
 import { fileSystem } from './fileSystem';
 import { tabs } from './tabs';
-import { windows } from "./windows";
+import { windows } from './windows';
 import { createReducer } from '../utils';
 
-export let store: App.Store;
+export let store: Store.Store;
 
 const coreHandlers = {
 	...persistanceHandlers,
@@ -29,7 +29,7 @@ export const initStore = () => {
 };
 
 export const useSelector = <T extends any>(
-	select: (state: App.ImmutableAppState) => T
+	select: (state: Store.State) => T
 ) => {
 	const [data, setData] = useState(() => select(store.getState()));
 
@@ -44,31 +44,15 @@ export const useSelector = <T extends any>(
 	return data;
 };
 
-type ActionHandlers = Record<string, App.Handler<any, any>>;
+const actionCreatorsCache = new Map<
+	Actions.HandlersMap,
+	Actions.ActionCreatorsMap<any>
+>();
 
-type ActionCreator<T> = (
-	dispatch: Actions.BaseDispatch<any>
-) => (payload: T) => void;
-
-type ActionCreators<T extends ActionHandlers> = {
-	[K in keyof T]: ActionCreator<Parameters<T[K]>[1]>;
-};
-
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
-	k: infer I
-) => void
-	? I
-	: never;
-
-type Dispatch<T extends ActionHandlers> = UnionToIntersection<{
-	[Key in keyof T as 0]: Key extends `@${infer Category}/${infer Name}`
-		? { [C in Category]: { [N in Name]: ReturnType<ActionCreators<T>[Key]> } }
-		: { [K in Key]: ReturnType<ActionCreators<T>[Key]>}
-}[0]>
-
-const actionCreatorsCache = new Map<ActionHandlers, ActionCreators<any>>();
-
-const getActionCreators = <T extends AnyObject, R extends ActionCreators<T>>(
+const getActionCreators = <
+	T extends AnyObject,
+	R extends Actions.ActionCreatorsMap<T>
+>(
 	handlers: T
 ) => {
 	const match = actionCreatorsCache.get(handlers);
@@ -76,7 +60,9 @@ const getActionCreators = <T extends AnyObject, R extends ActionCreators<T>>(
 
 	const actionCreators = (Object.keys(handlers) as (keyof R)[]).reduce(
 		(result, type) => {
-			const dispatcher: ActionCreator<any> = (dispatch) => (payload) => {
+			const dispatcher: Actions.ActionCreator<any> = (dispatch) => (
+				payload
+			) => {
 				dispatch({ type, payload });
 			};
 			result[type] = dispatcher as any;
@@ -91,60 +77,70 @@ const getActionCreators = <T extends AnyObject, R extends ActionCreators<T>>(
 
 const ACTION_TYPE_RE = /^@(?<category>.+)\/(?<name>.*)/;
 
-type ActionTypeRegexExec = OmitType<RegExpExecArray, 'groups'> & {
-	groups: {
-		category?: string;
-		name: string;
-	};
-};
+type ActionTypeExec = Maybe<
+	OmitType<RegExpExecArray, 'groups'> & {
+		groups: {
+			category?: string;
+			name: string;
+		};
+	}
+>;
 
-export const createDispatch = <T extends ActionCreators<any>>(
+export const createDispatch = <T extends Actions.ActionCreatorsMap<any>>(
 	dispatch: Actions.BaseDispatch<any>,
 	actionCreators: T
 ) =>
-	(Object.keys(actionCreators) as (keyof T)[]).reduce((result, type) => {
-		const match = ACTION_TYPE_RE.exec(type as string) as ActionTypeRegexExec | null;
+	(Object.keys(actionCreators) as (string & keyof T)[]).reduce(
+		(result, type) => {
+			const match = ACTION_TYPE_RE.exec(type) as ActionTypeExec;
 
-		if (match && match.groups.category) {
-			const { groups: { category, name } } = match;
-			(result[category] ||= {})[name] = actionCreators[type](dispatch);
-		} 
-		else {
-			result[type as string] = actionCreators[type](dispatch)
-		}
+			if (match && match.groups.category) {
+				const {
+					groups: { category, name },
+				} = match;
+				(result[category] ||= {})[name] = actionCreators[type](
+					dispatch
+				);
+			} else {
+				result[type] = actionCreators[type](dispatch);
+			}
 
-		return result;
-	}, {} as AnyObject) as Dispatch<T>;
+			return result;
+		},
+		{} as AnyObject
+	) as Actions.Dispatch<T>;
 
 type UseDispatchOptions = {
 	dispatch: Actions.BaseDispatch<any>;
-	handlers: ActionHandlers;
+	handlers: Actions.HandlersMap;
 };
 
-// TODO: global type
-export type CoreDispatch = Dispatch<typeof coreHandlers>
-
-let coreDispatch: CoreDispatch;
+let coreDispatch: Store.Dispatch;
 
 interface UseDispatch {
-	(): { dispatch: CoreDispatch };
-	<T extends UseDispatchOptions>(options: T): { dispatch: Dispatch<T['handlers']> };
+	(): { dispatch: Store.Dispatch };
+	<T extends UseDispatchOptions>(options: T): {
+		dispatch: Actions.Dispatch<T['handlers']>;
+	};
 }
 
-export const useDispatch: UseDispatch = <
-	T extends UseDispatchOptions
->(
+export const useDispatch: UseDispatch = <T extends UseDispatchOptions>(
 	options?: T
 ) => {
 	if (!options) {
-		coreDispatch ||= createDispatch(store.dispatch, getActionCreators(coreHandlers)) as any;
+		coreDispatch ||= createDispatch(
+			store.dispatch,
+			getActionCreators(coreHandlers)
+		) as any;
 		return { dispatch: coreDispatch };
 	}
 
 	const { dispatch, handlers } = options;
 
-	return useMemo(
-		() => ({ dispatch: createDispatch(dispatch, getActionCreators(handlers)) }),
+	return (useMemo(
+		() => ({
+			dispatch: createDispatch(dispatch, getActionCreators(handlers)),
+		}),
 		[]
-	) as Dispatch<T['handlers']> as any;
+	) as Actions.Dispatch<T['handlers']>) as any;
 };

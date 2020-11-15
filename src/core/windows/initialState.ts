@@ -1,8 +1,8 @@
 import Immutable from 'immutable';
 import { createWindow } from './helpers';
-import { windowRegistry } from '../../components/Windows/registry';
+import { windowRegistry } from '../../app/Windows/registry';
 
-export const state: App.WindowsState = {
+export const state: Store.WindowsState = {
 	windows: Immutable.Map(
 		Array.from(windowRegistry.entries()).map(([id, windowModule]) => [
 			id,
@@ -12,7 +12,7 @@ export const state: App.WindowsState = {
 	windowOrder: Immutable.OrderedSet(),
 };
 
-export const reviver: App.StateReviver = (tag, key, value) => {
+export const reviver: Store.Reviver = (tag, key, value) => {
 	switch (tag) {
 		case 'window':
 			return createWindow(value);

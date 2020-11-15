@@ -1,5 +1,4 @@
 import { useRef } from 'react';
-import { CoreDispatch } from '../../core';
 import { DIRECTORY_ID, fs } from '../../core/fileSystem';
 import { EXTENSIONS, TYPE_BY_EXTENSION } from '../../plugins';
 
@@ -11,14 +10,14 @@ type FileNameExec = Maybe<
 	OmitType<RegExpExecArray, 'groups'> & {
 		groups: {
 			name: string;
-			extension?: App.FileExtension;
+			extension?: Model.FileExtension;
 		};
 	}
 >;
 
 export const useUpload = (
-	appFiles: App.FileSystemState['files'],
-	dispatch: CoreDispatch
+	appFiles: Store.FileSystemState['files'],
+	dispatch: Store.Dispatch
 ) => {
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -32,7 +31,7 @@ export const useUpload = (
 
 		const uploadDirectory = appFiles.get(
 			DIRECTORY_ID.main
-		) as App.Directory;
+		) as Store.Directory;
 
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];

@@ -2,7 +2,7 @@ const Console: React.FC = () => {
 	return <div>Not implemented</div>;
 };
 
-const windowModule: App.WindowModule = {
+const windowModule: WindowModule = {
 	id: 'console',
 	icon: 'console',
 	title: 'Console',

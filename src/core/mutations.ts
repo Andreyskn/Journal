@@ -1,15 +1,15 @@
 import Events from 'events';
 
 type Mutations = {
-	FILE_CREATED: { state: App.ImmutableAppState; file: App.ImmutableFile };
-	FILE_DELETED: { state: App.ImmutableAppState; file: App.ImmutableFile };
-	FILE_UPDATED: { state: App.ImmutableAppState; file: App.ImmutableFile };
-	FILE_SELECTED: { state: App.ImmutableAppState; file: App.ImmutableFile };
-	SET_ACTIVE_FILE: { state: App.ImmutableAppState; id: App.ActiveFileId };
+	FILE_CREATED: { state: Store.State; file: Store.File };
+	FILE_DELETED: { state: Store.State; file: Store.File };
+	FILE_UPDATED: { state: Store.State; file: Store.File };
+	FILE_SELECTED: { state: Store.State; file: Store.File };
+	SET_ACTIVE_FILE: { state: Store.State; id: Store.ActiveFileId };
 };
 
 type Event = {
-	[T in keyof Mutations]: App.ActionBase<T, Mutations[T]>;
+	[T in keyof Mutations]: Actions.ActionBase<T, Mutations[T]>;
 }[keyof Mutations];
 
 type Listener = {

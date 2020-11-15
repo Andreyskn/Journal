@@ -12,29 +12,29 @@ const classes = bem('tabs', [
 ] as const);
 
 export type TabsProps = {
-	dispatch: App.CoreDispatch;
-	tabs: App.Tab[];
-	activeTabId: App.ActiveFileId;
+	dispatch: Store.Dispatch;
+	tabs: Store.Tab[];
+	activeTabId: Store.ActiveFileId;
 };
 
 export const Tabs: React.FC<TabsProps> = ({ tabs, activeTabId, dispatch }) => {
-	const createFile = (type: App.RegularFile['type']) => () => {
+	const createFile = (type: Store.RegularFile['type']) => () => {
 		dispatch.fs.createUntitledFile({ type });
 	};
 
-	const onSelect = (id: App.Tab['id']) => () => {
+	const onSelect = (id: Store.Tab['id']) => () => {
 		if (id !== activeTabId) {
 			dispatch.fs.setActiveFile({ id });
 		}
 	};
 
-	const onClose = (id: App.Tab['id']) => (e: React.MouseEvent) => {
+	const onClose = (id: Store.Tab['id']) => (e: React.MouseEvent) => {
 		if (e.button === 0 || e.button === 1) {
 			dispatch.tabs.closeTab({ id });
 		}
 	};
 
-	const renderTab = ({ id, name, type, path }: App.Tab) => {
+	const renderTab = ({ id, name, type, path }: Store.Tab) => {
 		const isActive = id === activeTabId;
 
 		return (

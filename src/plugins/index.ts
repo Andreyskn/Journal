@@ -9,12 +9,12 @@ export const PLUGINS = ctx
 
 export const PLUGINS_MAP = Object.fromEntries(
 	PLUGINS.map((p) => [p.type, p])
-) as Readonly<Record<App.FileType, Config>>;
+) as Readonly<Record<Model.FileType, Config>>;
 
 export const EXTENSIONS = PLUGINS.map((p) => p.extension) as ReadonlyArray<
-	App.FileExtension
+	Model.FileExtension
 >;
 
 export const TYPE_BY_EXTENSION = Object.fromEntries(
 	PLUGINS.map((p) => [p.extension, p.type])
-) as Readonly<Record<App.FileExtension, App.FileType>>;
+) as Readonly<Record<Model.FileExtension, Model.FileType>>;

@@ -4,10 +4,6 @@ export const noop: AnyFunction = () => {};
 
 export const Null: FC = () => null;
 
-export const except: AnyFunction = (message: string) => () => {
-	throw Error(message);
-};
-
 export const userSelect = {
 	disable: () => {
 		document.body.classList.add('disable-selection');

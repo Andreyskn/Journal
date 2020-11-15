@@ -1,12 +1,8 @@
 import Immutable from 'immutable';
-
-type WindowsKey = KeyOf<App.WindowsState, 'windows'>;
-type WindowOrderKey = KeyOf<App.WindowsState, 'windowOrder'>;
+import { handlers } from './handlers';
 
 declare global {
-	namespace Actions {}
-
-	namespace App {
+	namespace Model {
 		type Window = {
 			id: string;
 			status: 'closed' | 'open' | 'minimized' | 'maximized';
@@ -14,25 +10,25 @@ declare global {
 			height: Pixels;
 			position: Position;
 		};
-		type TaggedWindow = TaggedRecord<Window, 'window'>;
-		type ImmutableWindow = ImmutableRecord<TaggedWindow>;
+	}
+
+	namespace Store {
+		type Window = ImmutableRecord<Model.Window>;
 
 		type WindowsState = {
-			windows: Immutable.Map<Window['id'], ImmutableWindow>;
+			windows: Immutable.Map<Window['id'], Window>;
 			windowOrder: Immutable.OrderedSet<Window['id']>;
 		};
 
-		type WindowModule = {
-			id: string;
-			title: string;
-			icon: IconType;
-			Content: React.FC;
-			menuEntry?: {
-				order: number;
-				Label?: React.FC;
-			};
-		};
-
-		type WindowsImmutableNonRecordKey = WindowsKey | WindowOrderKey;
+		interface Registry {
+			Windows: SetCorePart<
+				WindowsState,
+				typeof handlers,
+				keyof WindowsState,
+				{
+					Window: TaggedObject<Model.Window, 'window'>;
+				}
+			>;
+		}
 	}
 }

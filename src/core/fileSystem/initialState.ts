@@ -35,7 +35,7 @@ const root = createDirectory({
 	path: PATHS.root,
 });
 
-export const state: App.FileSystemState = {
+export const state: Store.FileSystemState = {
 	data: Immutable.Map(),
 	files: Immutable.Map([
 		[root.id, root],
@@ -46,7 +46,7 @@ export const state: App.FileSystemState = {
 	activeFile: createActiveFile(),
 };
 
-export const reviver: App.StateReviver = (tag, key, value) => {
+export const reviver: Store.Reviver = (tag, key, value) => {
 	switch (tag) {
 		case 'file':
 			return createFileRecord(value);

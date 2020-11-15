@@ -34,7 +34,7 @@ export const Taskbar: React.FC = () => {
 		[]
 	);
 
-	const onWindowOpen = (id: App.Window['id']) => () => {
+	const onWindowOpen = (id: Store.Window['id']) => () => {
 		if (topWindow !== id) {
 			dispatch.windows.open({ id });
 		}

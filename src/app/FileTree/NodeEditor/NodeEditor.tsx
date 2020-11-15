@@ -12,11 +12,11 @@ type CreateMode = { mode: 'create' };
 type RenameMode = { mode: 'rename'; name: string };
 type NodeEditorMode = CreateMode | RenameMode;
 
-export type NodeEditorProps = Pick<App.FileSystemState, 'files'> &
+export type NodeEditorProps = Pick<Store.FileSystemState, 'files'> &
 	NodeEditorMode & {
 		type: 'file' | 'folder';
-		cwd: App.Directory['id'];
-		onConfirm: (name: string, type: App.File['type']) => void;
+		cwd: Store.Directory['id'];
+		onConfirm: (name: string, type: Store.File['type']) => void;
 		onDismiss: () => void;
 	};
 

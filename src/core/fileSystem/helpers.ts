@@ -1,10 +1,9 @@
 import Immutable from 'immutable';
 import { generateId } from '../../utils';
-import { TYPE_BY_EXTENSION } from '../../plugins';
 import { DIRECTORY_ID, PATHS, SEP } from './constants';
 
-export const createFileRecord = Immutable.Record<App.TaggedFile>({
-	_tag: 'file',
+export const createFileRecord = Immutable.Record<Store.TaggedRecords['File']>({
+	__tag: 'file',
 	id: generateId(),
 	lastModifiedAt: 0,
 	name: '',
@@ -21,8 +20,8 @@ export const createDirectory = ({
 	parent,
 	data = Immutable.OrderedMap(),
 	id = generateId(),
-}: Pick<App.Directory, 'name' | 'path' | 'parent'> &
-	Partial<Pick<App.Directory, 'data' | 'id'>>) => {
+}: Pick<Store.Directory, 'name' | 'path' | 'parent'> &
+	Partial<Pick<Store.Directory, 'data' | 'id'>>) => {
 	return createFileRecord({
 		id,
 		name,
@@ -39,7 +38,7 @@ export const createFile = ({
 	path,
 	parent,
 	data,
-}: Pick<App.RegularFile, 'type' | 'name' | 'path' | 'data' | 'parent'>) => {
+}: Pick<Store.RegularFile, 'type' | 'name' | 'path' | 'data' | 'parent'>) => {
 	return createFileRecord({
 		type,
 		name,
@@ -56,7 +55,7 @@ export const createSymlink = ({
 	path,
 	parent,
 	data,
-}: Pick<App.RegularFile, 'name' | 'path' | 'data' | 'parent'>) => {
+}: Pick<Store.RegularFile, 'name' | 'path' | 'data' | 'parent'>) => {
 	return createFileRecord({
 		type: 'symlink',
 		name,
@@ -69,13 +68,13 @@ export const createSymlink = ({
 };
 
 export const setDirectoryData = (
-	state: App.ImmutableAppState,
-	directoryId: App.File['parent'],
-	fileToAdd: App.ImmutableFile
+	state: Store.State,
+	directoryId: Store.File['parent'],
+	fileToAdd: Store.File
 ) => {
 	(state as any).updateIn(
 		['files', directoryId, 'data'],
-		(data: App.Directory['data']) =>
+		(data: Store.Directory['data']) =>
 			data.set(fileToAdd.name, fileToAdd.id).sortBy(
 				(id, name) => ({
 					name,
@@ -90,43 +89,34 @@ export const setDirectoryData = (
 	);
 };
 
-export const createActiveFile = Immutable.Record<App.TaggedActiveFile>({
-	_tag: 'active-file',
+export const createActiveFile = Immutable.Record<
+	Store.TaggedRecords['ActiveFile']
+>({
+	__tag: 'active-file',
 	ref: null,
 });
 
-export const createFileData = (state: any = null): App.FileData => ({
+export const createFileData = (state: any = null): Store.FileData => ({
 	id: generateId(),
 	state,
 });
 
-export const getFileType = (name: string): App.File['type'] => {
-	const extension = /(\..+)$/.exec(name)?.[1] as Maybe<App.FileExtension>;
-	return extension ? TYPE_BY_EXTENSION[extension] : 'directory';
-};
-
-export const isDirectory = (
-	file: App.ImmutableFile
-): file is App.ImmutableDirectory => {
+export const isDirectory = (file: Store.File): file is Store.Directory => {
 	return file.type === 'directory';
 };
 
-export const isSymlink = (
-	file: App.ImmutableFile
-): file is App.ImmutableSymlink => {
+export const isSymlink = (file: Store.File): file is Store.Symlink => {
 	return file.type === 'symlink';
 };
 
-export const isRegularFile = (
-	file: App.ImmutableFile
-): file is App.ImmutableRegularFile => {
+export const isRegularFile = (file: Store.File): file is Store.RegularFile => {
 	return !isDirectory(file) && !isSymlink(file);
 };
 
 export const getFilePath = (
-	files: App.FileSystemState['files'],
-	fileName: App.File['name'],
-	parentId: App.File['parent']
+	files: Store.FileSystemState['files'],
+	fileName: Store.File['name'],
+	parentId: Store.File['parent']
 ) => {
 	const path = [fileName];
 	let parent = files.get(parentId)!;
@@ -139,7 +129,10 @@ export const getFilePath = (
 	return SEP + path.reverse().join(SEP);
 };
 
-export const trashFileName = (name: App.File['name'], id: App.File['id']) => {
+export const trashFileName = (
+	name: Store.File['name'],
+	id: Store.File['id']
+) => {
 	return `${name}__TRASHED__${id}__`;
 };
 
@@ -149,10 +142,10 @@ export const sanitizeFileName = (name: string) => {
 	return name.replace(TRASHED_RE, '');
 };
 
-export const isTrashed = (file: App.ImmutableFile) => {
+export const isTrashed = (file: Store.File) => {
 	return file.isTrashed || TRASHED_RE.test(file.path);
 };
 
-export const getMainRelativePath = (path: App.File['path']) => {
+export const getMainRelativePath = (path: Store.File['path']) => {
 	return path.replace(PATHS.main, '') || SEP;
 };

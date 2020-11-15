@@ -23,7 +23,7 @@ export const useAutocomplete = (
 	const [isVisible, setVisibility] = useState(false);
 	const [extensions, setExtensions] = useState([...EXTENSIONS]);
 
-	const onSelect = (ext?: App.FileExtension) => {
+	const onSelect = (ext?: Model.FileExtension) => {
 		const value = ext || autocompleteRef.current?.value;
 		if (value) {
 			onSelectProp(inputValue.endsWith('.') ? value.slice(1) : value);
@@ -80,12 +80,12 @@ export const useAutocomplete = (
 };
 
 type AutocompleteProps = {
-	items: App.FileExtension[];
-	onSelect: (value: App.FileExtension) => void;
+	items: Model.FileExtension[];
+	onSelect: (value: Model.FileExtension) => void;
 };
 
 type AutocompleteRef = {
-	value: App.FileExtension;
+	value: Model.FileExtension;
 	focusNext: () => void;
 	focusPrev: () => void;
 };

@@ -11,86 +11,71 @@ type BaseFile = {
 };
 
 declare global {
-	namespace Actions {
-		type FileSystemAction = ExtractActions<typeof handlers>;
-	}
-
-	namespace App {
+	namespace Model {
 		type Directory = BaseFile & {
 			type: 'directory';
 			data: Immutable.OrderedMap<File['name'], File['id']>;
 		};
-		type TaggedDirectory = TaggedRecord<Directory, 'file'>;
-		type ImmutableDirectory = ImmutableRecord<TaggedDirectory>;
-
-		type RegularFile = BaseFile & {
-			type: FileType;
-			data: FileData['id'];
-		};
-		type TaggedRegularFile = TaggedRecord<RegularFile, 'file'>;
-		type ImmutableRegularFile = ImmutableRecord<TaggedRegularFile>;
 
 		type Symlink = BaseFile & {
 			type: 'symlink';
 			data: File['id'];
 		};
-		type TaggedSymlink = TaggedRecord<Symlink, 'file'>;
-		type ImmutableSymlink = ImmutableRecord<TaggedSymlink>;
 
-		type File = RegularFile | Directory | Symlink;
-		type TaggedFile = TaggedRecord<File, 'file'>;
-		type ImmutableFile = ImmutableRecord<TaggedFile>;
+		type RegularFile = BaseFile & {
+			type: FileType;
+			data: FileData['id'];
+		};
 
 		type FileType = Plugin.Type;
+
 		type FileExtension = Plugin.Extension;
+
 		type FileData = { id: string; state: unknown };
 
-		type ActiveFile = {
-			ref: Maybe<ImmutableRegularFile>;
+		type File = RegularFile | Directory | Symlink;
+
+		type ActiveFile<T = RegularFile> = {
+			ref: Maybe<T>;
 		};
-		type TaggedActiveFile = TaggedRecord<ActiveFile, 'active-file'>;
-		type ImmutableActiveFile = ImmutableRecord<TaggedActiveFile>;
+	}
+
+	namespace Store {
+		type Directory = ImmutableRecord<Model.Directory>;
+
+		type Symlink = ImmutableRecord<Model.Symlink>;
+
+		type RegularFile = ImmutableRecord<Model.RegularFile>;
+
+		type File = ImmutableRecord<Model.File>;
+
+		type FileData = Model.FileData;
+
+		type ActiveFile = ImmutableRecord<Model.ActiveFile<RegularFile>>;
 
 		type ActiveFileId = Maybe<RegularFile['id']>;
+
 		type ActiveFilePath = Maybe<RegularFile['path']>;
 
 		type FileSystemState = {
 			data: Immutable.Map<FileData['id'], FileData>;
-			files: Immutable.Map<File['id'], ImmutableFile>;
-			activeFile: ImmutableActiveFile;
+			files: Immutable.Map<File['id'], File>;
+			activeFile: ActiveFile;
 		};
 
-		type FileSystemStateImmutableNonRecordKey =
-			| 'files'
-			| 'data'
-			| 'activeFile';
-
-		// interface ImmutableAppState {
-		// 	updateIn(
-		// 		path: PathTo['foldersInFolder'],
-		// 		updater: Updater<FolderContent['folders']>
-		// 	): ImmutableAppState;
-		// 	updateIn(
-		// 		path: PathTo['filesInFolder'],
-		// 		updater: Updater<FolderContent['files']>
-		// 	): ImmutableAppState;
-		// 	getIn(path: PathTo['file']): ImmutableFile;
-		// }
-		// interface PathTo {
-		// 	folder: [FoldersKey, Folder['path']];
-		// 	foldersInFolder: [
-		// 		FoldersKey,
-		// 		Folder['path'],
-		// 		FolderContentKey,
-		// 		FolderContentFoldersKey
-		// 	];
-		// 	filesInFolder: [
-		// 		FoldersKey,
-		// 		Folder['path'],
-		// 		FolderContentKey,
-		// 		FolderContentFilesKey
-		// 	];
-		// 	file: [FilesKey, File['path']['absolute']];
-		// }
+		interface Registry {
+			FileSystem: SetCorePart<
+				FileSystemState,
+				typeof handlers,
+				keyof FileSystemState,
+				{
+					File: TaggedObject<Model.File, 'file'>;
+					ActiveFile: TaggedObject<
+						Model.ActiveFile<RegularFile>,
+						'active-file'
+					>;
+				}
+			>;
+		}
 	}
 }

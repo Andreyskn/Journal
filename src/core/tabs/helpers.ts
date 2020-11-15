@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
 
-export const createTab = Immutable.Record<App.TaggedTab>({
-	_tag: 'tab',
+export const createTab = Immutable.Record<Store.TaggedRecords['Tab']>({
+	__tag: 'tab',
 	id: '',
 	name: '',
 	path: '',

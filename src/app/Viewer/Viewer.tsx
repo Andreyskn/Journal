@@ -62,8 +62,8 @@ const connectPlugin = ({ render, initState, handlers }: Plugin.LazyModule) => {
 	const reducer = createReducer(handlers);
 
 	const ConnectedPlugin: React.FC<{
-		data: App.FileData;
-		file: App.RegularFile;
+		data: Store.FileData;
+		file: Store.RegularFile;
 	}> = ({ data, file }) => {
 		const initialState = useMemo(() => initState(data.state), []);
 		const [state, setState, stateRef] = useStateRef(initialState);
@@ -144,7 +144,7 @@ const pluginComponents = Object.fromEntries(
 	])
 ) as Readonly<
 	Record<
-		App.FileType,
+		Model.FileType,
 		React.LazyExoticComponent<ReturnType<typeof connectPlugin>['default']>
 	>
 >;

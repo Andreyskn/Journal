@@ -17,7 +17,7 @@ const DevTools: React.FC = () => {
 	);
 };
 
-const windowModule: App.WindowModule = {
+const windowModule: WindowModule = {
 	id: 'dev',
 	icon: 'code',
 	title: 'Dev Tools',

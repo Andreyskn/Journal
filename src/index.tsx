@@ -7,7 +7,7 @@ import '@blueprintjs/core/lib/css/blueprint.css';
 import { FocusStyleManager, Toaster, Intent } from '@blueprintjs/core';
 
 import { initStore } from './core';
-import { App } from './components/App';
+import { Main } from './app/Main';
 
 if (process.env.NODE_ENV === 'development') {
 	const onClear = () => {
@@ -36,4 +36,4 @@ FocusStyleManager.onlyShowFocusOnTabs();
 
 initStore();
 
-ReactDom.render(<App />, document.getElementById('root'));
+ReactDom.render(<Main />, document.getElementById('root'));

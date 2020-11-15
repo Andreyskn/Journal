@@ -39,15 +39,15 @@ const getDate = (timestamp: Timestamp) => {
 };
 
 type TrashItem = {
-	symlinkId: App.Symlink['id'];
-	target: App.ImmutableFile;
-	sanitizedName: App.File['name'];
-	sanitizedPath: App.File['path'];
+	symlinkId: Store.Symlink['id'];
+	target: Store.File;
+	sanitizedName: Store.File['name'];
+	sanitizedPath: Store.File['path'];
 };
 
 const RecycleBin: React.FC = () => {
 	const { trash, files } = useSelector((state) => ({
-		trash: (state.files.get(DIRECTORY_ID.trash) as App.Directory).data,
+		trash: (state.files.get(DIRECTORY_ID.trash) as Store.Directory).data,
 		files: state.files,
 	}));
 	const { dispatch } = useDispatch();
@@ -58,7 +58,7 @@ const RecycleBin: React.FC = () => {
 			.map(
 				(symlinkId): TrashItem => {
 					const target = files.get(
-						(files.get(symlinkId) as App.Symlink).data
+						(files.get(symlinkId) as Store.Symlink).data
 					)!;
 
 					return {
@@ -73,21 +73,22 @@ const RecycleBin: React.FC = () => {
 	}, [trash]);
 
 	const onDelete = (
-		symlinkId: App.Symlink['id'],
-		targetId: App.File['id']
+		symlinkId: Store.Symlink['id'],
+		targetId: Store.File['id']
 	) => () => {
 		// TODO: show confirmation dialog
 		dispatch.fs.deleteMultipleFiles({ ids: [symlinkId, targetId] });
 	};
 
 	const onRestore = (
-		symlinkId: App.Symlink['id'],
-		target: App.ImmutableFile,
-		sanitizedName: App.File['name']
+		symlinkId: Store.Symlink['id'],
+		target: Store.File,
+		sanitizedName: Store.File['name']
 	) => () => {
 		// TODO: same code is used in FileTree, consider abstracting out
 		new Promise<boolean>((resolve) => {
-			const targetData = (files.get(target.parent) as App.Directory).data;
+			const targetData = (files.get(target.parent) as Store.Directory)
+				.data;
 			const hasNameCollision = targetData.has(sanitizedName);
 
 			if (!hasNameCollision) return resolve(true);
@@ -138,7 +139,7 @@ const RecycleBin: React.FC = () => {
 								className={itemClasses.iconElement()}
 								icon={
 									PLUGINS_MAP[
-										target.type as App.RegularFile['type']
+										target.type as Store.RegularFile['type']
 									]?.icon || 'folder-close'
 								}
 							/>
@@ -197,7 +198,7 @@ const RecycleBin: React.FC = () => {
 
 const TrashCounter: React.FC = () => {
 	const { trash } = useSelector((state) => ({
-		trash: (state.files.get(DIRECTORY_ID.trash) as App.Directory).data,
+		trash: (state.files.get(DIRECTORY_ID.trash) as Store.Directory).data,
 	}));
 
 	if (!trash.size) return null;
@@ -209,7 +210,7 @@ const TrashCounter: React.FC = () => {
 	);
 };
 
-const windowModule: App.WindowModule = {
+const windowModule: WindowModule = {
 	id: 'recycle',
 	icon: 'trash',
 	title: 'Recycle Bin',

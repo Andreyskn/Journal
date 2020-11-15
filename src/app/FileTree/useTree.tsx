@@ -111,7 +111,7 @@ const createFileNode = ({
 	editorData,
 }: Partial<
 	Pick<FileNode, 'id' | 'label' | 'isSelected' | 'className'> &
-		Pick<App.RegularFile, 'type'>
+		Pick<Store.RegularFile, 'type'>
 > & {
 	isNew?: boolean;
 	parent: FolderNode;
@@ -196,7 +196,7 @@ export const useTree = (
 		!editorData && path === selectedPath;
 
 	const fillDirectory = (parent: FolderNode) => {
-		const file = files.get(parent.id) as App.Directory;
+		const file = files.get(parent.id) as Store.Directory;
 
 		const directories = file.data.takeWhile(
 			(id) => files.get(id)!.type === 'directory'
@@ -206,7 +206,7 @@ export const useTree = (
 		directories.forEach((id) => {
 			const { name: label, path, data, isTrashed } = files.get(
 				id
-			) as App.Directory;
+			) as Store.Directory;
 			if (isTrashed) return;
 
 			const node = createFolderNode({
@@ -217,7 +217,7 @@ export const useTree = (
 				label,
 				isSelected: isSelected(path),
 				isExpanded: prevNodesMap.current?.folders.get(path)?.isExpanded,
-				hasCaret: (data as App.Directory['data']).size > 0,
+				hasCaret: (data as Store.Directory['data']).size > 0,
 			});
 
 			fillDirectory(node);
@@ -230,7 +230,7 @@ export const useTree = (
 		regularFiles.forEach((id) => {
 			const { type, name: label, path, isTrashed } = files.get(
 				id
-			) as App.RegularFile;
+			) as Store.RegularFile;
 			if (isTrashed) return;
 
 			const node = createFileNode({

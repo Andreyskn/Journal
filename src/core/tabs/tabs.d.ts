@@ -1,27 +1,32 @@
 import Immutable from 'immutable';
 import { handlers } from './handlers';
 
-type TabsKey = KeyOf<App.TabsState, 'tabs'>;
-
 declare global {
-	namespace Actions {
-		type TabsAction = ExtractActions<typeof handlers>;
-	}
-
-	namespace App {
+	namespace Model {
 		type Tab = {
-			id: RegularFile['id'];
-			name: RegularFile['name'];
-			type: RegularFile['type'];
+			id: Model.RegularFile['id'];
+			name: Model.RegularFile['name'];
+			type: Model.RegularFile['type'];
 			path: Path;
 		};
-		type TaggedTab = TaggedRecord<Tab, 'tab'>;
-		type ImmutableTab = ImmutableRecord<TaggedTab>;
+	}
+
+	namespace Store {
+		type Tab = ImmutableRecord<Model.Tab>;
 
 		type TabsState = {
-			tabs: Immutable.OrderedMap<Tab['id'], ImmutableTab>;
+			tabs: Immutable.OrderedMap<Tab['id'], Tab>;
 		};
 
-		type TabsImmutableNonRecordKey = TabsKey;
+		interface Registry {
+			Tabs: SetCorePart<
+				TabsState,
+				typeof handlers,
+				keyof TabsState,
+				{
+					Tab: TaggedObject<Model.Tab, 'tab'>;
+				}
+			>;
+		}
 	}
 }

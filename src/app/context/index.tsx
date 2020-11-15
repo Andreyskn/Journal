@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { except } from '../../utils';
+import { noop } from '../../utils';
 
 import { useAlert } from './useAlert';
 
@@ -8,7 +8,7 @@ type AppContextValue = {
 };
 
 const AppContext = createContext<AppContextValue>({
-	showAlert: except('App context is not available'),
+	showAlert: noop,
 });
 
 export const useAppContext = () => useContext(AppContext);

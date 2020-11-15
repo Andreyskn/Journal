@@ -1,25 +1,23 @@
 import { isDefaultPositions } from './helpers';
 
-const setRect: App.Handler<{
-	id: App.Window['id'];
-	position?: App.Window['position'];
-	width?: App.Window['width'];
-	height?: App.Window['height'];
+const setRect: Actions.Handler<{
+	id: Store.Window['id'];
+	position?: Store.Window['position'];
+	width?: Store.Window['width'];
+	height?: Store.Window['height'];
 }> = (state, { id, position, width, height }) => {
-	return (state as any).updateIn(
-		['windows', id],
-		(window: App.ImmutableWindow) =>
-			window.withMutations((window) => {
-				window
-					.set('position', position ?? window.position)
-					.set('width', width ?? window.width)
-					.set('height', height ?? window.height);
-			})
+	return (state as any).updateIn(['windows', id], (window: Store.Window) =>
+		window.withMutations((window) => {
+			window
+				.set('position', position ?? window.position)
+				.set('width', width ?? window.width)
+				.set('height', height ?? window.height);
+		})
 	);
 };
 
-const bringToFront: App.Handler<{
-	id: App.Window['id'];
+const bringToFront: Actions.Handler<{
+	id: Store.Window['id'];
 }> = (state, { id }) => {
 	return state.update('windowOrder', (order) =>
 		order.withMutations((windowOrder) => {
@@ -28,8 +26,8 @@ const bringToFront: App.Handler<{
 	);
 };
 
-const open: App.Handler<{
-	id: App.Window['id'];
+const open: Actions.Handler<{
+	id: Store.Window['id'];
 }> = (state, { id }) => {
 	const targetWindow = state.windows.get(id)!;
 	const topWindow = state.windowOrder.last(null);
@@ -57,8 +55,8 @@ const open: App.Handler<{
 	});
 };
 
-const close: App.Handler<{
-	id: App.Window['id'];
+const close: Actions.Handler<{
+	id: Store.Window['id'];
 }> = (state, { id }) => {
 	return state.withMutations((state) => {
 		(state as any).setIn(['windows', id, 'status'], 'closed');
@@ -66,8 +64,8 @@ const close: App.Handler<{
 	});
 };
 
-const minimize: App.Handler<{
-	id: App.Window['id'];
+const minimize: Actions.Handler<{
+	id: Store.Window['id'];
 }> = (state, { id }) => {
 	return state.withMutations((state) => {
 		(state as any).setIn(['windows', id, 'status'], 'minimized');
@@ -75,8 +73,8 @@ const minimize: App.Handler<{
 	});
 };
 
-const maximize: App.Handler<{
-	id: App.Window['id'];
+const maximize: Actions.Handler<{
+	id: Store.Window['id'];
 }> = (state, { id }) => {
 	return state.withMutations((state) => {
 		(state as any).setIn(['windows', id, 'status'], 'maximized');

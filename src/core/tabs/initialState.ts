@@ -1,11 +1,11 @@
 import Immutable from 'immutable';
 import { createTab } from './helpers';
 
-export const state: App.TabsState = {
+export const state: Store.TabsState = {
 	tabs: Immutable.OrderedMap(),
 };
 
-export const reviver: App.StateReviver = (tag, key, value) => {
+export const reviver: Store.Reviver = (tag, key, value) => {
 	switch (tag) {
 		case 'tab':
 			return createTab(value);

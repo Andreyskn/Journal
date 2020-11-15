@@ -33,9 +33,9 @@ const explorerClasses = bem('file-explorer', [
 ] as const);
 
 export type FileTreeProps = {
-	files: App.FileSystemState['files'];
-	activeFilePath: App.ActiveFilePath;
-	dispatch: App.CoreDispatch;
+	files: Store.FileSystemState['files'];
+	activeFilePath: Store.ActiveFilePath;
+	dispatch: Store.Dispatch;
 };
 
 export const FileTree: React.FC<FileTreeProps> = ({
@@ -75,7 +75,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 
 		return selectedFile.type === 'directory'
 			? selectedFile.id
-			: (selectedFile as App.RegularFile).parent;
+			: (selectedFile as Store.RegularFile).parent;
 	};
 
 	const onNodeClick: TreeProps['onNodeClick'] = (node) => {
@@ -121,9 +121,9 @@ export const FileTree: React.FC<FileTreeProps> = ({
 
 		const onDelete = () => dispatch.fs.moveToTrash({ id: node.id });
 
-		const onMove = (target: App.Directory['id']) => () => {
+		const onMove = (target: Store.Directory['id']) => () => {
 			new Promise<boolean>((resolve) => {
-				const targetData = (files.get(target) as App.Directory).data;
+				const targetData = (files.get(target) as Store.Directory).data;
 				const hasNameCollision = targetData.has(node.label as string);
 
 				if (!hasNameCollision) return resolve(true);

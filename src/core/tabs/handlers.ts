@@ -30,13 +30,10 @@ mutations
 		},
 	});
 
-const createTab: App.Handler<{ file: App.ImmutableFile }> = (
-	state,
-	{ file }
-) => {
+const createTab: Actions.Handler<{ file: Store.File }> = (state, { file }) => {
 	if (!fs.isRegularFile(file) || state.tabs.get(file.id)) return state;
 
-	const { id, name, type, path } = file as App.RegularFile;
+	const { id, name, type, path } = file as Store.RegularFile;
 
 	// TODO: open new tab right next to currently active
 	return state.update('tabs', (tabs) =>
@@ -52,20 +49,20 @@ const createTab: App.Handler<{ file: App.ImmutableFile }> = (
 	);
 };
 
-const updateTab: App.Handler<{ file: App.ImmutableFile }> = (
+const updateTab: Actions.Handler<{ file: Store.File }> = (
 	state,
 	{ file: { id, name, path } }
 ) => {
 	if (!state.tabs.get(id)) return state;
 
-	return (state as any).updateIn(['tabs', id], (tab: App.ImmutableTab) =>
+	return (state as any).updateIn(['tabs', id], (tab: Store.Tab) =>
 		tab.withMutations((tab) => {
 			tab.set('name', name).set('path', path);
 		})
 	);
 };
 
-const closeTab: App.Handler<{ id: App.File['id'] }> = (state, { id }) => {
+const closeTab: Actions.Handler<{ id: Store.File['id'] }> = (state, { id }) => {
 	if (!state.tabs.get(id)) return state;
 
 	const tabKeys = state.tabs.keySeq();

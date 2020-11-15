@@ -46,17 +46,15 @@ const FILENAME_RE = new RegExp(
 	)}$)?(?<invalidExt>\..+$)?`
 );
 
-const matchFileName = (value: string) => {
-	return FILENAME_RE.exec(value) as FileNameRegexExec | null;
-};
-
-type FileNameRegexExec = OmitType<RegExpExecArray, 'groups'> & {
-	groups: FileNameData;
-};
+type FileNameExec = Maybe<
+	OmitType<RegExpExecArray, 'groups'> & {
+		groups: FileNameData;
+	}
+>;
 
 type FileNameData = {
 	name: string;
-	validExt?: App.FileExtension;
+	validExt?: Model.FileExtension;
 	invalidExt?: string;
 };
 
@@ -65,8 +63,8 @@ type ResultError = { isValid: false };
 type ResultOk = {
 	isValid: true;
 	name: string;
-	extension: App.FileExtension | '';
-	blockedExtensions: App.FileExtension[];
+	extension: Model.FileExtension | '';
+	blockedExtensions: Model.FileExtension[];
 };
 
 export type ValidationResult = ResultOk | ResultError;
@@ -78,7 +76,7 @@ export const useValidation = ({ type, cwd, files }: NodeEditorProps) => {
 	const result = {
 		ok: (
 			itemData: FileNameData,
-			blockedExtensions: App.FileExtension[] = []
+			blockedExtensions: Model.FileExtension[] = []
 		): ResultOk => ({
 			isValid: true,
 			name: itemData.name,
@@ -92,10 +90,10 @@ export const useValidation = ({ type, cwd, files }: NodeEditorProps) => {
 		inputValue: string,
 		itemData: FileNameData
 	): ValidationResult => {
-		const blockedExtensions: App.FileExtension[] = [];
+		const blockedExtensions: Model.FileExtension[] = [];
 		const lowerCaseValue = inputValue.toLowerCase();
 
-		const isAlreadyExist = (files.get(cwd) as App.Directory).data
+		const isAlreadyExist = (files.get(cwd) as Store.Directory).data
 			.keySeq()
 			.map((name) => name.toLowerCase())
 			.find((existingName) => {
@@ -135,7 +133,7 @@ export const useValidation = ({ type, cwd, files }: NodeEditorProps) => {
 
 		switch (type) {
 			case 'file': {
-				const match = matchFileName(value);
+				const match = FILENAME_RE.exec(value) as FileNameExec;
 
 				if (!match) {
 					setError(errors.invalidName(value, type));

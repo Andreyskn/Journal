@@ -5,19 +5,26 @@ import { fileSystem } from './fileSystem';
 import { tabs } from './tabs';
 import { windows } from './windows';
 
-const createAppState = Immutable.Record<App.AppState>({
+type PlainState = ReturnType<Store.State['toJS']>;
+
+const createAppState = Immutable.Record<PlainState>({
 	...fileSystem.state,
 	...tabs.state,
 	...windows.state,
 });
 
-const rootReviver: App.StateReviver = (tag, key, value) => {
+const rootReviver: Store.Reviver = (tag, key, value) => {
 	return key === '' ? createAppState(value) : value.toJS();
 };
 
-const reviveState = (savedState: App.AppState): App.ImmutableAppState => {
+const reviveState = (savedState: PlainState): Store.State => {
 	return Immutable.fromJS(savedState, (key, value) => {
-		const tag: Maybe<App.RecordTag> = isKeyed(value) && value.get('_tag');
+		const tag: Maybe<Store.RecordTag> =
+			isKeyed(value) &&
+			(value as Immutable.Collection.Keyed<
+				keyof TaggedObject<{}, any>,
+				any
+			>).get('__tag');
 
 		for (let reviver of [
 			fileSystem.reviver,
@@ -35,8 +42,8 @@ export const getInitialState = () => {
 	return createAppState();
 };
 
-export const initPersistance = (store: App.Store) => {
-	get<Maybe<App.AppState>>('state')
+export const initPersistance = (store: Store.Store) => {
+	get<Maybe<PlainState>>('state')
 		.then((savedState) => {
 			if (!savedState) return;
 			store.dispatch({
@@ -57,7 +64,7 @@ export const initPersistance = (store: App.Store) => {
 		});
 };
 
-const hydrateStore: App.Handler<{ savedState: App.AppState }> = (
+const hydrateStore: Actions.Handler<{ savedState: PlainState }> = (
 	state,
 	{ savedState }
 ) => reviveState(savedState);
@@ -67,7 +74,9 @@ export const persistanceHandlers = {
 };
 
 declare global {
-	namespace Actions {
-		type PersistanceAction = ExtractActions<typeof persistanceHandlers>;
+	namespace Store {
+		interface Registry {
+			Persistance: SetCorePart<{}, typeof persistanceHandlers, ''>;
+		}
 	}
 }
