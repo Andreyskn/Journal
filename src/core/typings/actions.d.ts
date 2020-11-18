@@ -23,12 +23,13 @@ declare global {
 			| ReduxDispatch<A>
 			| ReactDispatch<A>;
 
-		type Dispatcher<
+		type Thunk<
 			T extends any[] = undefined[],
-			A extends AnyAction = Store.Action
-		> = (deps: { dispatch: BaseDispatch<A> }) => (...args: T) => void;
+		> = (deps: { dispatch: Store.Dispatch }) => (...args: T) => void; // TODO: getState
 
-		type DispatcherMap<T extends Record<string, Dispatcher<any[], any>>> = {
+		type AnyThunks = Record<string, Thunk<any[]>>
+
+		type ThunksMap<T extends AnyThunks> = {
 			[K in keyof T]: ReturnType<T[K]>;
 		};
 
@@ -37,17 +38,17 @@ declare global {
 			S extends AnyObject = Store.State
 		> = P extends undefined ? (state: S) => S : (state: S, payload: P) => S;
 
-		type HandlersMap = Record<string, Actions.Handler<any, any>>;
+		type AnyHandlers = Record<string, Actions.Handler<any, any>>;
 
-		type ActionCreator<T> = (
-			dispatch: Actions.BaseDispatch<any>
+		type ActionCreator<T = undefined, A extends AnyAction = AnyAction> = (
+			dispatch: Actions.BaseDispatch<A>
 		) => (payload: T) => void;
 
-		type ActionCreatorsMap<T extends HandlersMap> = {
+		type ActionCreatorsMap<T extends AnyHandlers = AnyHandlers> = {
 			[K in keyof T]: ActionCreator<Parameters<T[K]>[1]>;
 		};
 
-		type Dispatch<T extends HandlersMap> = UnionToIntersection<{
+		type Dispatch<T extends AnyHandlers = AnyHandlers> = UnionToIntersection<{
 			[Key in keyof T as 0]: Key extends `@${infer Category}/${infer Name}`
 				? { [C in Category]: { [N in Name]: ReturnType<ActionCreatorsMap<T>[Key]> } }
 				: { [K in Key]: ReturnType<ActionCreatorsMap<T>[Key]>}

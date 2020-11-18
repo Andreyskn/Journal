@@ -4,7 +4,7 @@ import './viewer.scss';
 
 import { ErrorBoundary, createReducer, useStateRef, bem } from '../../utils';
 import { PLUGINS, PLUGINS_MAP } from '../../plugins';
-import { useSelector, useDispatch } from '../../core';
+import { useSelector, useDispatch, useCustomDispatch } from '../../core';
 import { Toolbar, ToolbarProps } from './Toolbar/Toolbar';
 
 const useStateHistory = (
@@ -75,7 +75,7 @@ const connectPlugin = ({ render, initState, handlers }: Plugin.LazyModule) => {
 			setReversibleState(reducer(stateRef.getState(), action));
 		}, []);
 
-		const { dispatch: pluginDispatch } = useDispatch({
+		const { dispatch: pluginDispatch } = useCustomDispatch({
 			dispatch: localDispatch,
 			handlers,
 		});

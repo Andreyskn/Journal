@@ -14,17 +14,17 @@ import { createReducer } from '../utils';
 
 export let store: Store.Store;
 
-const coreHandlers: Store.Handlers = {
+const handlers: Store.Handlers = {
 	...persistanceHandlers,
 	...fileSystem.handlers,
 	...tabs.handlers,
 	...windows.handlers,
 };
 
-const reducer = createReducer(coreHandlers, getInitialState());
+const reducer = createReducer(handlers, getInitialState());
 
 export const initStore = () => {
 	store = createStore(reducer, devToolsEnhancer({ name: 'Journal' }));
 	initPersistance(store);
-	initHooks(store, coreHandlers);
+	initHooks(store, handlers);
 };

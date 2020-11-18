@@ -8,7 +8,7 @@ declare global {
 
 		type SetSlice<
 			S extends AnyObject,
-			H extends Actions.HandlersMap,
+			H extends Actions.AnyHandlers,
 			REV extends keyof any,
 			REC extends Record<string, TaggedObject<AnyObject, any>> = {}
 		> = {

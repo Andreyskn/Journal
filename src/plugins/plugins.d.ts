@@ -14,7 +14,7 @@ declare global {
 
 		type Initializer<S> = (prevState: Maybe<S | string>) => S;
 
-		type Render<S, D extends Dispatch<any>> = (
+		type Render<S, D extends Actions.Dispatch> = (
 			state: S,
 			dispatch: D
 		) => {
@@ -40,20 +40,9 @@ declare global {
 			show: Show<any>;
 		}>;
 
-		type ComponentProps<S, D extends Dispatch<any>> = {
+		type ComponentProps<S, D extends Actions.Dispatch> = {
 			state: S;
 			dispatch: D;
 		};
-
-		type Dispatchers<T extends AnyObject> = {
-			[K in keyof T]: Actions.Dispatcher<
-				[payload: Parameters<T[K]>[1]],
-				Actions.ExtractActions<T>
-			>;
-		};
-
-		type Dispatch<T extends AnyObject> = Actions.DispatcherMap<
-			Plugin.Dispatchers<T>
-		>;
 	}
 }

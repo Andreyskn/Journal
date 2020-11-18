@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 
 const actionCreatorsCache = new Map<
-	Actions.HandlersMap,
-	Actions.ActionCreatorsMap<any>
+	Actions.AnyHandlers,
+	Actions.ActionCreatorsMap
 >();
 
 const getActionCreators = <
@@ -16,7 +16,7 @@ const getActionCreators = <
 
 	const actionCreators = (Object.keys(handlers) as (keyof R)[]).reduce(
 		(result, type) => {
-			const dispatcher: Actions.ActionCreator<any> = (dispatch) => (
+			const dispatcher: Actions.ActionCreator = (dispatch) => (
 				payload
 			) => {
 				dispatch({ type, payload });
@@ -31,6 +31,22 @@ const getActionCreators = <
 	return actionCreators;
 };
 
+const prepareThunks = <
+	T extends Actions.AnyThunks,
+	R extends Actions.ThunksMap<T>
+>(
+	thunks: T,
+	dispatch: Store.Dispatch
+) => {
+	return (Object.entries(thunks) as [keyof T, T[keyof T]][]).reduce(
+		(result, [name, fn]) => {
+			result[name] = fn({ dispatch }) as R[keyof T];
+			return result;
+		},
+		{} as R
+	);
+};
+
 const ACTION_TYPE_RE = /^@(?<category>.+)\/(?<name>.*)/;
 
 type ActionTypeExec = Maybe<
@@ -42,7 +58,7 @@ type ActionTypeExec = Maybe<
 	}
 >;
 
-const createDispatch = <T extends Actions.ActionCreatorsMap<any>>(
+const createDispatch = <T extends Actions.ActionCreatorsMap>(
 	dispatch: Actions.BaseDispatch<any>,
 	actionCreators: T
 ) =>
@@ -66,38 +82,71 @@ const createDispatch = <T extends Actions.ActionCreatorsMap<any>>(
 		{} as AnyObject
 	) as Actions.Dispatch<T>;
 
-type UseDispatchOptions = {
-	dispatch: Actions.BaseDispatch<any>;
-	handlers: Actions.HandlersMap;
+type CoreDispatchOptions = {
+	thunks?: Actions.AnyThunks;
 };
 
-interface UseDispatch {
-	(): { dispatch: Store.Dispatch };
-	<T extends UseDispatchOptions>(options: T): {
-		dispatch: Actions.Dispatch<T['handlers']>;
-	};
-}
+type CustomDispatchOptions = {
+	dispatch: Actions.BaseDispatch<any>;
+	handlers: Actions.AnyHandlers;
+};
+
+type DispatchWithThunks<T extends Actions.AnyThunks> = Store.Dispatch & {
+	thunks: Actions.ThunksMap<T>;
+};
+
+type UseDispatch = <T extends CoreDispatchOptions>(
+	options?: T
+) => {
+	dispatch: T extends Required<CoreDispatchOptions>
+		? DispatchWithThunks<T['thunks']>
+		: Store.Dispatch;
+};
+
+type UseCustomDispatch = <T extends CustomDispatchOptions>(
+	options: T
+) => {
+	dispatch: Actions.Dispatch<T['handlers']>;
+};
+
+export let useDispatch: UseDispatch;
+export let useCustomDispatch: UseCustomDispatch;
 
 let coreDispatch: Store.Dispatch;
-export let useDispatch: UseDispatch;
 
 const init: Store.HookInitializer = (store, coreHandlers) => {
-	useDispatch = <T extends UseDispatchOptions>(options?: T) =>
+	// TODO: single hook
+	useDispatch = <T extends CoreDispatchOptions>(options = {} as T) =>
 		useMemo(() => {
-			if (!options) {
-				coreDispatch ||= createDispatch(
-					store.dispatch,
-					getActionCreators(coreHandlers)
-				) as any;
+			let dispatch: Store.Dispatch;
 
-				return { dispatch: coreDispatch };
+			dispatch = coreDispatch ||= createDispatch(
+				store.dispatch,
+				getActionCreators(coreHandlers)
+			) as any;
+
+			// TODO: cache thunks
+			if (options.thunks) {
+				const dispatchWithThunks: DispatchWithThunks<NonNullable<
+					T['thunks']
+				>> = {
+					...dispatch,
+					thunks: prepareThunks(options.thunks, coreDispatch),
+				};
+
+				dispatch = dispatchWithThunks;
 			}
 
+			return { dispatch: dispatch as any };
+		}, []);
+
+	useCustomDispatch = <T extends CustomDispatchOptions>(options: T) =>
+		useMemo(() => {
 			return {
 				dispatch: createDispatch(
 					options.dispatch,
 					getActionCreators(options.handlers)
-				) as any,
+				) as Actions.Dispatch<T['handlers']>,
 			};
 		}, []);
 };

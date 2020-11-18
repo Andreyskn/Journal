@@ -8,7 +8,7 @@ declare global {
 	}
 
 	namespace Questions {
-		type Dispatch = Plugin.Dispatch<typeof handlers>;
+		type Dispatch = Actions.Dispatch<typeof handlers>;
 
 		type Handler<
 			P extends AnyObject | undefined = undefined
