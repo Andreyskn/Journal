@@ -68,8 +68,8 @@ export const Taskbar: React.FC = () => {
 						);
 					})}
 					<MenuItem
-						icon='upload'
-						text='Upload File'
+						icon='import'
+						text='Import Markdown'
 						onClick={onUpload}
 					/>
 				</Menu>

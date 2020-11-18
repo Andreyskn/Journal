@@ -3,11 +3,10 @@ import { Store as ReduxStore } from 'redux';
 
 declare global {
 	namespace Store {
-		interface Registry {
-			App: SetCorePart<{}, {}, ''>;
-		}
+		interface SliceRegistry {}
+		interface HandlersRegistry {}
 
-		type SetCorePart<
+		type SetSlice<
 			S extends AnyObject,
 			H extends Actions.HandlersMap,
 			REV extends keyof any,
@@ -20,7 +19,7 @@ declare global {
 		};
 
 		type TaggedRecords = UnionToIntersection<
-			Registry[keyof Registry]['taggedRecords']
+			SliceRegistry[keyof SliceRegistry]['taggedRecords']
 		>;
 
 		type ImmutableRecord<T extends AnyObject> = Immutable.Record<
@@ -31,7 +30,8 @@ declare global {
 		type RecordTag = TaggedRecords[keyof TaggedRecords]['__tag'];
 
 		type Handlers = UnionToIntersection<
-			Registry[keyof Registry]['handlers']
+			| SliceRegistry[keyof SliceRegistry]['handlers']
+			| HandlersRegistry[keyof HandlersRegistry]
 		>;
 
 		type Action = Actions.ExtractActions<Handlers>;
@@ -40,11 +40,13 @@ declare global {
 
 		type Store = ReduxStore<State, Action>;
 
+		type HookInitializer = (store: Store, handlers: Handlers) => void;
+
 		interface State
 			extends OmitType<
 				ImmutableRecord<
 					UnionToIntersection<
-						Store.Registry[keyof Store.Registry]['state']
+						Store.SliceRegistry[keyof Store.SliceRegistry]['state']
 					>
 				>,
 				'updateIn' | 'getIn' | 'setIn'
@@ -52,7 +54,7 @@ declare global {
 
 		type Reviver = (
 			tag: Maybe<RecordTag>,
-			key: Maybe<Registry[keyof Registry]['reviverKey']>,
+			key: Maybe<SliceRegistry[keyof SliceRegistry]['reviverKey'] | ''>,
 			value:
 				| Immutable.Collection.Keyed<string, any>
 				| Immutable.Collection.Indexed<any>

@@ -1,5 +1,5 @@
 import Immutable from 'immutable';
-import { handlers } from './handlers';
+import { handlers } from '../windows/handlers';
 
 declare global {
 	namespace Model {
@@ -20,8 +20,8 @@ declare global {
 			windowOrder: Immutable.OrderedSet<Window['id']>;
 		};
 
-		interface Registry {
-			Windows: SetCorePart<
+		interface SliceRegistry {
+			Windows: SetSlice<
 				WindowsState,
 				typeof handlers,
 				keyof WindowsState,

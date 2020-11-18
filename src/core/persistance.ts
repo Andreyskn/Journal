@@ -75,8 +75,8 @@ export const persistanceHandlers = {
 
 declare global {
 	namespace Store {
-		interface Registry {
-			Persistance: SetCorePart<{}, typeof persistanceHandlers, ''>;
+		interface HandlersRegistry {
+			Persistance: typeof persistanceHandlers;
 		}
 	}
 }

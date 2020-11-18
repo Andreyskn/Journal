@@ -1,5 +1,5 @@
 import Immutable from 'immutable';
-import { handlers } from './handlers';
+import { handlers } from '../tabs/handlers';
 
 declare global {
 	namespace Model {
@@ -18,8 +18,8 @@ declare global {
 			tabs: Immutable.OrderedMap<Tab['id'], Tab>;
 		};
 
-		interface Registry {
-			Tabs: SetCorePart<
+		interface SliceRegistry {
+			Tabs: SetSlice<
 				TabsState,
 				typeof handlers,
 				keyof TabsState,

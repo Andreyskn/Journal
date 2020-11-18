@@ -1,5 +1,5 @@
 import Immutable from 'immutable';
-import { handlers } from './handlers';
+import { handlers } from '../fileSystem/handlers';
 
 type BaseFile = {
 	id: string;
@@ -19,7 +19,7 @@ declare global {
 
 		type Symlink = BaseFile & {
 			type: 'symlink';
-			data: File['id'];
+			data: BaseFile['id'];
 		};
 
 		type RegularFile = BaseFile & {
@@ -63,8 +63,8 @@ declare global {
 			activeFile: ActiveFile;
 		};
 
-		interface Registry {
-			FileSystem: SetCorePart<
+		interface SliceRegistry {
+			FileSystem: SetSlice<
 				FileSystemState,
 				typeof handlers,
 				keyof FileSystemState,

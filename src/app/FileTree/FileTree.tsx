@@ -245,7 +245,7 @@ export const FileTree: React.FC<FileTreeProps> = ({
 	return (
 		<div className={explorerClasses.fileExplorerBlock()}>
 			<div className={explorerClasses.controlsElement()}>
-				<ButtonGroup>
+				<ButtonGroup minimal>
 					<Button
 						icon='document'
 						title='New File'
@@ -256,13 +256,12 @@ export const FileTree: React.FC<FileTreeProps> = ({
 						title='New Folder'
 						onClick={onAddItem('folder')}
 					/>
+					<Button
+						icon='collapse-all'
+						title='Collapse Folders'
+						onClick={onCollapseAll}
+					/>
 				</ButtonGroup>
-				<Button
-					minimal
-					icon='collapse-all'
-					title='Collapse Folders'
-					onClick={onCollapseAll}
-				/>
 			</div>
 			<div
 				className={explorerClasses.treeContainerElement({
