@@ -185,14 +185,6 @@ const deleteFile: Actions.Handler<{
 	});
 };
 
-const deleteMultipleFiles: Actions.Handler<{
-	ids: Store.File['id'][];
-}> = (state, { ids }) => {
-	return state.withMutations((state) => {
-		ids.forEach((id) => deleteFile(state, { id }));
-	});
-};
-
 const updateFile: Actions.Handler<{
 	id: Store.File['id'];
 	newName?: Store.File['name'];
@@ -364,7 +356,6 @@ export const handlers = {
 	'@fs/createFile': createFile,
 	'@fs/createUntitledFile': createUntitledFile,
 	'@fs/deleteFile': deleteFile,
-	'@fs/deleteMultipleFiles': deleteMultipleFiles,
 	'@fs/moveToTrash': moveToTrash,
 	'@fs/restoreFile': restoreFile,
 	'@fs/renameFile': renameFile,

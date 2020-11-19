@@ -34,6 +34,8 @@ declare global {
 			| HandlersRegistry[keyof HandlersRegistry]
 		>;
 
+		type AppHandlers = Omit<Handlers, Actions.SystemActionType>;
+
 		type Action = Actions.ExtractActions<Handlers>;
 
 		type Dispatch = Actions.Dispatch<Handlers>;

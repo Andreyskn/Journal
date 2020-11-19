@@ -45,7 +45,7 @@ export const useUpload = (
 			if (uploadDirectory.data.has(fullName)) continue;
 
 			file.text().then((text) => {
-				// TODO: single dispatch to create multiple files
+				// TODO: batch dispatch to create multiple files
 				dispatch.fs.createFile({
 					name: fullName,
 					type: TYPE_BY_EXTENSION[extension],

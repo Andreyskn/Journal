@@ -42,7 +42,9 @@ declare global {
 
 		type ActionCreator<T = undefined, A extends AnyAction = AnyAction> = (
 			dispatch: Actions.BaseDispatch<A>
-		) => (payload: T) => void;
+		) => ActionCaller<T>;
+
+		type ActionCaller<P = unknown, T extends string = any> = { type: T } & ((payload: P) => void);
 
 		type ActionCreatorsMap<T extends AnyHandlers = AnyHandlers> = {
 			[K in keyof T]: ActionCreator<Parameters<T[K]>[1]>;
@@ -50,8 +52,14 @@ declare global {
 
 		type Dispatch<T extends AnyHandlers = AnyHandlers> = UnionToIntersection<{
 			[Key in keyof T as 0]: Key extends `@${infer Category}/${infer Name}`
-				? { [C in Category]: { [N in Name]: ReturnType<ActionCreatorsMap<T>[Key]> } }
+				? Category extends SystemDispatchCategory 
+					? never
+					: { [C in Category]: { [N in Name]: ReturnType<ActionCreatorsMap<T>[Key]> } }
 				: { [K in Key]: ReturnType<ActionCreatorsMap<T>[Key]>}
 		}[0]>
+
+		type SystemDispatchCategory = 'system';
+
+		type SystemActionType<T extends string = string> = `@${SystemDispatchCategory}/${T}`;
 	}
 }

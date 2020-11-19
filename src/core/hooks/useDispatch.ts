@@ -16,12 +16,14 @@ const getActionCreators = <
 
 	const actionCreators = (Object.keys(handlers) as (keyof R)[]).reduce(
 		(result, type) => {
-			const dispatcher: Actions.ActionCreator = (dispatch) => (
-				payload
-			) => {
-				dispatch({ type, payload });
+			const actionCreator: Actions.ActionCreator = (dispatch) => {
+				const actionCaller: Actions.ActionCaller = (payload) => {
+					dispatch({ type, payload });
+				};
+				actionCaller.type = type;
+				return actionCaller;
 			};
-			result[type] = dispatcher as any;
+			result[type] = actionCreator as any;
 			return result;
 		},
 		{} as R
@@ -58,29 +60,46 @@ type ActionTypeExec = Maybe<
 	}
 >;
 
-const createDispatch = <T extends Actions.ActionCreatorsMap>(
-	dispatch: Actions.BaseDispatch<any>,
-	actionCreators: T
+type EnhancedDispatch<T = AnyObject> = {
+	enhancedDispatch: T;
+	enhancedDispatchProxy: T;
+};
+
+// pass thunks here?
+const createEnhancedDispatch = <T extends Actions.ActionCreatorsMap>(
+	baseDispatch: Actions.BaseDispatch<any>,
+	actionCreators: T,
+	actionProxyHandler: ActionProxyHandler
 ) =>
 	(Object.keys(actionCreators) as (string & keyof T)[]).reduce(
 		(result, type) => {
+			const { enhancedDispatch, enhancedDispatchProxy } = result;
 			const match = ACTION_TYPE_RE.exec(type) as ActionTypeExec;
+			const actionCaller = actionCreators[type](baseDispatch);
+			const actionCallerProxy = new Proxy(
+				actionCaller,
+				actionProxyHandler
+			);
 
+			// TODO: should always match name and optionally category
 			if (match && match.groups.category) {
 				const {
 					groups: { category, name },
 				} = match;
-				(result[category] ||= {})[name] = actionCreators[type](
-					dispatch
-				);
+
+				(enhancedDispatch[category] ||= {})[name] = actionCaller;
+				(enhancedDispatchProxy[category] ||= {})[
+					name
+				] = actionCallerProxy;
 			} else {
-				result[type] = actionCreators[type](dispatch);
+				enhancedDispatch[type] = actionCaller;
+				enhancedDispatchProxy[type] = actionCallerProxy;
 			}
 
 			return result;
 		},
-		{} as AnyObject
-	) as Actions.Dispatch<T>;
+		{ enhancedDispatch: {}, enhancedDispatchProxy: {} } as EnhancedDispatch
+	) as EnhancedDispatch<Actions.Dispatch<T>>;
 
 type CoreDispatchOptions = {
 	thunks?: Actions.AnyThunks;
@@ -101,6 +120,7 @@ type UseDispatch = <T extends CoreDispatchOptions>(
 	dispatch: T extends Required<CoreDispatchOptions>
 		? DispatchWithThunks<T['thunks']>
 		: Store.Dispatch;
+	batch: Batch;
 };
 
 type UseCustomDispatch = <T extends CustomDispatchOptions>(
@@ -113,17 +133,60 @@ export let useDispatch: UseDispatch;
 export let useCustomDispatch: UseCustomDispatch;
 
 let coreDispatch: Store.Dispatch;
+let coreBatch: Batch;
+
+type GetBatcher = (
+	store: Store.Store
+) => {
+	batcher: Batcher;
+	actionProxyHandler: ActionProxyHandler;
+};
+type Batcher = (dispatchProxy: Store.Dispatch) => Batch;
+type Batch = (batchCalls: (dispatchProxy: Store.Dispatch) => void) => void;
+type ActionProxyHandler = ProxyHandler<ReturnType<Actions.ActionCreator<any>>>;
+
+const getBatcher: GetBatcher = (store) => {
+	const actions = new Set<Store.Action>();
+
+	const actionProxyHandler: ActionProxyHandler = {
+		apply: ({ type }, _, [payload]) => {
+			actions.add({ type, payload });
+		},
+	};
+
+	const batcher: Batcher = (dispatchProxy) => (batchCalls) => {
+		batchCalls(dispatchProxy);
+		store.dispatch({
+			type: '@system/batchDispatch',
+			payload: { actions: Array.from(actions.values()) },
+		});
+		actions.clear();
+	};
+
+	return { batcher, actionProxyHandler };
+};
 
 const init: Store.HookInitializer = (store, coreHandlers) => {
+	const { batcher, actionProxyHandler } = getBatcher(store);
+
 	// TODO: single hook
 	useDispatch = <T extends CoreDispatchOptions>(options = {} as T) =>
 		useMemo(() => {
-			let dispatch: Store.Dispatch;
+			let dispatch = coreDispatch;
 
-			dispatch = coreDispatch ||= createDispatch(
-				store.dispatch,
-				getActionCreators(coreHandlers)
-			) as any;
+			if (!coreDispatch) {
+				const {
+					enhancedDispatch,
+					enhancedDispatchProxy,
+				} = createEnhancedDispatch(
+					store.dispatch,
+					getActionCreators(coreHandlers),
+					actionProxyHandler
+				);
+
+				dispatch = coreDispatch = enhancedDispatch as any;
+				coreBatch = batcher(enhancedDispatchProxy as any);
+			}
 
 			// TODO: cache thunks
 			if (options.thunks) {
@@ -137,16 +200,19 @@ const init: Store.HookInitializer = (store, coreHandlers) => {
 				dispatch = dispatchWithThunks;
 			}
 
-			return { dispatch: dispatch as any };
+			return { dispatch: dispatch as any, batch: coreBatch };
 		}, []);
 
 	useCustomDispatch = <T extends CustomDispatchOptions>(options: T) =>
 		useMemo(() => {
+			const { enhancedDispatch } = createEnhancedDispatch(
+				options.dispatch,
+				getActionCreators(options.handlers),
+				actionProxyHandler
+			);
+
 			return {
-				dispatch: createDispatch(
-					options.dispatch,
-					getActionCreators(options.handlers)
-				) as Actions.Dispatch<T['handlers']>,
+				dispatch: enhancedDispatch as Actions.Dispatch<T['handlers']>,
 			};
 		}, []);
 };

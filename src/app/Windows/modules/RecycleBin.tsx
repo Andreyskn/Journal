@@ -50,7 +50,7 @@ const RecycleBin: React.FC = () => {
 		trash: (state.files.get(DIRECTORY_ID.trash) as Store.Directory).data,
 		files: state.files,
 	}));
-	const { dispatch } = useDispatch();
+	const { batch } = useDispatch();
 	const { showAlert } = useAppContext();
 
 	const trashArray = useMemo(() => {
@@ -77,7 +77,10 @@ const RecycleBin: React.FC = () => {
 		targetId: Store.File['id']
 	) => () => {
 		// TODO: show confirmation dialog
-		dispatch.fs.deleteMultipleFiles({ ids: [symlinkId, targetId] });
+		batch((dispatch) => {
+			dispatch.fs.deleteFile({ id: symlinkId });
+			dispatch.fs.deleteFile({ id: targetId });
+		});
 	};
 
 	const onRestore = (
@@ -110,19 +113,21 @@ const RecycleBin: React.FC = () => {
 			});
 		}).then((confirm) => {
 			if (!confirm) return;
-			// TODO: single dispatch
-			dispatch.fs.deleteFile({ id: symlinkId });
-			dispatch.fs.restoreFile({ id: target.id });
+			batch((dispatch) => {
+				dispatch.fs.deleteFile({ id: symlinkId });
+				dispatch.fs.restoreFile({ id: target.id });
+			});
 		});
 	};
 
 	const onClear = () => {
 		// TODO: show confirmation dialog
-		dispatch.fs.deleteMultipleFiles({
-			ids: trashArray.flatMap(({ symlinkId, target }) => [
-				symlinkId,
-				target.id,
-			]),
+		batch((dispatch) => {
+			trashArray
+				.flatMap(({ symlinkId, target }) => [symlinkId, target.id])
+				.forEach((id) => {
+					dispatch.fs.deleteFile({ id });
+				});
 		});
 	};
 

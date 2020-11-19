@@ -85,3 +85,8 @@ export const toViewportUnits = (
 export const pluralize = (singular: string, count: number) => {
 	return count === 1 ? singular : `${singular}s`;
 };
+
+export const getSystemActionType = <T extends string>(type: T) => {
+	const system: Actions.SystemDispatchCategory = 'system';
+	return `@${system}/${type}` as Actions.SystemActionType<T>;
+};
