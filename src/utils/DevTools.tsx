@@ -17,7 +17,7 @@ const DevTools: React.FC = () => {
 	);
 };
 
-const windowModule: WindowModule = {
+const windowModule: Windows.Module<'Dev'> = {
 	id: 'dev',
 	icon: 'code',
 	title: 'Dev Tools',
@@ -28,3 +28,11 @@ const windowModule: WindowModule = {
 };
 
 export const { id, icon, title, Content, menuEntry } = windowModule;
+
+declare global {
+	namespace Windows {
+		interface Registry {
+			Dev: SetWindow<'dev'>;
+		}
+	}
+}

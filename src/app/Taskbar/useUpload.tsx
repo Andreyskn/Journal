@@ -15,9 +15,20 @@ type FileNameExec = Maybe<
 	}
 >;
 
+type FileImportData = {
+	name: string;
+	type: Model.FileType;
+	data: Model.FileData;
+};
+
+const enum RejectReasons {
+	InvalidExtension,
+	NameCollision,
+}
+
 export const useUpload = (
 	appFiles: Store.FileSystemState['files'],
-	dispatch: Store.Dispatch
+	batch: Store.BatchDispatch
 ) => {
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -26,34 +37,48 @@ export const useUpload = (
 	};
 
 	const onUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { files } = e.target;
-		if (!files) return;
+		if (!e.target.files) return;
+
+		const files = Array.from(e.target.files);
 
 		const uploadDirectory = appFiles.get(
 			DIRECTORY_ID.main
 		) as Store.Directory;
 
-		for (let i = 0; i < files.length; i++) {
-			const file = files[i];
-			const match = FILENAME_RE.exec(file.name) as FileNameExec;
+		Promise.allSettled(
+			files.map((file) => {
+				return new Promise<FileImportData>((resolve, reject) => {
+					const match = FILENAME_RE.exec(file.name) as FileNameExec;
 
-			if (!match) continue;
+					if (!match) return reject(RejectReasons.InvalidExtension);
 
-			const { name, extension = '.n' } = match.groups;
-			const fullName = name + extension;
+					const { name, extension = '.n' } = match.groups;
+					const fullName = name + extension;
 
-			if (uploadDirectory.data.has(fullName)) continue;
+					if (uploadDirectory.data.has(fullName))
+						return reject(RejectReasons.NameCollision);
 
-			file.text().then((text) => {
-				// TODO: batch dispatch to create multiple files
-				dispatch.fs.createFile({
-					name: fullName,
-					type: TYPE_BY_EXTENSION[extension],
-					data: fs.createFileData(text),
-					parent: uploadDirectory.id,
+					file.text().then((text) => {
+						resolve({
+							name: fullName,
+							data: fs.createFileData(text),
+							type: TYPE_BY_EXTENSION[extension],
+						});
+					});
+				});
+			})
+		).then((results) => {
+			batch((dispatch) => {
+				results.forEach((result) => {
+					if (result.status === 'rejected') return; // TODO: handle rejection
+
+					dispatch.fs.createFile({
+						...result.value,
+						parent: uploadDirectory.id,
+					});
 				});
 			});
-		}
+		});
 
 		e.target.value = '';
 	};

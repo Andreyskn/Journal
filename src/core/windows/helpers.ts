@@ -4,7 +4,7 @@ const defaultPosition: Position = { top: 10, left: 10 };
 
 export const createWindow = Immutable.Record<Store.TaggedRecords['Window']>({
 	__tag: 'window',
-	id: '',
+	id: '' as any,
 	position: defaultPosition,
 	width: 600,
 	height: 300,

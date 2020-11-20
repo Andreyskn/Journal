@@ -8,7 +8,7 @@ type Options<
 	D extends Actions.BaseDispatch = Actions.BaseDispatch,
 	H extends Actions.AnyHandlers = Actions.AnyHandlers
 > = {
-	dispatch: D;
+	baseDispatch: D;
 	handlers: H;
 };
 
@@ -169,7 +169,7 @@ const init: Store.HookInitializer = (store, coreHandlers) => {
 	};
 
 	const defaultOptions: Options = {
-		dispatch: store.dispatch,
+		baseDispatch: store.dispatch,
 		handlers: coreHandlers,
 	};
 
@@ -196,7 +196,7 @@ const init: Store.HookInitializer = (store, coreHandlers) => {
 
 			if (options !== defaultOptions) {
 				const { enhancedDispatch } = createEnhancedDispatch(
-					options.dispatch,
+					options.baseDispatch,
 					getActionCreators(options.handlers),
 					actionProxyHandler
 				);

@@ -4,7 +4,7 @@ import { handlers } from '../windows/handlers';
 declare global {
 	namespace Model {
 		type Window = {
-			id: string;
+			id: Windows.Registry[keyof Windows.Registry]['id'];
 			status: 'closed' | 'open' | 'minimized' | 'maximized';
 			width: Pixels;
 			height: Pixels;

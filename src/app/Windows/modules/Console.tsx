@@ -2,7 +2,7 @@ const Console: React.FC = () => {
 	return <div>Not implemented</div>;
 };
 
-const windowModule: WindowModule = {
+const windowModule: Windows.Module<'Console'> = {
 	id: 'console',
 	icon: 'console',
 	title: 'Console',
@@ -13,3 +13,11 @@ const windowModule: WindowModule = {
 };
 
 export const { id, icon, title, Content, menuEntry } = windowModule;
+
+declare global {
+	namespace Windows {
+		interface Registry {
+			Console: SetWindow<'console'>;
+		}
+	}
+}

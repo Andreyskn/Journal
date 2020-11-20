@@ -76,7 +76,7 @@ const connectPlugin = ({ render, initState, handlers }: Plugin.LazyModule) => {
 		}, []);
 
 		const { dispatch: pluginDispatch } = useDispatch(null, {
-			dispatch: localDispatch,
+			baseDispatch: localDispatch,
 			handlers,
 		});
 
@@ -120,7 +120,7 @@ const connectPlugin = ({ render, initState, handlers }: Plugin.LazyModule) => {
 		};
 
 		const options: ToolbarProps['options'] = [
-			{ icon: 'fullscreen', text: 'Fullscreen', onClick: onFullscreen },
+			// { icon: 'fullscreen', text: 'Fullscreen', onClick: onFullscreen },
 			{ icon: 'export', text: 'Export', onClick: onExport },
 		];
 

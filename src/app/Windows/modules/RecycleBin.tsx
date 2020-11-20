@@ -215,7 +215,7 @@ const TrashCounter: React.FC = () => {
 	);
 };
 
-const windowModule: WindowModule = {
+const windowModule: Windows.Module<'RecycleBin'> = {
 	id: 'recycle',
 	icon: 'trash',
 	title: 'Recycle Bin',
@@ -227,3 +227,11 @@ const windowModule: WindowModule = {
 };
 
 export const { id, icon, title, Content, menuEntry } = windowModule;
+
+declare global {
+	namespace Windows {
+		interface Registry {
+			RecycleBin: SetWindow<'recycle'>;
+		}
+	}
+}

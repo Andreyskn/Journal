@@ -16,8 +16,8 @@ export const Taskbar: React.FC = () => {
 		windowOrder: state.windowOrder,
 		files: state.files,
 	}));
-	const { dispatch } = useDispatch();
-	const { fileInput, onUpload } = useUpload(files, dispatch);
+	const { dispatch, batch } = useDispatch();
+	const { fileInput, onUpload } = useUpload(files, batch);
 
 	const { windowsArray, topWindow } = useMemo(() => {
 		return {
