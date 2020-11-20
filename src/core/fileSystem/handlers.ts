@@ -353,13 +353,13 @@ const setFileDataState: Actions.Handler<{
 };
 
 export const handlers = {
-	'@fs/createFile': createFile,
-	'@fs/createUntitledFile': createUntitledFile,
-	'@fs/deleteFile': deleteFile,
-	'@fs/moveToTrash': moveToTrash,
-	'@fs/restoreFile': restoreFile,
-	'@fs/renameFile': renameFile,
-	'@fs/moveFile': moveFile,
-	'@fs/setActiveFile': setActiveFile,
-	'@fs/setFileDataState': setFileDataState,
+	'fs/createFile': createFile,
+	'fs/createUntitledFile': createUntitledFile,
+	'fs/deleteFile': deleteFile,
+	'fs/moveToTrash': moveToTrash,
+	'fs/restoreFile': restoreFile,
+	'fs/renameFile': renameFile,
+	'fs/moveFile': moveFile,
+	'fs/setActiveFile': setActiveFile,
+	'fs/setFileDataState': setFileDataState,
 };

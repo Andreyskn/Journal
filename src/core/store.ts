@@ -7,21 +7,21 @@ import {
 	persistanceHandlers,
 } from './persistance';
 import { initHooks } from './hooks';
-import { appHandlers, batchHandlers } from './batching';
+import { appHandlers, batchHandlers } from './batchHandlers';
 import { createReducer } from '../utils';
 
 export let store: Store.Store;
 
-const storeHandlers: Store.Handlers = {
+const handlers: Store.Handlers = {
 	...appHandlers,
 	...persistanceHandlers,
 	...batchHandlers,
 };
 
-const reducer = createReducer(storeHandlers, getInitialState());
+const reducer = createReducer(handlers, getInitialState());
 
 export const initStore = () => {
 	store = createStore(reducer, devToolsEnhancer({ name: 'Journal' }));
 	initPersistance(store);
-	initHooks(store, storeHandlers);
+	initHooks(store, handlers);
 };

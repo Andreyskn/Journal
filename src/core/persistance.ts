@@ -1,7 +1,7 @@
 import Immutable, { isKeyed } from 'immutable';
 import { get, set } from 'idb-keyval';
 
-import { getSystemActionType } from '../utils';
+import { createSystemActionType } from '../utils';
 import { fileSystem } from './fileSystem';
 import { tabs } from './tabs';
 import { windows } from './windows';
@@ -48,7 +48,7 @@ export const initPersistance = (store: Store.Store) => {
 		.then((savedState) => {
 			if (!savedState) return;
 			store.dispatch({
-				type: '@system/hydrateStore',
+				type: 'system/hydrateStore',
 				payload: { savedState },
 			});
 		})
@@ -71,7 +71,7 @@ const hydrateStore: Actions.Handler<{ savedState: PlainState }> = (
 ) => reviveState(savedState);
 
 export const persistanceHandlers = {
-	[getSystemActionType('hydrateStore')]: hydrateStore,
+	[createSystemActionType('hydrateStore')]: hydrateStore,
 };
 
 declare global {

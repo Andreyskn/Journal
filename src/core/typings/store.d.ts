@@ -40,6 +40,10 @@ declare global {
 
 		type Dispatch = Actions.Dispatch<Handlers>;
 
+		type BatchDispatch = (
+			batchDispatch: (dispatchProxy: Dispatch) => void
+		) => void;
+
 		type Store = ReduxStore<State, Action>;
 
 		type HookInitializer = (store: Store, handlers: Handlers) => void;

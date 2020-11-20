@@ -19,17 +19,18 @@ declare global {
 			[K in keyof T]: ActionBase<K, Parameters<T[K]>[1]>;
 		}[keyof T];
 
-		type BaseDispatch<A extends AnyAction = Store.Action> =
+		type BaseDispatch<A extends AnyAction = any> =
 			| ReduxDispatch<A>
 			| ReactDispatch<A>;
 
 		type Thunk<
 			T extends any[] = undefined[],
-		> = (deps: { dispatch: Store.Dispatch }) => (...args: T) => void; // TODO: getState
+			D extends Store.Dispatch | Dispatch = Store.Dispatch
+		> = (deps: { dispatch: D } & (D extends Store.Dispatch ? {batch: Store.BatchDispatch} : {})) => (...args: T) => void;
 
-		type AnyThunks = Record<string, Thunk<any[]>>
+		type AnyThunks = Record<string, Thunk<any[], any>>
 
-		type ThunksMap<T extends AnyThunks> = {
+		type ThunksMap<T extends AnyThunks = AnyThunks> = {
 			[K in keyof T]: ReturnType<T[K]>;
 		};
 
@@ -51,15 +52,19 @@ declare global {
 		};
 
 		type Dispatch<T extends AnyHandlers = AnyHandlers> = UnionToIntersection<{
-			[Key in keyof T as 0]: Key extends `@${infer Category}/${infer Name}`
+			[Key in keyof T as 0]: Key extends `${infer Category}/${infer Name}`
 				? Category extends SystemDispatchCategory 
 					? never
 					: { [C in Category]: { [N in Name]: ReturnType<ActionCreatorsMap<T>[Key]> } }
 				: { [K in Key]: ReturnType<ActionCreatorsMap<T>[Key]>}
 		}[0]>
 
+		type DispatchWithThunks<D, T extends Actions.AnyThunks> = D & {
+			thunks: Actions.ThunksMap<T>;
+		};
+
 		type SystemDispatchCategory = 'system';
 
-		type SystemActionType<T extends string = string> = `@${SystemDispatchCategory}/${T}`;
+		type SystemActionType<T extends string = string> = `${SystemDispatchCategory}/${T}`;
 	}
 }

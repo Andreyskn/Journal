@@ -1,7 +1,7 @@
 import { fileSystem } from './fileSystem';
 import { tabs } from './tabs';
 import { windows } from './windows';
-import { getSystemActionType } from '../utils';
+import { createSystemActionType } from '../utils';
 
 export const appHandlers: Store.AppHandlers = {
 	...fileSystem.handlers,
@@ -22,7 +22,7 @@ const batchDispatch: Actions.Handler<{ actions: Store.Action[] }> = (
 };
 
 export const batchHandlers = {
-	[getSystemActionType('batchDispatch')]: batchDispatch,
+	[createSystemActionType('batchDispatch')]: batchDispatch,
 };
 
 declare global {

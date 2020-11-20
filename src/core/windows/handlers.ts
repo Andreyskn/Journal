@@ -83,10 +83,10 @@ const maximize: Actions.Handler<{
 };
 
 export const handlers = {
-	'@windows/setRect': setRect,
-	'@windows/open': open,
-	'@windows/close': close,
-	'@windows/minimize': minimize,
-	'@windows/maximize': maximize,
-	'@windows/bringToFront': bringToFront,
+	'windows/setRect': setRect,
+	'windows/open': open,
+	'windows/close': close,
+	'windows/minimize': minimize,
+	'windows/maximize': maximize,
+	'windows/bringToFront': bringToFront,
 };
