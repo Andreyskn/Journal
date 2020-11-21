@@ -6,14 +6,14 @@ import {
 	useMemo,
 	useRef,
 } from 'react';
-import { mergeExcluding, userSelect, toViewportUnits } from './helpers';
+import { mergeExcluding, toViewportUnits } from './helpers';
 
 type AlignmentData = {
 	sideX: { name: HorizontalCSSSide; value: ViewportRelativeUnits };
 	sideY: { name: VerticalCSSSide; value: ViewportRelativeUnits };
 };
 
-type OnMoveEndCallback = (position: Position) => void;
+export type OnMoveEndCallback = (position: Position) => void;
 
 export const useMove = (
 	initialPosition: Position,
@@ -126,13 +126,11 @@ export const useMove = (
 			bottom: rect.bottom - e.clientY,
 		};
 
-		userSelect.disable();
 		document.addEventListener('mouseup', onRelease);
 		document.addEventListener('mousemove', onMove);
 	}, []);
 
 	const onRelease = useCallback(() => {
-		userSelect.enable();
 		onMoveEnd(position.value as Position);
 		document.removeEventListener('mouseup', onRelease);
 		document.removeEventListener('mousemove', onMove);

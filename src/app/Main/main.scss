@@ -13,32 +13,37 @@
 
 	height: 100vh;
 
+	contain: strict;
 	grid-template: "file-tree tabs" auto
 	"file-tree viewer" minmax(0, 1fr)
-	"taskbar taskbar" auto /
+	"taskbar taskbar" 30px /
 	200px minmax(0, 1fr);
 
 	&__file-tree {
 		background-color: var(--secondary-background);
 
+		contain: content;
 		grid-area: file-tree;
 	}
 
 	&__tabs {
 		background-color: var(--primary-background);
 
+		contain: content;
 		grid-area: tabs;
 	}
 
 	&__viewer {
 		background-color: var(--primary-background);
 
+		contain: content;
 		grid-area: viewer;
 	}
 
 	&__taskbar {
 		background-color: #394b59;
 
+		contain: strict;
 		grid-area: taskbar;
 	}
 }

@@ -9,6 +9,7 @@ export const createWindow = Immutable.Record<Store.TaggedRecords['Window']>({
 	width: 600,
 	height: 300,
 	status: process.env.NODE_ENV === 'development' ? 'minimized' : 'closed',
+	isMaximized: false,
 });
 
 export const isDefaultPositions = (w1: Store.Window, w2: Store.Window) => {

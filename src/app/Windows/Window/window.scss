@@ -1,8 +1,7 @@
 .window {
-	position: fixed;
-	z-index: 19;
-
 	background-color: var(--secondary-background);
+
+	contain: layout size;
 
 	&__header {
 		display: flex;

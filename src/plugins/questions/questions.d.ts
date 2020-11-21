@@ -3,7 +3,7 @@ import { handlers } from './handlers';
 declare global {
 	namespace Plugin {
 		interface Registry {
-			Questions: SetPlugin<'questions', '.qa'>;
+			Questions: SetPlugin<'questions', '.q'>;
 		}
 	}
 

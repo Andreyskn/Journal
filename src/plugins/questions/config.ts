@@ -7,7 +7,7 @@ const show: Plugin.Show<Questions.State> = (state) => {
 export const config: Plugin.Configuration<'Questions'> = {
 	order: 3,
 	type: 'questions',
-	extension: '.qa',
+	extension: '.q',
 	icon: 'help',
 	label: 'Q & A',
 	getLazyModule: () => import('./init'),

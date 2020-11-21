@@ -1,11 +1,9 @@
 import { isDefaultPositions } from './helpers';
+import { mutations } from '../mutations';
 
-const setRect: Actions.Handler<{
-	id: Store.Window['id'];
-	position?: Store.Window['position'];
-	width?: Store.Window['width'];
-	height?: Store.Window['height'];
-}> = (state, { id, position, width, height }) => {
+const setRect: Actions.Handler<
+	Pick<Store.Window, 'id'> & Partial<Model.WindowRect>
+> = (state, { id, position, width, height }) => {
 	return (state as any).updateIn(['windows', id], (window: Store.Window) =>
 		window.withMutations((window) => {
 			window
@@ -16,9 +14,10 @@ const setRect: Actions.Handler<{
 	);
 };
 
-const bringToFront: Actions.Handler<{
-	id: Store.Window['id'];
-}> = (state, { id }) => {
+const bringToFront: Actions.Handler<Pick<Store.Window, 'id'>> = (
+	state,
+	{ id }
+) => {
 	return state.update('windowOrder', (order) =>
 		order.withMutations((windowOrder) => {
 			windowOrder.delete(id).add(id);
@@ -26,24 +25,28 @@ const bringToFront: Actions.Handler<{
 	);
 };
 
-const open: Actions.Handler<{
-	id: Store.Window['id'];
-}> = (state, { id }) => {
-	const targetWindow = state.windows.get(id)!;
+const open: Actions.Handler<Pick<Store.Window, 'id'>> = (state, { id }) => {
+	const window = state.windows.get(id)!.set('status', 'open');
 	const topWindow = state.windowOrder.last(null);
 
 	return state.withMutations((state) => {
-		(state as any).setIn(['windows', id, 'status'], 'open');
+		(state as any).setIn(['windows', id], window);
+
+		mutations.dispatch({
+			type: 'WINDOW_STATUS_CHANGE',
+			payload: { state, window },
+		});
+
 		bringToFront(state, { id });
 
 		if (
 			topWindow &&
 			topWindow !== id &&
-			isDefaultPositions(targetWindow, state.windows.get(topWindow)!)
+			isDefaultPositions(window, state.windows.get(topWindow)!)
 		) {
 			setRect(state, {
 				id,
-				position: Object.entries(targetWindow.position).reduce(
+				position: Object.entries(window.position).reduce(
 					(result, [side, value]) => {
 						result[side] = value + 4;
 						return result;
@@ -55,29 +58,42 @@ const open: Actions.Handler<{
 	});
 };
 
-const close: Actions.Handler<{
-	id: Store.Window['id'];
-}> = (state, { id }) => {
+const close: Actions.Handler<Pick<Store.Window, 'id'>> = (state, { id }) => {
+	const window = state.windows.get(id)!.set('status', 'closed');
+
 	return state.withMutations((state) => {
-		(state as any).setIn(['windows', id, 'status'], 'closed');
+		(state as any).setIn(['windows', id], window);
+
+		mutations.dispatch({
+			type: 'WINDOW_STATUS_CHANGE',
+			payload: { state, window },
+		});
+
 		state.update('windowOrder', (order) => order.delete(id));
 	});
 };
 
-const minimize: Actions.Handler<{
-	id: Store.Window['id'];
-}> = (state, { id }) => {
+const minimize: Actions.Handler<Pick<Store.Window, 'id'>> = (state, { id }) => {
+	const window = state.windows.get(id)!.set('status', 'minimized');
+
 	return state.withMutations((state) => {
-		(state as any).setIn(['windows', id, 'status'], 'minimized');
+		(state as any).setIn(['windows', id], window);
+
+		mutations.dispatch({
+			type: 'WINDOW_STATUS_CHANGE',
+			payload: { state, window },
+		});
+
 		state.update('windowOrder', (order) => order.delete(id));
 	});
 };
 
-const maximize: Actions.Handler<{
-	id: Store.Window['id'];
-}> = (state, { id }) => {
+const setIsMaximized: Actions.Handler<Pick<
+	Store.Window,
+	'id' | 'isMaximized'
+>> = (state, { id, isMaximized }) => {
 	return state.withMutations((state) => {
-		(state as any).setIn(['windows', id, 'status'], 'maximized');
+		(state as any).setIn(['windows', id, 'isMaximized'], isMaximized);
 		bringToFront(state, { id });
 	});
 };
@@ -87,6 +103,6 @@ export const handlers = {
 	'windows/open': open,
 	'windows/close': close,
 	'windows/minimize': minimize,
-	'windows/maximize': maximize,
+	'windows/setIsMaximized': setIsMaximized,
 	'windows/bringToFront': bringToFront,
 };

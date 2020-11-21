@@ -3,12 +3,16 @@ import { handlers } from '../windows/handlers';
 
 declare global {
 	namespace Model {
-		type Window = {
-			id: Windows.Registry[keyof Windows.Registry]['id'];
-			status: 'closed' | 'open' | 'minimized' | 'maximized';
+		type WindowRect = {
 			width: Pixels;
 			height: Pixels;
 			position: Position;
+		};
+
+		type Window = WindowRect & {
+			id: Windows.Registry[keyof Windows.Registry]['id'];
+			status: 'closed' | 'open' | 'minimized';
+			isMaximized: boolean;
 		};
 	}
 

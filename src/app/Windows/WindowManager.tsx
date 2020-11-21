@@ -1,15 +1,30 @@
-import { RefObject, useMemo, useRef } from 'react';
+import { RefObject, useMemo, useRef, useEffect, useCallback } from 'react';
 
 import './window-manager.scss';
 
-import { useDispatch, useSelector } from '../../core';
-import { Window, WindowProps } from './Window/Window';
+import {
+	useDispatch,
+	useSelector,
+	mutations,
+	Mutations,
+	MutationListener,
+	appHandlers,
+} from '../../core';
+import { Window, WindowRef } from './Window/Window';
 import { windowRegistry } from './registry';
 import { bem } from '../../utils';
 
 const classes = bem('windows');
 
 const nullPosition: Position = { left: 0, top: 0 };
+
+const isWindowHidden = (window: Store.Window) => {
+	return window.status === 'closed' || window.status === 'minimized';
+};
+
+const forceTopLayer = (window: WindowRef | null, enable = true) => {
+	window?.container?.classList[enable ? 'add' : 'remove']('top-window');
+};
 
 export const WindowManager: React.FC = () => {
 	const { windows, windowOrder } = useSelector((state) => ({
@@ -18,6 +33,13 @@ export const WindowManager: React.FC = () => {
 	}));
 
 	const windowsArray = useMemo(() => Array.from(windows.values()), []);
+
+	const windowRefMap = windowsArray.reduce((refs, window) => {
+		refs[window.id] = useRef(null);
+		return refs;
+	}, {} as Record<Store.Window['id'], RefObject<WindowRef>>);
+
+	const windowRefArray = useMemo(() => Object.values(windowRefMap), []);
 
 	const { visibleWindows, topWindow } = useMemo(() => {
 		return {
@@ -28,35 +50,51 @@ export const WindowManager: React.FC = () => {
 		};
 	}, [windowOrder]);
 
-	const { dispatch } = useDispatch();
+	const { dispatch, batch } = useDispatch();
 
-	const refs = windowsArray.reduce((refs, window) => {
-		refs[window.id] = useRef(null);
-		return refs;
-	}, {} as Record<Store.Window['id'], RefObject<HTMLDivElement>>);
+	useEffect(() => {
+		windowRefArray.forEach(({ current: window }) => {
+			forceTopLayer(window, false);
+		});
+	});
+
+	const onWindowStatusChange = useCallback(
+		({ state, window }: Mutations['WINDOW_STATUS_CHANGE']) => {
+			const windowRect = windowRefMap[window.id].current?.rect;
+
+			if (isWindowHidden(window) && windowRect) {
+				appHandlers['windows/setRect'](state, {
+					id: window.id,
+					...windowRect,
+				});
+			}
+		},
+		[]
+	);
+
+	useEffect(() => {
+		const listener: MutationListener = {
+			type: 'WINDOW_STATUS_CHANGE',
+			act: onWindowStatusChange,
+		};
+
+		mutations.on(listener);
+		return () => {
+			mutations.off(listener);
+		};
+	}, []);
 
 	if (!visibleWindows.length) return null;
 
 	return (
 		<div className={classes.windowsBlock()}>
 			{visibleWindows.map(
-				({ id, status, position, width, height }, zIndex) => {
+				({ id, position, width, height, isMaximized }, zIndex) => {
 					const { icon, title, Content } = windowRegistry.get(id)!;
-					const isMaximized = status === 'maximized';
-					const ref = refs[id];
+					const ref = windowRefMap[id];
 
-					// TODO: save rect only on minimize/maximize/close (avoid excessive store writes)
-					const onReposition: WindowProps['onReposition'] = (
-						position
-					) => {
-						dispatch.windows.setRect({ id, position });
-					};
-
-					const onResize: WindowProps['onResize'] = (
-						width,
-						height
-					) => {
-						dispatch.windows.setRect({ id, width, height });
+					const onClose = () => {
+						dispatch.windows.close({ id });
 					};
 
 					const onMinimize = () => {
@@ -64,21 +102,26 @@ export const WindowManager: React.FC = () => {
 					};
 
 					const onMaximize = () => {
-						isMaximized
-							? dispatch.windows.open({ id })
-							: dispatch.windows.maximize({ id });
-					};
+						batch((dispatch) => {
+							dispatch.windows.setIsMaximized({
+								id,
+								isMaximized: !isMaximized,
+							});
 
-					const onClose = () => {
-						dispatch.windows.close({ id });
+							if (!isMaximized) {
+								dispatch.windows.setRect({
+									id,
+									...ref.current!.rect,
+								});
+							}
+						});
 					};
 
 					const onContainerMouseDown = () => {
-						ref.current!.classList.add('top-window');
+						forceTopLayer(ref.current);
 					};
 
 					const onContainerClick = () => {
-						ref.current!.classList.remove('top-window');
 						if (topWindow !== id) {
 							dispatch.windows.bringToFront({ id });
 						}
@@ -95,11 +138,9 @@ export const WindowManager: React.FC = () => {
 							height={isMaximized ? window.innerHeight : height}
 							position={isMaximized ? nullPosition : position}
 							isMaximized={isMaximized}
-							onReposition={onReposition}
 							onMinimize={onMinimize}
 							onMaximize={onMaximize}
 							onClose={onClose}
-							onResize={onResize}
 							onContainerClick={onContainerClick}
 							onContainerMouseDown={onContainerMouseDown}
 						>

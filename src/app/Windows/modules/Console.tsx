@@ -1,5 +1,5 @@
 const Console: React.FC = () => {
-	return <div>Not implemented</div>;
+	return null;
 };
 
 const windowModule: Windows.Module<'Console'> = {
