@@ -29,6 +29,7 @@ type EventEmitter = {
 
 const eventEmitter = new Events.EventEmitter();
 
+// TODO: don't use object arg
 export const mutations: EventEmitter = {
 	dispatch: ({ type, payload }) => {
 		eventEmitter.emit(type, payload);

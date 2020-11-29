@@ -40,6 +40,13 @@ const reviveState = (savedState: PlainState): Store.State => {
 };
 
 export const getInitialState = () => {
+	const preloadedState = window.__PRELOADED_STATE__;
+
+	if (preloadedState) {
+		window.__PRELOADED_STATE__ = undefined;
+		return reviveState(preloadedState);
+	}
+
 	return createAppState();
 };
 
@@ -75,6 +82,10 @@ export const persistanceHandlers = {
 };
 
 declare global {
+	interface Window {
+		__PRELOADED_STATE__?: PlainState;
+	}
+
 	namespace Store {
 		interface HandlersRegistry {
 			Persistance: typeof persistanceHandlers;

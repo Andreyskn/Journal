@@ -23,17 +23,15 @@ $moveTarget: "#{$explorer}__move-target";
 	#{$controls} {
 		display: flex;
 
-		height: 30px;
-		margin-bottom: 1px;
-
 		justify-content: flex-end;
 	}
 
 	#{$treeContainer} {
 		display: flex;
+		overflow: auto;
 		flex-direction: column;
 
-		height: calc(100% - 33px);
+		height: calc(100% - 30px);
 
 		&--selected {
 			box-shadow: inset 0 0 0 1px var(--color-accent);

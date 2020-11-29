@@ -44,7 +44,6 @@ const ToolbarContent: React.FC<{ dispatch: TaskList.Dispatch }> = ({
 			<Button
 				text='Add task'
 				icon='plus'
-				intent='success'
 				onClick={onDialogOpen}
 				elementRef={addButton}
 			/>

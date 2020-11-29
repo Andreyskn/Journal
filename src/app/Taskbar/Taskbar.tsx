@@ -67,11 +67,7 @@ export const Taskbar: React.FC = () => {
 							/>
 						);
 					})}
-					<MenuItem
-						icon='import'
-						text='Import Markdown'
-						onClick={onUpload}
-					/>
+					<MenuItem icon='import' text='Import' onClick={onUpload} />
 				</Menu>
 			</Popover>
 			{windowsArray.map(({ id, status }) => {

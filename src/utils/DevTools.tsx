@@ -26,7 +26,7 @@ const windowModule: Windows.Module<'Dev'> = {
 		order: Infinity,
 	},
 };
-
+// TODO: change to default export, add module types
 export const { id, icon, title, Content, menuEntry } = windowModule;
 
 declare global {

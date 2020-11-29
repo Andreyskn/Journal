@@ -2,6 +2,7 @@
 	background-color: var(--secondary-background);
 
 	contain: layout size;
+	will-change: left, right, top, bottom, width, height;
 
 	&__header {
 		display: flex;

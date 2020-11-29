@@ -97,6 +97,17 @@ const connectPlugin = ({ render, initState, handlers }: Plugin.LazyModule) => {
 			};
 		}, []);
 
+		useEffect(() => {
+			// update state after store hydration from IndexedDB
+			if (
+				data.state &&
+				typeof data.state !== 'string' &&
+				data.state !== state
+			) {
+				setState(data.state);
+			}
+		}, [data.state]);
+
 		const { main, toolbarContent } = render(state, pluginDispatch);
 
 		const viewerElement = useRef<HTMLDivElement>(null);
@@ -116,7 +127,7 @@ const connectPlugin = ({ render, initState, handlers }: Plugin.LazyModule) => {
 			a.download = `${file.name}.md`;
 			document.body.appendChild(a);
 			a.click();
-			window.URL.revokeObjectURL(url);
+			URL.revokeObjectURL(url);
 		};
 
 		const options: ToolbarProps['options'] = [
@@ -162,7 +173,7 @@ export const Viewer: React.FC = () => {
 	const Plugin = pluginComponents[activeFile.type];
 
 	return (
-		<ErrorBoundary name={`${PLUGINS_MAP[activeFile.type].label}`}>
+		<ErrorBoundary name={PLUGINS_MAP[activeFile.type].label}>
 			<Suspense fallback={null}>
 				<Plugin
 					file={activeFile}

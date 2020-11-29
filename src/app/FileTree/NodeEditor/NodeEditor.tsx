@@ -67,6 +67,7 @@ export const NodeEditor: React.FC<NodeEditorProps> = (props) => {
 	};
 
 	const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		// TODO: use ts-key-enum package
 		switch (e.key) {
 			case 'Escape': {
 				onDismiss();

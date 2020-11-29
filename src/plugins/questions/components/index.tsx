@@ -37,7 +37,6 @@ const ToolbarContent: React.FC<{ dispatch: Questions.Dispatch }> = ({
 			<Button
 				text='Add question'
 				icon='plus'
-				intent='success'
 				onClick={onDialogOpen}
 				elementRef={addButton}
 			/>

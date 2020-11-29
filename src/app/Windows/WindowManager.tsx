@@ -73,6 +73,7 @@ export const WindowManager: React.FC = () => {
 	);
 
 	useEffect(() => {
+		// TODO: add useReducerEvent hook
 		const listener: MutationListener = {
 			type: 'WINDOW_STATUS_CHANGE',
 			act: onWindowStatusChange,
@@ -122,6 +123,7 @@ export const WindowManager: React.FC = () => {
 					};
 
 					const onContainerClick = () => {
+						forceTopLayer(ref.current, false);
 						if (topWindow !== id) {
 							dispatch.windows.bringToFront({ id });
 						}

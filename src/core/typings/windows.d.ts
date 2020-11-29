@@ -22,6 +22,7 @@ declare global {
 		type WindowsState = {
 			windows: Immutable.Map<Window['id'], Window>;
 			windowOrder: Immutable.OrderedSet<Window['id']>;
+			// TODO: taskbar items order
 		};
 
 		interface SliceRegistry {
